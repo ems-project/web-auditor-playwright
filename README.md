@@ -30,6 +30,7 @@ These variables control crawl behavior, performance limits, and execution parame
 You can define them directly in the shell, in a `.env` file, or via Docker environment variables.
 
 Example:
+
 ```bash
 START_URL=https://your-site.com \
 MAX_PAGES=100 \
