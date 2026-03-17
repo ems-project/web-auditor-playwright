@@ -92,6 +92,7 @@ export type EngineState = {
     origin: string;
     seen: Set<string>;
     htmlVisitedCount: number;
+    downloadVisitedCount: number;
     processedCount: number;
     successCount: number;
     errorCount: number;

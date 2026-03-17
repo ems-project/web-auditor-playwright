@@ -24,6 +24,7 @@ export class CrawlerEngine {
             origin,
             seen: new Set([start]),
             htmlVisitedCount: 0,
+            downloadVisitedCount: 0,
             processedCount: 0,
             successCount: 0,
             errorCount: 0,
@@ -85,6 +86,9 @@ export class CrawlerEngine {
                     mime: undefined,
                 }),
             };
+            const downloadPromise = page
+                .waitForEvent("download", { timeout: 5000 })
+                .catch(() => null);
 
             try {
                 await this.registry.runPhase("beforeGoto", ctx);
@@ -162,32 +166,35 @@ export class CrawlerEngine {
                 // plugins de “process”
                 await this.registry.runPhase("afterProcess", ctx);
 
+                // phase périodique (plugins peuvent décider via engineState)
+                await this.registry.runPhase("periodic", ctx);
+            } catch (e: unknown) {
+                const download = await downloadPromise;
+                if (download) {
+                    state.downloadVisitedCount += 1;
+                } else {
+                    let errorMessage = "Unknown error: " + String(e);
+                    if (e instanceof Error) {
+                        errorMessage = e.message;
+                    }
+                    ctx.findings.push({
+                        plugin: "engine",
+                        type: "error",
+                        code: "NAVIGATION_FAILED",
+                        message: errorMessage,
+                        url: ctx.url,
+                    });
+                }
+            } finally {
                 const hasErrorFinding = ctx.findings.some((f) => f.type === "error");
                 if (hasErrorFinding) {
                     state.errorCount += 1;
                 } else {
                     state.successCount += 1;
                 }
-            } catch (e: unknown) {
-                state.errorCount += 1;
-                let errorMessage = "Unknown error: " + String(e);
-                if (e instanceof Error) {
-                    errorMessage = e.message;
-                }
-                ctx.findings.push({
-                    plugin: "engine",
-                    type: "error",
-                    code: "NAVIGATION_FAILED",
-                    message: errorMessage,
-                    url: ctx.url,
-                });
-            } finally {
                 state.processedCount += 1;
                 state.queueSize = queue.length;
                 state.activeWorkers -= 1;
-
-                // phase périodique (plugins peuvent décider via engineState)
-                await this.registry.runPhase("periodic", ctx);
 
                 results.push(ctx);
                 await page.close();
