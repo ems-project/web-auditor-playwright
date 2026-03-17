@@ -168,9 +168,6 @@ export class CrawlerEngine {
                 } else {
                     state.successCount += 1;
                 }
-
-                // phase périodique (plugins peuvent décider via engineState)
-                await this.registry.runPhase("periodic", ctx);
             } catch (e: unknown) {
                 state.errorCount += 1;
                 let errorMessage = "Unknown error: " + String(e);
@@ -188,6 +185,9 @@ export class CrawlerEngine {
                 state.processedCount += 1;
                 state.queueSize = queue.length;
                 state.activeWorkers -= 1;
+
+                // phase périodique (plugins peuvent décider via engineState)
+                await this.registry.runPhase("periodic", ctx);
 
                 results.push(ctx);
                 await page.close();

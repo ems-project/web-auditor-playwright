@@ -24,7 +24,7 @@ export class PerUrlJsonReportPlugin implements IPlugin {
         const targetUrl = ctx.report.url ?? ctx.finalUrl ?? ctx.url;
         const filePath = path.join(this.options.outputDir, this.buildFileName(targetUrl));
 
-        await fs.writeFile(filePath, JSON.stringify(ctx.report, null, 2), "utf-8");
+        await fs.writeFile(filePath, JSON.stringify(ctx.report, null, 4), "utf-8");
     }
 
     private buildFileName(url: string): string {
