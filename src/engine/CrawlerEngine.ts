@@ -172,6 +172,7 @@ export class CrawlerEngine {
                 const download = await downloadPromise;
                 if (download) {
                     state.downloadVisitedCount += 1;
+                    await this.registry.runPhase("download", ctx);
                 } else {
                     let errorMessage = "Unknown error: " + String(e);
                     if (e instanceof Error) {

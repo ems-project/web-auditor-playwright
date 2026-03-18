@@ -117,6 +117,7 @@ export type PluginPhase =
     | "afterExtract"
     | "afterProcess"
     | "periodic"
+    | "download"
     | "finally";
 
 export interface IPlugin {

@@ -50,6 +50,7 @@ async function main() {
             startedAt: state.startedAt,
             origin: state.origin,
             htmlVisitedCount: state.htmlVisitedCount,
+            downloadedVisitedCount: state.downloadVisitedCount,
             seenCount: state.seen.size,
         },
         findings: results.flatMap((r) => r.findings),
