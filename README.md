@@ -51,6 +51,7 @@ npm start
 | `CHECK_EXTERNAL_LINKS` | `false`               | If enabled, dead link detection will also test external links. Otherwise only internal links are checked.                   |
 | `LH_EVERY_N`           | `10`                  | Run a Lighthouse audit every N HTML pages visited.                                                                          |
 | `REPORT_OUTPUT_DIR`    | `./reports`           | Path to the directory used to store URL reports (one JSON file per URL).                                                    |
+| `OUTPUT_FORMAT`        | `both`                | Controls output format of the crawler results (`json`, `table`, or `both`).                                                 |
 
 ## Performance Tuning
 
