@@ -59,6 +59,12 @@ async function main() {
     console.log("  - URLs seen  : " + state.seen.size);
 
     const pluginSummaries = registry.getSummaries();
+    pluginSummaries.push({
+        plugin: "engine",
+        auditedUrls: state.seen.size,
+        errors: state.errorCount,
+        warnings: state.warningCount,
+    });
     printPluginSummaryTable(pluginSummaries);
     // const report = {
     //     state: {

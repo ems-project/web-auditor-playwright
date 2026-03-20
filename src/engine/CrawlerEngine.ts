@@ -32,6 +32,7 @@ export class CrawlerEngine {
             processedCount: 0,
             successCount: 0,
             errorCount: 0,
+            warningCount: 0,
             queueSize: 1,
             activeWorkers: 0,
             maxPages: this.opts.maxPages,
@@ -112,6 +113,31 @@ export class CrawlerEngine {
                 ctx.response = response ?? undefined;
                 ctx.status = response?.status();
                 ctx.finalUrl = response?.url();
+                const statusMessage =
+                    ctx.response?.statusText() || getStatusMessage(ctx.status) || null;
+
+                if (!ctx.status) {
+                    ctx.findings.push({
+                        plugin: "engine",
+                        type: "error",
+                        code: "MISSING_RETURN_CODE",
+                        message: "Return code is missing",
+                    });
+                } else if (ctx.status >= 400) {
+                    ctx.findings.push({
+                        plugin: "engine",
+                        type: "error",
+                        code: "UNEXPECTED_RETURN_CODE",
+                        message: ctx.status + ": " + (statusMessage ?? ""),
+                    });
+                } else if (ctx.status >= 300) {
+                    ctx.findings.push({
+                        plugin: "engine",
+                        type: "warning",
+                        code: "UNEXPECTED_RETURN_CODE",
+                        message: ctx.status + ": " + (statusMessage ?? ""),
+                    });
+                }
 
                 ctx.mime = parseMime(response?.headers()["content-type"]);
                 const finalTargetUrl = ctx.finalUrl ?? ctx.url;
@@ -122,8 +148,7 @@ export class CrawlerEngine {
                 ctx.report.base_url = parsed.pathname;
                 ctx.report.timestamp = new Date().toISOString();
                 ctx.report.status_code = ctx.status ?? null;
-                ctx.report.message =
-                    ctx.response?.statusText() || getStatusMessage(ctx.status) || null;
+                ctx.report.message = statusMessage;
                 ctx.report.mimetype = response?.headers()["content-type"] ?? ctx.mime ?? null;
 
                 await this.registry.runPhase("afterGoto", ctx);
@@ -151,6 +176,9 @@ export class CrawlerEngine {
                     await this.registry.runPhase("error", ctx);
                 }
             } finally {
+                if (ctx.findings.some((f) => f.type === "warning")) {
+                    state.warningCount += 1;
+                }
                 const hasErrorFinding = ctx.findings.some((f) => f.type === "error");
                 if (hasErrorFinding) {
                     state.errorCount += 1;

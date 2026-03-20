@@ -103,6 +103,7 @@ export type EngineState = {
     processedCount: number;
     successCount: number;
     errorCount: number;
+    warningCount: number;
     queueSize: number;
     activeWorkers: number;
     maxPages: number;
