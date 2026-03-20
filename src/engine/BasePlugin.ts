@@ -1,4 +1,5 @@
 import type { PluginSummary } from "./types.js";
+import { TitleIssueSeverity } from "../utils/TitleAnalyzer.js";
 
 export abstract class BasePlugin {
     protected auditedUrls = 0;
@@ -34,5 +35,19 @@ export abstract class BasePlugin {
 
     protected registerError(): void {
         this.errors += 1;
+    }
+
+    protected registerByType(severity: TitleIssueSeverity) {
+        switch (severity) {
+            case "info":
+                this.registerInfo();
+                break;
+            case "warning":
+                this.registerWarning();
+                break;
+            case "error":
+                this.registerError();
+                break;
+        }
     }
 }

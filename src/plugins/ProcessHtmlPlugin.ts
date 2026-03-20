@@ -104,18 +104,4 @@ export class ProcessHtmlPlugin extends BasePlugin implements IPlugin {
         }
         this.registerUrl();
     }
-
-    private registerByType(severity: TitleIssueSeverity) {
-        switch (severity) {
-            case "info":
-                this.registerInfo();
-                break;
-            case "warning":
-                this.registerWarning();
-                break;
-            case "error":
-                this.registerError();
-                break;
-        }
-    }
 }
