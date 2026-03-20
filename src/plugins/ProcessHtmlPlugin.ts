@@ -28,14 +28,14 @@ export class ProcessHtmlPlugin implements IPlugin {
                 .map((el) => el.textContent?.trim() ?? "")
                 .filter((t) => t.length > 0);
 
-            const hrefs = Array.from(document.querySelectorAll("a[href]"))
+            const links = Array.from(document.querySelectorAll("[href], [src]"))
                 .map((a) => (a as HTMLAnchorElement).href)
                 .filter(Boolean);
 
             return {
                 title,
                 h1s,
-                hrefs,
+                links,
                 lang,
             };
         });
@@ -44,9 +44,9 @@ export class ProcessHtmlPlugin implements IPlugin {
         ctx.report.meta_title = extracted.title;
         ctx.report.locale = extracted.lang;
         ctx.report.title = extracted.h1s.length > 0 ? extracted.h1s[0] : null;
-        ctx.links = extracted.hrefs;
+        ctx.links = extracted.links;
 
-        for (const href of extracted.hrefs) {
+        for (const href of extracted.links) {
             ctx.crawler.enqueueUrl({
                 url: href,
                 source: this.name,
