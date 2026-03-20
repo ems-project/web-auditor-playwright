@@ -7,7 +7,7 @@ import type {
     ResourceContext,
 } from "./types.js";
 import { PluginRegistry } from "./PluginRegistry.js";
-import { normalizeUrl, parseMime, isSameOrigin } from "./utils.js";
+import { getStatusMessage, isSameOrigin, normalizeUrl, parseMime } from "./utils.js";
 import { RateLimiter } from "./RateLimiter.js";
 import { createInitialReport } from "./report.js";
 
@@ -127,7 +127,8 @@ export class CrawlerEngine {
                 ctx.report.base_url = parsed.pathname;
                 ctx.report.timestamp = new Date().toISOString();
                 ctx.report.status_code = ctx.status ?? null;
-                ctx.report.message = ctx.response?.statusText() ?? null;
+                ctx.report.message =
+                    ctx.response?.statusText() || getStatusMessage(ctx.status) || null;
                 ctx.report.mimetype = response?.headers()["content-type"] ?? ctx.mime ?? null;
 
                 await this.registry.runPhase("afterGoto", ctx);
