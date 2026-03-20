@@ -62,7 +62,9 @@ export class ProcessHtmlPlugin implements IPlugin {
         ctx.report.meta_title = extracted.title;
         ctx.report.locale = extracted.lang;
         ctx.report.title = extracted.h1s.length > 0 ? extracted.h1s[0] : null;
-        ctx.report.links = extracted.links;
+        ctx.report.links = this.maxLinksPerPage
+            ? extracted.links.slice(0, this.maxLinksPerPage)
+            : extracted.links;
 
         for (const link of extracted.links) {
             ctx.crawler.enqueueUrl({
