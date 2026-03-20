@@ -21,7 +21,8 @@ export class ProcessHtmlPlugin implements IPlugin {
     async run(_phase: PluginPhase, ctx: ResourceContext): Promise<void> {
         const extracted = await ctx.page.evaluate(() => {
             const title = document.querySelector("title")?.textContent ?? null;
-            const lang = document.querySelector("html")?.attributes.getNamedItem("lang")?.value ?? null;
+            const lang =
+                document.querySelector("html")?.attributes.getNamedItem("lang")?.value ?? null;
 
             const h1s = Array.from(document.querySelectorAll("h1"))
                 .map((el) => el.textContent?.trim() ?? "")
