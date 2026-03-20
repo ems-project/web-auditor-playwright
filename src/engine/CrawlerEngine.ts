@@ -147,7 +147,6 @@ export class CrawlerEngine {
                         type: "error",
                         code: "NAVIGATION_FAILED",
                         message: errorMessage,
-                        url: ctx.url,
                     });
                     await this.registry.runPhase("error", ctx);
                 }

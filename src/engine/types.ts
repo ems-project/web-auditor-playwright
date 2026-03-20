@@ -114,7 +114,6 @@ export type Finding = {
     type: "info" | "warning" | "error";
     code: string;
     message: string;
-    url: string;
     data?: FindingData;
 };
 
