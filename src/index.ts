@@ -9,6 +9,7 @@ import { CrawlerEngine } from "./engine/CrawlerEngine.js";
 import { StatsCollectorPlugin } from "./plugins/StatsCollectorPlugin.js";
 import { ConsoleStatusPlugin } from "./plugins/ConsoleStatusPlugin.js";
 import { PerUrlJsonReportPlugin } from "./plugins/PerUrlJsonReportPlugin.js";
+import { ProcessHtmlPlugin } from "./plugins/ProcessHtmlPlugin.js";
 
 async function main() {
     const registry = new PluginRegistry()
@@ -23,8 +24,9 @@ async function main() {
             new PerUrlJsonReportPlugin({
                 outputDir: process.env.REPORT_OUTPUT_DIR ?? "./reports",
             }),
-        );
-    // .register(new ConsoleErrorsPlugin())
+        )
+        .register(new ProcessHtmlPlugin());
+
     // .register(new A11yAxePlugin())
     // .register(new DeadLinksPlugin({ checkExternal: (process.env.CHECK_EXTERNAL_LINKS ?? "false") === "true" }))
     // .register(new PdfTextractPlugin())

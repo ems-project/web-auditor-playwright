@@ -140,19 +140,6 @@ export class CrawlerEngine {
                 if (ctx.kind === "unknown") {
                     await this.registry.runPhase("unknown", ctx);
                 } else if (ctx.kind === "html") {
-                    ctx.html = await page.content();
-
-                    const hrefs: string[] = await page.$$eval("a[href]", (as) =>
-                        as.map((a) => (a as HTMLAnchorElement).href).filter(Boolean),
-                    );
-                    ctx.links = hrefs;
-
-                    for (const href of hrefs) {
-                        ctx.crawler.enqueueUrl({
-                            url: href,
-                            source: "engine:html-links",
-                        });
-                    }
                     await this.registry.runPhase("html", ctx);
                     state.htmlVisitedCount += 1;
                 } else if (ctx.kind === "pdf") {
