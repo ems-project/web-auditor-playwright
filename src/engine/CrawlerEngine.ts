@@ -82,7 +82,6 @@ export class CrawlerEngine {
                 context,
                 console: consoleLogs,
                 pageErrors,
-                links: [],
                 engineState: state,
                 findings: [],
                 crawler: {

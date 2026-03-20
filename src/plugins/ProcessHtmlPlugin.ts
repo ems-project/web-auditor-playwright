@@ -1,4 +1,4 @@
-import type { IPlugin, PluginPhase, ResourceContext } from "../engine/types.js";
+import { IPlugin, PluginPhase, ResourceContext, ResourceReportLink } from "../engine/types.js";
 
 type ProcessHtmlPluginOptions = {
     maxLinksPerPage?: number;
@@ -28,9 +28,27 @@ export class ProcessHtmlPlugin implements IPlugin {
                 .map((el) => el.textContent?.trim() ?? "")
                 .filter((t) => t.length > 0);
 
-            const links = Array.from(document.querySelectorAll("[href], [src]"))
-                .map((a) => (a as HTMLAnchorElement).href)
-                .filter(Boolean);
+            const elements = Array.from(document.querySelectorAll("[href], [src]"));
+            const links: ResourceReportLink[] = [];
+
+            for (const el of elements) {
+                let url: string | null = null;
+
+                if (el.hasAttribute("href")) {
+                    url = (el as HTMLAnchorElement).href;
+                } else if (el.hasAttribute("src")) {
+                    // @ts-expect-error: the src attribute exist
+                    url = el.src;
+                }
+
+                if (!url) continue;
+
+                links.push({
+                    type: el.tagName.toLowerCase(),
+                    url,
+                    text: el.textContent?.trim() ?? null,
+                });
+            }
 
             return {
                 title,
@@ -44,11 +62,11 @@ export class ProcessHtmlPlugin implements IPlugin {
         ctx.report.meta_title = extracted.title;
         ctx.report.locale = extracted.lang;
         ctx.report.title = extracted.h1s.length > 0 ? extracted.h1s[0] : null;
-        ctx.links = extracted.links;
+        ctx.report.links = extracted.links;
 
-        for (const href of extracted.links) {
+        for (const link of extracted.links) {
             ctx.crawler.enqueueUrl({
-                url: href,
+                url: link.url,
                 source: this.name,
             });
         }

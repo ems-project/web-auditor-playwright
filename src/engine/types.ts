@@ -31,7 +31,6 @@ export type ResourceContext = {
     // signals collected
     console: { type: string; text: string; location?: string }[];
     pageErrors: string[];
-    links: string[]; // liens extraits (si html)
     extractedText?: string; // ex: textract PDF
 
     report: ResourceReport;
@@ -50,9 +49,6 @@ export type ResourceReportLink = {
     type: string;
     text: string;
     url: string;
-    status_code: number | null;
-    message: string | null;
-    mimetype: string | null;
 };
 
 export type ResourceReportPa11yItem = {
