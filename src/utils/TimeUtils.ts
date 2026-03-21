@@ -1,5 +1,4 @@
 export class TimeUtils {
-
     static durationMs(startedAt: Date | string, endedAt: Date | string): number {
         const start = startedAt instanceof Date ? startedAt : new Date(startedAt);
         const end = endedAt instanceof Date ? endedAt : new Date(endedAt);
