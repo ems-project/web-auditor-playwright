@@ -21,5 +21,6 @@ export function createInitialReport(
         description: null,
         content: null,
         findings: [],
+        size: null,
     };
 }

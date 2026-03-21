@@ -73,6 +73,7 @@ export type ResourceReport = {
     links: ResourceReportLink[];
     pa11y: ResourceReportPa11yItem[];
     findings: Finding[];
+    size: number | null;
 };
 
 export type EnqueueRequest = {

@@ -141,6 +141,9 @@ export class CrawlerEngine {
                 }
 
                 ctx.mime = parseMime(response?.headers()["content-type"]);
+                const size = response?.headers()["content-length"]
+                    ? Number(response?.headers()["content-length"])
+                    : null;
                 const finalTargetUrl = ctx.finalUrl ?? ctx.url;
                 const parsed = new URL(finalTargetUrl);
                 ctx.report.url = finalTargetUrl;
@@ -151,6 +154,7 @@ export class CrawlerEngine {
                 ctx.report.status_code = ctx.status ?? null;
                 ctx.report.message = statusMessage;
                 ctx.report.mimetype = response?.headers()["content-type"] ?? ctx.mime ?? null;
+                ctx.report.size = size;
 
                 await this.registry.runPhase("afterGoto", ctx);
 
