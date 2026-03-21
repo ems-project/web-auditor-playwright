@@ -47,14 +47,6 @@ export type ResourceReportLink = {
     url: string;
 };
 
-export type ResourceReportPa11yItem = {
-    code: string;
-    type: string;
-    message: string;
-    selector?: string | null;
-    context?: string | null;
-};
-
 export type ResourceReportA11yAxeNode = {
     impact: string | null | undefined;
     html: string;
@@ -90,7 +82,6 @@ export type ResourceReport = {
     description: string | null;
     content: string | null;
     links: ResourceReportLink[];
-    pa11y: ResourceReportPa11yItem[];
     a11y_axe: ResourceReportA11yAxeItem[];
     findings: Finding[];
     size: number | null;
