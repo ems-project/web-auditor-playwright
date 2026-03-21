@@ -40,7 +40,7 @@ npm start
 ```
 
 | Variable                 | Default               | Description                                                                                                                 |
-| ------------------------ |-----------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| ------------------------ | --------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `START_URL`              | `https://example.org` | The initial URL where the crawler starts. All discovered pages will be crawled starting from this entry point.              |
 | `MAX_PAGES`              | `50`                  | Maximum number of pages the crawler will visit before stopping.                                                             |
 | `MAX_DEPTH`              | `3`                   | Maximum crawl depth starting from the `START_URL`. Depth `0` is the start page.                                             |
