@@ -193,6 +193,16 @@ export class CrawlerEngine {
                 const hasErrorFinding = ctx.findings.some((f) => f.type === "error");
                 if (hasErrorFinding) {
                     state.errorCount += 1;
+                } else if (!ctx.audited) {
+                    state.warningCount += 1;
+                    ctx.findings.push({
+                        plugin: "engine",
+                        type: "warning",
+                        code: "URL_NOT_AUDITED",
+                        message: "This URL is not supported",
+                        url: ctx.url,
+                    });
+                    state.successCount += 1;
                 } else {
                     state.successCount += 1;
                 }

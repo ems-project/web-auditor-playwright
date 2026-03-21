@@ -28,6 +28,6 @@ export class CleanDownloadedPlugin extends BasePlugin implements IPlugin {
             );
         }
 
-        this.register();
+        this.register(ctx);
     }
 }

@@ -73,7 +73,7 @@ export class ProcessHtmlPlugin extends BasePlugin implements IPlugin {
                 source: this.name,
             });
         }
-        this.register();
+        this.register(ctx);
     }
 
     private async extractFromDom(ctx: ResourceContext) {

@@ -21,7 +21,8 @@ export abstract class BasePlugin {
         };
     }
 
-    protected register(): void {
+    protected register(ctx: ResourceContext): void {
+        ctx.audited = true;
         this.auditedUrls += 1;
     }
 

@@ -60,7 +60,7 @@ export class A11yAxePlugin extends BasePlugin implements IPlugin {
             this.registerError(ctx, violation.id, message);
         }
 
-        this.register();
+        this.register(ctx);
     }
 
     private extractWcagCriteria(tags: string[]): string[] {

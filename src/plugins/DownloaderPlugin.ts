@@ -63,7 +63,7 @@ export class DownloaderPlugin extends BasePlugin implements IPlugin {
                 "DOWNLOAD_SAVE_FAILED",
                 ErrorUtils.errorMessage(ctx.report.message, error),
             );
-            this.register();
+            this.register(ctx);
             return;
         }
 
@@ -113,7 +113,7 @@ export class DownloaderPlugin extends BasePlugin implements IPlugin {
             );
         }
 
-        this.register();
+        this.register(ctx);
     }
 
     private detectMimeType(

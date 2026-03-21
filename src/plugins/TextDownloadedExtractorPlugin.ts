@@ -49,7 +49,7 @@ export class TextDownloadedExtractorPlugin extends BasePlugin implements IPlugin
                 "TEXT_EXTRACTION_SKIPPED_TOO_LARGE",
                 `Text extraction skipped because the file is larger than ${this.maxFileSizeBytes} bytes.`,
             );
-            this.register();
+            this.register(ctx);
             return;
         }
 
@@ -72,7 +72,7 @@ export class TextDownloadedExtractorPlugin extends BasePlugin implements IPlugin
             );
         }
 
-        this.register();
+        this.register(ctx);
     }
 
     private isSupportedMime(mime: string): boolean {

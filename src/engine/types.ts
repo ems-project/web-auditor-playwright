@@ -46,6 +46,7 @@ export type ResourceContext = {
     pageErrors: string[];
     extractedText?: string; // ex: textract PDF
 
+    audited?: boolean;
     report: ResourceReport;
     crawler: CrawlerControl;
     engineState: EngineState;
