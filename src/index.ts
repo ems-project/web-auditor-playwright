@@ -7,8 +7,9 @@ import { StatsCollectorPlugin } from "./plugins/StatsCollectorPlugin.js";
 import { ConsoleStatusPlugin } from "./plugins/ConsoleStatusPlugin.js";
 import { PerUrlJsonReportPlugin } from "./plugins/PerUrlJsonReportPlugin.js";
 import { ProcessHtmlPlugin } from "./plugins/ProcessHtmlPlugin.js";
-import { printPluginSummaryTable } from "./engine/summaryPrinter.js";
 import { DownloaderPlugin } from "./plugins/DownloaderPlugin.js";
+import { CleanDownloadedPlugin } from "./plugins/CleanDownloadedPlugin.js";
+import { printPluginSummaryTable } from "./engine/summaryPrinter.js";
 
 async function main() {
     const registry = new PluginRegistry()
@@ -40,10 +41,8 @@ async function main() {
                     .map((tag) => tag.trim())
                     .filter(Boolean),
             }),
-        );
-    // .register(new DeadLinksPlugin({ checkExternal: (process.env.CHECK_EXTERNAL_LINKS ?? "false") === "true" }))
-    // .register(new PdfTextractPlugin())
-    // .register(new LighthouseEveryNHtmlPlugin(Number(process.env.LH_EVERY_N ?? 10)));
+        )
+        .register(new CleanDownloadedPlugin());
 
     const outputFormat = process.env.OUTPUT_FORMAT ?? "both";
     const engine = new CrawlerEngine(
