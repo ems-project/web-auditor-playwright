@@ -1,17 +1,11 @@
 export class TimeUtils {
-    /**
-     * Compute duration in milliseconds
-     */
+
     static durationMs(startedAt: Date | string, endedAt: Date | string): number {
         const start = startedAt instanceof Date ? startedAt : new Date(startedAt);
         const end = endedAt instanceof Date ? endedAt : new Date(endedAt);
         return Math.max(0, end.getTime() - start.getTime());
     }
 
-    /**
-     * Format duration as HH:mm:ss
-     * Example: 01:05:09
-     */
     static formatHMS(ms: number): string {
         const totalSeconds = Math.floor(ms / 1000);
 
@@ -26,10 +20,6 @@ export class TimeUtils {
         ].join(":");
     }
 
-    /**
-     * Human readable format
-     * Example: 2h 3m 10s
-     */
     static formatHuman(ms: number): string {
         const totalSeconds = Math.floor(ms / 1000);
 
@@ -46,13 +36,6 @@ export class TimeUtils {
         return parts.join(" ");
     }
 
-    /**
-     * Short format (adaptive)
-     * Examples:
-     * - 45s
-     * - 3m 12s
-     * - 1h 02m
-     */
     static formatShort(ms: number): string {
         const totalSeconds = Math.floor(ms / 1000);
 
@@ -71,10 +54,6 @@ export class TimeUtils {
         return `${seconds}s`;
     }
 
-    /**
-     * Format milliseconds with unit
-     * Example: 1234ms, 1.2s
-     */
     static formatMs(ms: number): string {
         if (ms < 1000) return `${ms}ms`;
 

@@ -1,7 +1,6 @@
 export function normalizeUrl(u: string): string {
     const url = new URL(u);
     url.hash = "";
-    // optionnel: uniformiser trailing slash (attention aux sites sensibles)
     return url.toString();
 }
 
