@@ -22,65 +22,52 @@ export class ProcessHtmlPlugin extends BasePlugin implements IPlugin {
     }
 
     async run(_phase: PluginPhase, ctx: ResourceContext): Promise<void> {
-        try {
-            const extracted = await this.extractFromDom(ctx);
-            const titleAnalyzer = new TitleAnalyzer();
-            const titleAnalysis = titleAnalyzer.analyze(extracted.title);
+        const extracted = await this.extractFromDom(ctx);
+        const titleAnalyzer = new TitleAnalyzer();
+        const titleAnalysis = titleAnalyzer.analyze(extracted.title);
 
-            const mailOrTelLinkCount = extracted.links.filter(
-                (l) => l.url.startsWith("mailto:") || l.url.startsWith("tel:"),
-            ).length;
-            if (mailOrTelLinkCount > 0) {
-                this.registerInfo(
-                    ctx,
-                    "MAIL_OR_TEL_LINK",
-                    `Contains ${mailOrTelLinkCount} mailto or tel links.`,
-                );
-            }
-
-            for (const issue of titleAnalysis.issues) {
-                this.registerFinding(issue.severity, ctx, issue.code, issue.message, {
-                    title: titleAnalysis.normalized,
-                    length: titleAnalysis.length,
-                    brand: titleAnalysis.brand,
-                    mainTitle: titleAnalysis.mainTitle,
-                });
-            }
-
-            const wordCount = extracted.content.split(/\s+/).length;
-            if (wordCount < 100) {
-                this.registerWarning(ctx, "LOW_CONTENT", `Low content page (${wordCount} words).`);
-            }
-
-            ctx.report.is_web = true;
-            ctx.report.meta_title = extracted.title;
-            ctx.report.locale = extracted.lang;
-            ctx.report.description = extracted.description;
-            ctx.report.content = extracted.content;
-            ctx.report.title = extracted.h1s.length > 0 ? extracted.h1s[0] : null;
-            ctx.report.links = this.maxLinksPerPage
-                ? extracted.links.slice(0, this.maxLinksPerPage)
-                : extracted.links;
-
-            for (const link of extracted.links) {
-                ctx.crawler.enqueueUrl({
-                    url: link.url,
-                    source: this.name,
-                });
-            }
-            this.register();
-        } catch (e: unknown) {
-            let errorMessage = "Unknown error: " + String(e);
-            if (e instanceof Error) {
-                errorMessage = e.message;
-            }
-            this.registerError(
+        const mailOrTelLinkCount = extracted.links.filter(
+            (l) => l.url.startsWith("mailto:") || l.url.startsWith("tel:"),
+        ).length;
+        if (mailOrTelLinkCount > 0) {
+            this.registerInfo(
                 ctx,
-                "PROCESS_HTML_ERROR",
-                `It's impossible to process the URL ${ctx.url}: ${errorMessage}.`,
+                "MAIL_OR_TEL_LINK",
+                `Contains ${mailOrTelLinkCount} mailto or tel links.`,
             );
-            return;
         }
+
+        for (const issue of titleAnalysis.issues) {
+            this.registerFinding(issue.severity, ctx, issue.code, issue.message, {
+                title: titleAnalysis.normalized,
+                length: titleAnalysis.length,
+                brand: titleAnalysis.brand,
+                mainTitle: titleAnalysis.mainTitle,
+            });
+        }
+
+        const wordCount = extracted.content.split(/\s+/).length;
+        if (wordCount < 100) {
+            this.registerWarning(ctx, "LOW_CONTENT", `Low content page (${wordCount} words).`);
+        }
+
+        ctx.report.is_web = true;
+        ctx.report.meta_title = extracted.title;
+        ctx.report.locale = extracted.lang;
+        ctx.report.description = extracted.description;
+        ctx.report.content = extracted.content;
+        ctx.report.title = extracted.h1s.length > 0 ? extracted.h1s[0] : null;
+        ctx.report.links = this.maxLinksPerPage
+            ? extracted.links.slice(0, this.maxLinksPerPage)
+            : extracted.links;
+
+        for (const link of extracted.links) {
+            ctx.crawler.enqueueUrl({
+                url: link.url,
+                source: this.name,
+            });
+        }
+        this.register();
     }
 
     private async extractFromDom(ctx: ResourceContext) {
