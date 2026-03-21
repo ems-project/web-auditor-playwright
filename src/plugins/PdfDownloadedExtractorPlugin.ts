@@ -37,13 +37,10 @@ export class PdfDownloadedExtractorPlugin extends BasePlugin implements IPlugin 
     }
 
     applies(ctx: ResourceContext): boolean {
-        console.log(!!ctx.downloaded?.savedPath);
-        console.log(ctx.downloaded?.mime === "application/pdf");
         return !!ctx.downloaded?.savedPath && ctx.downloaded?.mime === "application/pdf";
     }
 
     async run(_phase: PluginPhase, ctx: ResourceContext): Promise<void> {
-        console.log("yes");
         const savedPath = ctx.downloaded?.savedPath;
         const size = ctx.downloaded?.size;
 
