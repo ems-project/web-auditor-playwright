@@ -3,10 +3,6 @@ import { CrawlerEngine } from "./engine/CrawlerEngine.js";
 import { TimeUtils } from "./utils/TimeUtils.js";
 
 import { A11yAxePlugin } from "./plugins/A11yAxePlugin.js";
-// import { ConsoleErrorsPlugin } from "./plugins/ConsoleErrorsPlugin";
-// import { DeadLinksPlugin } from "./plugins/DeadLinksPlugin";
-// import { PdfTextractPlugin } from "./plugins/PdfTextractPlugin";
-// import { LighthouseEveryNHtmlPlugin } from "./plugins/LighthouseEveryNHtmlPlugin";
 import { StatsCollectorPlugin } from "./plugins/StatsCollectorPlugin.js";
 import { ConsoleStatusPlugin } from "./plugins/ConsoleStatusPlugin.js";
 import { PerUrlJsonReportPlugin } from "./plugins/PerUrlJsonReportPlugin.js";
