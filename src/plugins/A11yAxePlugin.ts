@@ -52,6 +52,7 @@ export class A11yAxePlugin extends BasePlugin implements IPlugin {
                 impact: violation.impact,
                 nodes,
                 tags: violation.tags,
+                wcag_criteria: this.extractWcagCriteria(violation.tags),
             });
             const message = `${violation.help} (${violation.impact ?? "unknown"})`;
             ctx.findings.push({
@@ -65,5 +66,15 @@ export class A11yAxePlugin extends BasePlugin implements IPlugin {
         }
 
         this.registerUrl();
+    }
+
+    private extractWcagCriteria(tags: string[]): string[] {
+        return tags.map(this.formatWcagCriterion).filter((v): v is string => v !== null);
+    }
+
+    private formatWcagCriterion(tag: string): string | null {
+        const m = /^wcag(\d)(\d)(\d+)$/.exec(tag);
+        if (!m) return null;
+        return `${m[1]}.${m[2]}.${m[3]}`;
     }
 }

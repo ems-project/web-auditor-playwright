@@ -66,6 +66,7 @@ export type ResourceReportA11yAxeItem = {
     id: string;
     impact: string | null | undefined;
     tags: string[];
+    wcag_criteria: string[];
     description: string;
     help: string;
     help_url: string;
