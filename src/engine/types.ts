@@ -130,6 +130,7 @@ export type Finding = {
     type: FindingSeverity;
     code: string;
     message: string;
+    url: string;
     data?: FindingData;
 };
 

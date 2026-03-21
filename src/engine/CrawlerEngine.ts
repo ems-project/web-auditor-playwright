@@ -123,6 +123,7 @@ export class CrawlerEngine {
                         type: "error",
                         code: "MISSING_RETURN_CODE",
                         message: "Return code is missing",
+                        url: ctx.url,
                     });
                 } else if (ctx.status >= 400) {
                     ctx.findings.push({
@@ -130,6 +131,7 @@ export class CrawlerEngine {
                         type: "error",
                         code: "UNEXPECTED_RETURN_CODE",
                         message: ctx.status + ": " + (statusMessage ?? ""),
+                        url: ctx.url,
                     });
                 } else if (ctx.status >= 300) {
                     ctx.findings.push({
@@ -137,6 +139,7 @@ export class CrawlerEngine {
                         type: "warning",
                         code: "UNEXPECTED_RETURN_CODE",
                         message: ctx.status + ": " + (statusMessage ?? ""),
+                        url: ctx.url,
                     });
                 }
 
@@ -177,6 +180,7 @@ export class CrawlerEngine {
                         type: "error",
                         code: "NAVIGATION_FAILED",
                         message: errorMessage,
+                        url: ctx.url,
                     });
                     await this.registry.runPhase("error", ctx);
                 }

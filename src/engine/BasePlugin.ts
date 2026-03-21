@@ -50,6 +50,7 @@ export abstract class BasePlugin {
             code,
             message,
             data,
+            url: ctx.url,
         });
         switch (severity) {
             case "info":
