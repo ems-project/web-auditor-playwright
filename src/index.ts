@@ -11,18 +11,17 @@ import { DownloaderPlugin } from "./plugins/DownloaderPlugin.js";
 import { CleanDownloadedPlugin } from "./plugins/CleanDownloadedPlugin.js";
 import { TextDownloadedExtractorPlugin } from "./plugins/TextDownloadedExtractorPlugin.js";
 import { PdfDownloadedExtractorPlugin } from "./plugins/PdfDownloadedExtractorPlugin.js";
+import { DocxDownloadedExtractorPlugin } from "./plugins/DocxDownloadedExtractorPlugin.js";
 import { printPluginSummaryTable } from "./engine/summaryPrinter.js";
 
 async function main() {
     const registry = new PluginRegistry()
-        // High priority plugins
         .register(
             new DownloaderPlugin({
                 outputDir: process.env.DOWNLOAD_OUTPUT_DIR ?? "./reports/downloads",
                 keepFiles: process.env.DOWNLOAD_KEEP_FILES === "true",
             }),
         )
-        // Normal priority plugins
         .register(new StatsCollectorPlugin({ rollingWindowSize: 12 }))
         .register(
             new ConsoleStatusPlugin({
@@ -62,7 +61,15 @@ async function main() {
                 ),
             }),
         )
-        // Low priority plugins
+        .register(
+            new DocxDownloadedExtractorPlugin({
+                maxExtractedChars: Number(process.env.DOWNLOAD_MAX_EXTRACTED_CHARS ?? 200000),
+                maxLinks: Number(process.env.DOWNLOAD_MAX_LINKS ?? 500),
+                maxFileSizeBytes: Number(
+                    process.env.DOWNLOAD_MAX_TEXT_READ_BYTES ?? 5 * 1024 * 1024,
+                ),
+            }),
+        )
         .register(new CleanDownloadedPlugin());
 
     const outputFormat = process.env.OUTPUT_FORMAT ?? "both";
