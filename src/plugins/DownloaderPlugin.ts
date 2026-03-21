@@ -5,6 +5,7 @@ import crypto from "node:crypto";
 
 import { BasePlugin } from "../engine/BasePlugin.js";
 import { IPlugin, PluginPhase, ResourceContext } from "../engine/types.js";
+import { ErrorUtils } from "../utils/ErrorUtils.js";
 
 type DownloaderPluginOptions = {
     outputDir?: string;
@@ -60,7 +61,7 @@ export class DownloaderPlugin extends BasePlugin implements IPlugin {
             this.registerError(
                 ctx,
                 "DOWNLOAD_SAVE_FAILED",
-                this.errorMessage(ctx.report.message, error),
+                ErrorUtils.errorMessage(ctx.report.message, error),
             );
             this.register();
             return;
@@ -216,10 +217,5 @@ export class DownloaderPlugin extends BasePlugin implements IPlugin {
     private async sha256(filePath: string): Promise<string> {
         const buffer = await fsp.readFile(filePath);
         return crypto.createHash("sha256").update(buffer).digest("hex");
-    }
-
-    private errorMessage(prefix: string, error: unknown): string {
-        const message = error instanceof Error ? error.message : String(error);
-        return `${prefix}: ${message}`;
     }
 }

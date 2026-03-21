@@ -10,6 +10,7 @@ import { PluginRegistry } from "./PluginRegistry.js";
 import { getStatusMessage, isSameOrigin, normalizeUrl, parseMime } from "./utils.js";
 import { RateLimiter } from "./RateLimiter.js";
 import { createInitialReport } from "./report.js";
+import { ErrorUtils } from "../utils/ErrorUtils.js";
 
 export class CrawlerEngine {
     private readonly rateLimiter: RateLimiter;
@@ -173,15 +174,11 @@ export class CrawlerEngine {
                     ctx.download = download;
                     await this.registry.runPhase("download", ctx);
                 } else {
-                    let errorMessage = "Unknown error: " + String(e);
-                    if (e instanceof Error) {
-                        errorMessage = e.message;
-                    }
                     ctx.findings.push({
                         plugin: "engine",
                         type: "error",
                         code: "NAVIGATION_FAILED",
-                        message: errorMessage,
+                        message: ErrorUtils.errorMessage("Failed to open or download the url", e),
                         url: ctx.url,
                     });
                     await this.registry.runPhase("error", ctx);

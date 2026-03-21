@@ -1,4 +1,5 @@
 import type { IPlugin, PluginPhase, PluginSummary, ResourceContext } from "./types.js";
+import { ErrorUtils } from "../utils/ErrorUtils.js";
 
 export class PluginRegistry {
     private plugins: IPlugin[] = [];
@@ -19,15 +20,11 @@ export class PluginRegistry {
             try {
                 await p.run(phase, ctx);
             } catch (e) {
-                let errorMessage = "Unknown error: " + String(e);
-                if (e instanceof Error) {
-                    errorMessage = e.message;
-                }
                 ctx.findings.push({
                     plugin: p.name,
                     type: "error",
                     code: "UNEXPECTED_ERROR",
-                    message: errorMessage,
+                    message: ErrorUtils.errorMessage("Failed to run the plugin", e),
                     url: ctx.url,
                 });
             }
