@@ -18,6 +18,7 @@ import { SecurityHeadersPlugin } from "./plugins/SecurityHeadersPlugin.js";
 import { LanguageDetectionPlugin } from "./plugins/LanguageDetectionPlugin.js";
 import { StandardUrlsAuditPlugin } from "./plugins/StandardUrlsAuditPlugin.js";
 import { ConsolePlugin } from "./plugins/ConsolePlugin.js";
+import { PdfAccessibilityPlugin } from "./plugins/PdfAccessibilityPlugin.js";
 
 async function main() {
     const registry = new PluginRegistry()
@@ -78,6 +79,16 @@ async function main() {
                 maxPages: Number(process.env.DOWNLOAD_MAX_PDF_PAGES ?? 200),
                 maxFileSizeBytes: Number(
                     process.env.DOWNLOAD_MAX_TEXT_READ_BYTES ?? 5 * 1024 * 1024,
+                ),
+            }),
+        )
+        .register(
+            new PdfAccessibilityPlugin({
+                minExtractedChars: Number(process.env.PDF_A11Y_MIN_EXTRACTED_CHARS ?? 30),
+                maxPages: Number(process.env.PDF_A11Y_MAX_PAGES ?? 200),
+                lowTextThreshold: Number(process.env.PDF_A11Y_LOW_TEXT_THRESHOLD ?? 20),
+                warnOnMissingBookmarksMinPages: Number(
+                    process.env.PDF_A11Y_WARN_MISSING_BOOKMARKS_MIN_PAGES ?? 5,
                 ),
             }),
         )
