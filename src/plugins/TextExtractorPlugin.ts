@@ -5,21 +5,21 @@ import { IPlugin, PluginPhase, ResourceContext } from "../engine/types.js";
 import { ErrorUtils } from "../utils/ErrorUtils.js";
 import { TextUtils } from "../utils/TextUtils.js";
 
-type TextDownloadedExtractorPluginOptions = {
+type TextExtractorPluginOptions = {
     maxExtractedChars?: number;
     maxLinks?: number;
     maxFileSizeBytes?: number;
 };
 
-export class TextDownloadedExtractorPlugin extends BasePlugin implements IPlugin {
-    name = "text-downloaded-extractor";
+export class TextExtractorPlugin extends BasePlugin implements IPlugin {
+    name = "text-extractor";
     phases: PluginPhase[] = ["after-download"];
 
     private readonly maxExtractedChars: number;
     private readonly maxLinks: number;
     private readonly maxFileSizeBytes: number;
 
-    constructor(options: TextDownloadedExtractorPluginOptions = {}) {
+    constructor(options: TextExtractorPluginOptions = {}) {
         super();
         this.maxExtractedChars = options.maxExtractedChars ?? 200_000;
         this.maxLinks = options.maxLinks ?? 500;
