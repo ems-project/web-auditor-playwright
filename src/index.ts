@@ -76,7 +76,7 @@ async function main() {
                 maxExtractedChars: Number(process.env.DOWNLOAD_MAX_EXTRACTED_CHARS ?? 200000),
                 maxLinks: Number(process.env.DOWNLOAD_MAX_LINKS ?? 500),
                 maxFileSizeBytes: Number(
-                    process.env.DOWNLOAD_MAX_TEXT_READ_BYTES ?? 5 * 1024 * 1024,
+                    process.env.DOWNLOAD_MAX_BINARY_READ_BYTES ?? 20 * 1024 * 1024,
                 ),
             }),
         )
