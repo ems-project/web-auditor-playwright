@@ -125,7 +125,6 @@ export class TextractExtractorPlugin extends BasePlugin implements IPlugin {
 
     private loadTextract(): TextractModule {
         const mod = require("textract") as unknown;
-        console.log(typeof mod);
 
         const candidates: unknown[] = [
             mod,
