@@ -356,6 +356,12 @@ export class PdfExtractorPlugin extends BasePlugin implements IPlugin {
                 break;
             }
         }
+        for (const link of collected) {
+            ctx.crawler.enqueueUrl({
+                url: link.url,
+                source: this.name,
+            });
+        }
 
         ctx.report.links = this.mergeLinks(ctx.report.links ?? [], collected);
     }
