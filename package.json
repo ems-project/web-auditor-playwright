@@ -14,7 +14,6 @@
     "dependencies": {
         "@axe-core/playwright": "^4.9.0",
         "mammoth": "^1.12.0",
-        "pdf-parse": "^2.4.5",
         "pdfjs-dist": "^5.5.207",
         "playwright": "^1.49.0",
         "textract": "^0.20.0"
