@@ -7,7 +7,7 @@ import { TextUtils } from "../utils/TextUtils.js";
 
 const require = createRequire(import.meta.url);
 
-type TextractDownloadedExtractorPluginOptions = {
+type TextractExtractorPluginOptions = {
     maxExtractedChars?: number;
     maxLinks?: number;
     maxFileSizeBytes?: number;
@@ -21,15 +21,15 @@ type TextractModule = {
     ): void;
 };
 
-export class TextractDownloadedExtractorPlugin extends BasePlugin implements IPlugin {
-    name = "textract-downloaded-extractor";
+export class TextractExtractorPlugin extends BasePlugin implements IPlugin {
+    name = "textract-extractor";
     phases: PluginPhase[] = ["download"];
 
     private readonly maxExtractedChars: number;
     private readonly maxLinks: number;
     private readonly maxFileSizeBytes: number;
 
-    constructor(options: TextractDownloadedExtractorPluginOptions = {}) {
+    constructor(options: TextractExtractorPluginOptions = {}) {
         super();
         this.maxExtractedChars = options.maxExtractedChars ?? 200_000;
         this.maxLinks = options.maxLinks ?? 500;
