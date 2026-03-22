@@ -1,7 +1,7 @@
 import fsp from "node:fs/promises";
 
 import { BasePlugin } from "../engine/BasePlugin.js";
-import { IPlugin, PluginPhase, ResourceContext, ResourceReportLink } from "../engine/types.js";
+import { IPlugin, PluginPhase, ResourceContext } from "../engine/types.js";
 import { ErrorUtils } from "../utils/ErrorUtils.js";
 import { TextUtils } from "../utils/TextUtils.js";
 
