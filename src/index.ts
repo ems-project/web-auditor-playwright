@@ -14,6 +14,7 @@ import { TextExtractorPlugin } from "./plugins/TextExtractorPlugin.js";
 import { PdfExtractorPlugin } from "./plugins/PdfExtractorPlugin.js";
 import { DocxExtractorPlugin } from "./plugins/DocxExtractorPlugin.js";
 import { TextractExtractorPlugin } from "./plugins/TextractExtractorPlugin.js";
+import { SecurityHeadersPlugin } from "./plugins/SecurityHeadersPlugin.js";
 import { LanguageDetectionPlugin } from "./plugins/LanguageDetectionPlugin.js";
 import { StandardUrlsAuditPlugin } from "./plugins/StandardUrlsAuditPlugin.js";
 
@@ -72,6 +73,11 @@ async function main() {
                 maxFileSizeBytes: Number(
                     process.env.DOWNLOAD_MAX_TEXT_READ_BYTES ?? 5 * 1024 * 1024,
                 ),
+            }),
+        )
+        .register(
+            new SecurityHeadersPlugin({
+                auditOnlyStartUrl: (process.env.SECURITY_ONLY_START_URL ?? "true") === "true",
             }),
         )
         .register(
