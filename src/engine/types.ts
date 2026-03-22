@@ -144,9 +144,17 @@ export type EngineState = {
     maxPages: number;
     any: Record<string, unknown>;
     findings: Finding[];
+    inventory: InventoryItem[];
 };
 
 export type FindingSeverity = "info" | "warning" | "error";
+
+export type InventoryItem = {
+    depth: number;
+    status?: number;
+    mime?: Mime;
+    url: string;
+};
 
 export type Finding = {
     plugin: string;

@@ -133,6 +133,7 @@ async function main() {
             },
             plugins: pluginSummaries,
             findings: state.findings,
+            inventory: state.inventory,
         };
         console.log(JSON.stringify(report, null, 4));
     }
