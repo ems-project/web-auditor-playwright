@@ -1,4 +1,10 @@
-import { FindingData, FindingSeverity, PluginSummary, ResourceContext } from "./types.js";
+import {
+    FindingData,
+    FindingSeverity,
+    PluginSummary,
+    ResourceContext,
+    ResourceReportLink,
+} from "./types.js";
 
 export abstract class BasePlugin {
     protected auditedUrls = 0;
