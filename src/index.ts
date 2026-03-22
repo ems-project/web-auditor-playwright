@@ -19,6 +19,7 @@ import { LanguageDetectionPlugin } from "./plugins/LanguageDetectionPlugin.js";
 import { StandardUrlsAuditPlugin } from "./plugins/StandardUrlsAuditPlugin.js";
 import { ConsolePlugin } from "./plugins/ConsolePlugin.js";
 import { PdfAccessibilityPlugin } from "./plugins/PdfAccessibilityPlugin.js";
+import { PerformanceMetricsPlugin } from "./plugins/PerformanceMetricsPlugin.js";
 
 async function main() {
     const registry = new PluginRegistry()
@@ -32,6 +33,28 @@ async function main() {
         .register(
             new SaveReportAsJsonPlugin({
                 outputDir: process.env.REPORT_OUTPUT_DIR ?? "./reports",
+            }),
+        )
+        .register(
+            new PerformanceMetricsPlugin({
+                auditOnlyStartUrl: (process.env.PERF_AUDIT_ONLY_START_URL ?? "false") === "true",
+                slowResourceThresholdMs: Number(
+                    process.env.PERF_SLOW_RESOURCE_THRESHOLD_MS ?? 1000,
+                ),
+                largeResourceThresholdBytes: Number(
+                    process.env.PERF_LARGE_RESOURCE_THRESHOLD_BYTES ?? 500000,
+                ),
+                maxReportedResources: Number(process.env.PERF_MAX_REPORTED_RESOURCES ?? 10),
+                highResourceCountThreshold: Number(
+                    process.env.PERF_HIGH_RESOURCE_COUNT_THRESHOLD ?? 100,
+                ),
+                largeTransferThresholdBytes: Number(
+                    process.env.PERF_LARGE_TRANSFER_THRESHOLD_BYTES ?? 3000000,
+                ),
+                slowLoadThresholdMs: Number(process.env.PERF_SLOW_LOAD_THRESHOLD_MS ?? 3000),
+                slowDomContentLoadedThresholdMs: Number(
+                    process.env.PERF_SLOW_DOMCONTENTLOADED_THRESHOLD_MS ?? 1500,
+                ),
             }),
         )
         .register(
