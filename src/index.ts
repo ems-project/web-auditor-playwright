@@ -32,6 +32,8 @@ import { XlsxExporter } from "./reporting/XlsxExporter.js";
 async function main() {
     const reportOutputDir = process.env.REPORT_OUTPUT_DIR ?? "./reports";
     const websiteId = process.env.WEBSITE_ID ?? "my_website";
+    const urlAllowlist = TextUtils.parseRegexList(process.env.URL_ALLOWLIST_REGEX);
+    const urlBlocklist = TextUtils.parseRegexList(process.env.URL_BLOCKLIST_REGEX);
     const registry = new PluginRegistry({
         disabledPlugins: (process.env.DISABLED_PLUGINS ?? "")
             .split(",")
@@ -193,6 +195,8 @@ async function main() {
             navTimeoutMs: Number(process.env.NAV_TIMEOUT_MS ?? 30000),
             userAgent: process.env.USER_AGENT,
             rateLimitMs: Number(process.env.RATE_LIMIT_MS ?? 500),
+            urlAllowlist: urlAllowlist,
+            urlBlocklist: urlBlocklist,
         },
         registry,
     );

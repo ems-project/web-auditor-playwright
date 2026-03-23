@@ -5,12 +5,15 @@ import type {
     EnqueueRequest,
     EnqueueResult,
     ResourceContext,
+    UrlRejectionReason,
 } from "./types.js";
 import { PluginRegistry } from "./PluginRegistry.js";
 import { getStatusMessage, isSameOrigin, normalizeUrl, parseMime } from "./utils.js";
 import { RateLimiter } from "./RateLimiter.js";
 import { createInitialReport } from "./report.js";
 import { ErrorUtils } from "../utils/ErrorUtils.js";
+
+type UrlDecision = { allowed: true } | { allowed: false; reason: UrlRejectionReason };
 
 export class CrawlerEngine {
     private readonly rateLimiter: RateLimiter;
@@ -290,6 +293,15 @@ export class CrawlerEngine {
             };
         }
 
+        const decision = this.evaluateUrl(normalizedUrl);
+        if (!decision.allowed) {
+            return {
+                accepted: false,
+                normalizedUrl,
+                reason: decision.reason,
+            };
+        }
+
         if (state.seen.has(normalizedUrl)) {
             return {
                 accepted: false,
@@ -318,5 +330,33 @@ export class CrawlerEngine {
             accepted: true,
             normalizedUrl,
         };
+    }
+
+    private evaluateUrl(url: string): UrlDecision {
+        const { urlAllowlist, urlBlocklist } = this.opts;
+
+        if (urlAllowlist && urlAllowlist.length > 0) {
+            const matches = urlAllowlist.some((r) => {
+                r.lastIndex = 0;
+                return r.test(url);
+            });
+
+            if (!matches) {
+                return { allowed: false, reason: "not_in_allowlist" };
+            }
+        }
+
+        if (urlBlocklist && urlBlocklist.length > 0) {
+            const blocked = urlBlocklist.some((r) => {
+                r.lastIndex = 0;
+                return r.test(url);
+            });
+
+            if (blocked) {
+                return { allowed: false, reason: "blocked_by_blocklist" };
+            }
+        }
+
+        return { allowed: true };
     }
 }

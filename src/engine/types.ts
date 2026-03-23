@@ -12,6 +12,8 @@ export type CrawlOptions = {
     navTimeoutMs: number;
     userAgent?: string;
     rateLimitMs: number;
+    urlAllowlist?: RegExp[];
+    urlBlocklist?: RegExp[];
 };
 
 export type DownloadArtifact = {
@@ -116,15 +118,19 @@ export type EnqueueRequest = {
     source?: string;
 };
 
+export type UrlRejectionReason =
+    | "invalid_url"
+    | "already_seen"
+    | "max_depth_reached"
+    | "not_in_allowlist"
+    | "cross_origin_blocked"
+    | "blocked_by_blocklist"
+    | "max_pages_reached";
+
 export type EnqueueResult = {
     accepted: boolean;
     normalizedUrl?: string;
-    reason?:
-        | "invalid_url"
-        | "already_seen"
-        | "max_depth_reached"
-        | "cross_origin_blocked"
-        | "max_pages_reached";
+    reason?: UrlRejectionReason;
 };
 
 export type CrawlerControl = {
