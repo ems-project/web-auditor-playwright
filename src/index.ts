@@ -27,6 +27,7 @@ import { PerformanceMetricsPlugin } from "./plugins/PerformanceMetricsPlugin.js"
 import { TlsCertificatePlugin } from "./plugins/TlsCertificatePlugin.js";
 import { IpSupportPlugin } from "./plugins/IpSupportPlugin.js";
 import { TextUtils } from "./utils/TextUtils.js";
+import { XlsxExporter } from "./reporting/XlsxExporter.js";
 
 async function main() {
     const reportOutputDir = process.env.REPORT_OUTPUT_DIR ?? "./reports";
@@ -228,7 +229,7 @@ async function main() {
         printPluginSummaryTable(pluginSummaries);
     }
 
-    const report = {
+    const globalReport = {
         state: {
             startedAt: state.startedAt.toISOString(),
             endedAt: endedAt.toISOString(),
@@ -248,14 +249,19 @@ async function main() {
             ipV6Reachable: state.ipV6Reachable ?? null,
         },
         plugins: pluginSummaries,
-        findings: state.findings,
+        issues: state.findings,
         inventory: state.inventory,
     };
-    const jsonReport = JSON.stringify(report, null, 4);
+    const jsonReport = JSON.stringify(globalReport, null, 4);
     if (outputFormat === "json" || outputFormat === "both") {
         console.log(jsonReport);
     }
     await fs.writeFile(path.join(reportOutputDir, `${websiteId}.json`), jsonReport, "utf-8");
+
+    const xlsxExporter = new XlsxExporter({
+        outputPath: path.join(reportOutputDir, `${websiteId}.xlsx`),
+    });
+    await xlsxExporter.export(globalReport);
 
     const hasErrors = pluginSummaries.reduce((sum, p) => sum + p.errors, 0) > 0;
     process.exit(hasErrors ? 2 : 0);
