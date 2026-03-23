@@ -120,6 +120,11 @@ export class TlsCertificatePlugin extends BasePlugin implements IPlugin {
 
         try {
             const cert = await this.inspectCertificate(host, port, servername);
+            ctx.engineState.tlsGrade = cert.grade;
+            ctx.engineState.tlsScore = cert.score;
+            ctx.engineState.tlsValidFrom = cert.validFrom ?? undefined;
+            ctx.engineState.tlsValidTo = cert.validTo ?? undefined;
+            ctx.engineState.tlsDaysRemaining = cert.daysRemaining ?? undefined;
 
             this.registerInfo(
                 ctx,

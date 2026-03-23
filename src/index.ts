@@ -209,17 +209,22 @@ async function main() {
 
     if (outputFormat === "table" || outputFormat === "both") {
         const securityHeader = `${state.securityHeaderGrade ?? "N/A"} (${state.securityHeaderScore ?? "N/A"}%)`;
+        const tlsGrade = `${state.tlsGrade ?? "N/A"} (${state.tlsScore ?? "N/A"}%)`;
         const ipv4 = `supported ${TextUtils.statusLabel(state.ipV4Supported)} | reachable ${TextUtils.statusLabel(state.ipV4Reachable)} `;
         const ipv6 = `supported ${TextUtils.statusLabel(state.ipV6Supported)} | reachable ${TextUtils.statusLabel(state.ipV6Reachable)} `;
         console.log("\n\n=== Audit completed ===\n");
-        console.log(`  - Origin          : ${state.origin}`);
-        console.log(`  - Started at      : ${state.startedAt.toISOString()}`);
-        console.log(`  - Ended at        : ${endedAt.toISOString()}`);
-        console.log(`  - Duration        : ${TimeUtils.formatHuman(durationMs)}`);
-        console.log(`  - URLs seen       : ${state.seen.size}`);
-        console.log(`  - Security header : ${securityHeader}`);
-        console.log(`  - IPv4            : ${ipv4}`);
-        console.log(`  - IPv6            : ${ipv6}`);
+        console.log(`  - Origin           : ${state.origin}`);
+        console.log(`  - Started at       : ${state.startedAt.toISOString()}`);
+        console.log(`  - Ended at         : ${endedAt.toISOString()}`);
+        console.log(`  - Duration         : ${TimeUtils.formatHuman(durationMs)}`);
+        console.log(`  - URLs seen        : ${state.seen.size}`);
+        console.log(`  - Security header  : ${securityHeader}`);
+        console.log(`  - TLS              : ${tlsGrade}`);
+        console.log(`    - Valid from     : ${state.tlsValidFrom}`);
+        console.log(`    - Valid to       : ${state.tlsValidTo}`);
+        console.log(`    - Days remaining : ${state.tlsDaysRemaining}`);
+        console.log(`  - IPv4             : ${ipv4}`);
+        console.log(`  - IPv6             : ${ipv6}`);
         printPluginSummaryTable(pluginSummaries);
     }
 

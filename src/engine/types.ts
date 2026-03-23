@@ -148,6 +148,11 @@ export type EngineState = {
     inventory: InventoryItem[];
     securityHeaderGrade?: string;
     securityHeaderScore?: number;
+    tlsGrade?: string;
+    tlsScore?: number;
+    tlsValidFrom?: string;
+    tlsValidTo?: string;
+    tlsDaysRemaining?: number;
     ipV4Supported?: boolean;
     ipV6Supported?: boolean;
     ipV4Reachable?: boolean;
