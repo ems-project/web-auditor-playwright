@@ -25,6 +25,7 @@ import { ConsolePlugin } from "./plugins/ConsolePlugin.js";
 import { PdfAccessibilityPlugin } from "./plugins/PdfAccessibilityPlugin.js";
 import { PerformanceMetricsPlugin } from "./plugins/PerformanceMetricsPlugin.js";
 import { TlsCertificatePlugin } from "./plugins/TlsCertificatePlugin.js";
+import { IpSupportPlugin } from "./plugins/IpSupportPlugin.js";
 
 async function main() {
     const reportOutputDir = process.env.REPORT_OUTPUT_DIR ?? "./reports";
@@ -145,6 +146,14 @@ async function main() {
                     | "TLSv1.2"
                     | "TLSv1.3",
                 minScoreForError: Number(process.env.TLS_CERT_MIN_SCORE_FOR_ERROR ?? 50),
+            }),
+        )
+        .register(
+            new IpSupportPlugin({
+                auditOnlyStartUrl:
+                    (process.env.IP_SUPPORT_AUDIT_ONLY_START_URL ?? "true") === "true",
+                timeoutMs: Number(process.env.IP_SUPPORT_TIMEOUT_MS ?? 5000),
+                testConnectivity: (process.env.IP_SUPPORT_TEST_CONNECTIVITY ?? "false") === "true",
             }),
         )
         .register(
