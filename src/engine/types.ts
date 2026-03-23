@@ -74,18 +74,6 @@ export type ResourceReportA11yAxeNode = {
     xpath: string[] | undefined;
 };
 
-export type ResourceReportA11yAxeItem = {
-    id: string;
-    impact: string | null | undefined;
-    tags: string[];
-    wcag_criteria: string[];
-    en301549_criteria: string[];
-    description: string;
-    help: string;
-    help_url: string;
-    nodes: ResourceReportA11yAxeNode[];
-};
-
 export type MetaItem = {
     key: string;
     value: string;
