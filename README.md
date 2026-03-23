@@ -5,7 +5,7 @@
 ```shell
 npm install
 npm run build
-START_URL=https://your-site.com npm start
+START_URL=https://mathieu.dekeyzer.net npm start
 ```
 
 ## Build & run
@@ -14,10 +14,13 @@ START_URL=https://your-site.com npm start
 docker build -t elasticms/web-auditor .
 
 docker run --rm \
+  -v $(pwd)/reports:/opt/reports \
   -e START_URL="https://your-site.com" \
+  -e WEBSITE_ID="your_site" \
   -e MAX_PAGES="80" \
   -e MAX_DEPTH="15" \
   -e CONCURRENCY="2" \
+  -e RATE_LIMIT_MS="500" \
   -e CHECK_EXTERNAL_LINKS="false" \
   elasticms/web-auditor
 ```
@@ -42,6 +45,7 @@ npm start
 | Variable                                    | Default                                                          | Description                                                                                                                                                                                                                                                             |
 | ------------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `START_URL`                                 | `https://example.org`                                            | The initial URL where the crawler starts. All discovered pages will be crawled starting from this entry point.                                                                                                                                                          |
+| `WEBSITE_ID`                                | `my_website`                                                     | Used to saved the report in the `REPORT_OUTPUT_DIR` directory.                                                                                                                                                                                                          |
 | `MAX_PAGES`                                 | `50`                                                             | Maximum number of pages the crawler will visit before stopping.                                                                                                                                                                                                         |
 | `MAX_DEPTH`                                 | `3`                                                              | Maximum crawl depth starting from the `START_URL`. Depth `0` is the start page.                                                                                                                                                                                         |
 | `CONCURRENCY`                               | `3`                                                              | Maximum number of pages processed in parallel. Increasing this value speeds up crawling but increases CPU and memory usage.                                                                                                                                             |
@@ -51,10 +55,10 @@ npm start
 | `SAME_ORIGIN_ONLY`                          | `true`                                                           | If enabled, the crawler only follows links that belong to the same origin as the `START_URL`.                                                                                                                                                                           |
 | `CHECK_EXTERNAL_LINKS`                      | `false`                                                          | If enabled, dead link detection will also test external links. Otherwise only internal links are checked.                                                                                                                                                               |
 | `LH_EVERY_N`                                | `10`                                                             | Run a Lighthouse audit every N HTML pages visited.                                                                                                                                                                                                                      |
-| `REPORT_OUTPUT_DIR`                         | `./reports`                                                      | Path to the directory used to store URL reports (one JSON file per URL).                                                                                                                                                                                                |
-| `OUTPUT_FORMAT`                             | `both`                                                           | Controls output format of the crawler results (`json`, `table`, `both` or `none`).                                                                                                                                                                                      |
+| `REPORT_OUTPUT_DIR`                         | `./reports` (`/opt/reports` in the docker image)                 | Path to the directory used to store URL reports (one JSON file per URL).                                                                                                                                                                                                |
+| `OUTPUT_FORMAT`                             | `table`                                                          | Controls output format of the crawler results (`json`, `table`, `both` or `none`).                                                                                                                                                                                      |
 | `A11Y_AXE_RELEVANT_TAGS`                    | `EN-301-549`                                                     | Comma-separated list of Axe rule tags to include in accessibility results filtering (e.g. `wcag2a,wcag2aa`).                                                                                                                                                            |
-| `DOWNLOAD_OUTPUT_DIR`                       | `./reports/downloads`                                            | Directory where downloaded files are temporarily stored during analysis.                                                                                                                                                                                                |
+| `DOWNLOAD_OUTPUT_DIR`                       | `./downloads` (`/opt/downloads` in the docker image) `           | Directory where downloaded files are temporarily stored during analysis.                                                                                                                                                                                                |
 | `DOWNLOAD_KEEP_FILES`                       | `false`                                                          | If set to `true`, keeps downloaded files on disk instead of deleting them after processing.                                                                                                                                                                             |
 | `DOWNLOAD_MAX_EXTRACTED_CHARS`              | `200000`                                                         | Maximum number of characters extracted from a downloaded resource's content.                                                                                                                                                                                            |
 | `DOWNLOAD_MAX_PDF_PAGES`                    | `200`                                                            | Maximum number of PDF pages to parse when extracting text from downloaded PDF resources.                                                                                                                                                                                |

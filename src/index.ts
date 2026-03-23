@@ -1,8 +1,12 @@
+import fs from "node:fs/promises";
+import path from "node:path";
+
 import { PluginRegistry } from "./engine/PluginRegistry.js";
 import { CrawlerEngine } from "./engine/CrawlerEngine.js";
+import { printPluginSummaryTable } from "./engine/summaryPrinter.js";
+
 import { TimeUtils } from "./utils/TimeUtils.js";
 
-import { printPluginSummaryTable } from "./engine/summaryPrinter.js";
 import { A11yAxePlugin } from "./plugins/A11yAxePlugin.js";
 import { StatsCollectorPlugin } from "./plugins/StatsCollectorPlugin.js";
 import { ConsoleStatusPlugin } from "./plugins/ConsoleStatusPlugin.js";
@@ -22,6 +26,8 @@ import { PdfAccessibilityPlugin } from "./plugins/PdfAccessibilityPlugin.js";
 import { PerformanceMetricsPlugin } from "./plugins/PerformanceMetricsPlugin.js";
 
 async function main() {
+    const reportOutputDir = process.env.REPORT_OUTPUT_DIR ?? "./reports";
+    const websiteId = process.env.WEBSITE_ID ?? "my_website";
     const registry = new PluginRegistry()
         .register(new StatsCollectorPlugin({ rollingWindowSize: 12 }))
         .register(
@@ -32,7 +38,7 @@ async function main() {
         )
         .register(
             new SaveReportAsJsonPlugin({
-                outputDir: process.env.REPORT_OUTPUT_DIR ?? "./reports",
+                outputDir: path.join(reportOutputDir, websiteId),
             }),
         )
         .register(
@@ -82,7 +88,7 @@ async function main() {
         )
         .register(
             new DownloaderPlugin({
-                outputDir: process.env.DOWNLOAD_OUTPUT_DIR ?? "./reports/downloads",
+                outputDir: process.env.DOWNLOAD_OUTPUT_DIR ?? "./downloads",
                 keepFiles: process.env.DOWNLOAD_KEEP_FILES === "true",
             }),
         )
@@ -151,7 +157,7 @@ async function main() {
         );
     }
 
-    const outputFormat = process.env.OUTPUT_FORMAT ?? "both";
+    const outputFormat = process.env.OUTPUT_FORMAT ?? "table";
     const engine = new CrawlerEngine(
         {
             startUrl: process.env.START_URL || "https://example.org",
@@ -197,23 +203,25 @@ async function main() {
         printPluginSummaryTable(pluginSummaries);
     }
 
+    const report = {
+        state: {
+            startedAt: state.startedAt.toISOString(),
+            endedAt: endedAt.toISOString(),
+            durationMs: durationMs,
+            origin: state.origin,
+            seenCount: state.seen.size,
+            securityGrade: securityGrade,
+            securityScore: securityScore,
+        },
+        plugins: pluginSummaries,
+        findings: state.findings,
+        inventory: state.inventory,
+    };
+    const jsonReport = JSON.stringify(report, null, 4);
     if (outputFormat === "json" || outputFormat === "both") {
-        const report = {
-            state: {
-                startedAt: state.startedAt.toISOString(),
-                endedAt: endedAt.toISOString(),
-                durationMs: durationMs,
-                origin: state.origin,
-                seenCount: state.seen.size,
-                securityGrade: securityGrade,
-                securityScore: securityScore,
-            },
-            plugins: pluginSummaries,
-            findings: state.findings,
-            inventory: state.inventory,
-        };
-        console.log(JSON.stringify(report, null, 4));
+        console.log(jsonReport);
     }
+    await fs.writeFile(path.join(reportOutputDir, `${websiteId}.json`), jsonReport, "utf-8");
 
     const hasErrors = pluginSummaries.reduce((sum, p) => sum + p.errors, 0) > 0;
     process.exit(hasErrors ? 2 : 0);
