@@ -1,14 +1,115 @@
-# Web-Auditor (with Playwright)
+# Web Auditor (Playwright)
 
-## TL;DR
+Web Auditor is an open-source website auditing tool designed to analyze and improve the quality of informational websites.
+
+Built on top of Playwright, it crawls websites and runs a series of customizable plugins to detect issues across multiple domains such as accessibility, SEO, performance, and best practices.
+
+## Features
+
+- Website crawling with configurable depth and scope
+- Plugin-based architecture for extensibility
+- Accessibility audits (axe, pa11y, etc.)
+- SEO checks (titles, meta tags, structure)
+- Performance insights (Lighthouse-like audits)
+- Security checks (SSL, headers, certificates)
+- Media analysis (images size, metadata, etc.)
+- Resource analysis (PDF, downloads, MIME types)
+- Structured JSON reports (one per URL)
+
+## Plugin System
+
+Web Auditor is built around a flexible plugin system. Each plugin can:
+- Analyze pages or resources
+- Emit findings categorized (SEO, A11y, Security, etc.)
+- Be enabled/disabled via configuration
+
+## ⚙️ Configuration
+
+The tool can be configured using [environment variables](#environment-variables):
+- URL allowlists / blocklists (regex)
+- Plugin activation control
+- Output directory
+- Crawl limits
+
+## Use Cases
+
+- Audit institutional or public service websites
+- Continuous quality monitoring
+- Pre-production validation
+- Technical SEO and accessibility reviews
+
+## Tech Stack
+
+- TypeScript / Node.js
+- Playwright
+- Optional integrations: axe-core, pa11y, trextract
+
+## Roadmap
+
+- Enhanced reporting (aggregated dashboards)
+- CI/CD integration
+- Scheduling and automation
+- Advanced performance audits
+- PDF accessibility checks
+- Graceful shutdown
+- Web server to follow the audit and its report
+- Lighthouse plugin every x pages
+- Generate a HTML repport with
+  - Audit summary
+  - Performance report
+  - European compatible accessibility report in french, dutch, german and english
+- Generate a sitemap.xml report
+- Validate sitemap resources
+- Validate robots.txt
+  - Ensure that the robots.txt has a rule to throttle the robots
+  - Ensure that all page's CSS are not blocked by robots.txt's rules
+- Images metadata plugin
+- Images integration in HTML pages plugin
+  - Non optimized images
+  - Lazy loading
+- Empty anchor links
+- Log link's targets
+- Logs external dependencies
+- Cookie plugin
+  - lifetime
+- Language mismatched
+- Stats by locales
+- Extends the IPlugin by a conclusion method
+- Tests runner's IPs like https://ipv4.icanhazip.com/ and https://ipv6.icanhazip.com/
+- hreflang
+- Soft 404
+- Analyse text's complexity (something like [Scolarius](https://www.scolarius.com/))
+- JSON-LD structure
+  - `@context": "https://schema.org"`
+- Check the format validity of email et tel links
+
+## Installing Playwright and launch an audit locally
+
+To use Web Auditor locally, you first need to install Playwright and its required browsers. After cloning the repository, install the project dependencies using:
+
+```bash
+npm install
+```
+
+Then, install Playwright along with the supported browsers:
+
+```bash
+npx playwright install
+```
+
+This command downloads the necessary browser binaries (Chromium, Firefox, and WebKit). If you are running the project in a restricted environment (e.g., corporate network or Docker), make sure all required system dependencies are available. For Linux environments, you may need to run:
 
 ```shell
-npm install
-npm run build
+npx playwright install-deps
+```
+
+Once completed, Playwright is ready to use and the Web Auditor can start crawling and auditing websites.
+
+```shell
 START_URL=your-site.com RATE_LIMIT_MS=400 WEBSITE_ID=your_site npm start
 ```
 
-## Build & run
+## Build & run a docker image locally
 
 ```shell
 docker build -t elasticms/web-auditor .
@@ -127,6 +228,13 @@ Examples:
 | `500`  | Balanced          |
 | `1000` | Very polite crawl |
 
+
+
+## Contributing
+
+Contributions are welcome! Feel free to open issues or submit pull requests.
+
+
 ## Code Formatting and Linting
 
 This project uses **Prettier** for automatic code formatting and **ESLint** for static code analysis.  
@@ -170,3 +278,7 @@ Some issues can be fixed automatically:
 ```bash
 npm run lint:fix
 ```
+
+## License
+
+LGPL-3.0
