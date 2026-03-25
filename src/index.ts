@@ -3,6 +3,7 @@ import path from "node:path";
 
 import { PluginRegistry } from "./engine/PluginRegistry.js";
 import { CrawlerEngine } from "./engine/CrawlerEngine.js";
+import { GracefulStopController } from "./engine/GracefulStopController.js";
 import { printPluginSummaryTable } from "./engine/summaryPrinter.js";
 
 import { TimeUtils } from "./utils/TimeUtils.js";
@@ -201,7 +202,19 @@ async function main() {
         registry,
     );
 
-    const state = await engine.run();
+    const stopController = new GracefulStopController({
+        onConfirmedStop: () => engine.requestStop(),
+        isStopAlreadyRequested: () => engine.isStopRequested(),
+    });
+
+    stopController.start();
+    let state;
+    try {
+        state = await engine.run();
+    } finally {
+        stopController.stop();
+    }
+
     const pluginSummaries = registry.getSummaries();
     pluginSummaries.push({
         plugin: "engine",
@@ -223,6 +236,8 @@ async function main() {
         console.log(`  - Started at       : ${state.startedAt.toISOString()}`);
         console.log(`  - Ended at         : ${endedAt.toISOString()}`);
         console.log(`  - Duration         : ${TimeUtils.formatHuman(durationMs)}`);
+        console.log(`  - Stop requested   : ${state.stopRequested ? "✔ yes" : "✖ no"}`);
+        console.log(`  - Stop confirmed   : ${state.stopConfirmedAt ?? ""}`);
         console.log(`  - URLs seen        : ${state.seen.size}`);
         console.log(`  - Security header  : ${securityHeader}`);
         console.log(`  - TLS              : ${tlsGrade}`);
@@ -239,6 +254,8 @@ async function main() {
             startedAt: state.startedAt.toISOString(),
             endedAt: endedAt.toISOString(),
             durationMs: durationMs,
+            stopRequested: state.stopRequested ?? false,
+            stopConfirmedAt: state.stopConfirmedAt ?? null,
             origin: state.origin,
             seenCount: state.seen.size,
             securityGrade: state.securityHeaderGrade ?? null,

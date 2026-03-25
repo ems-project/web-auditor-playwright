@@ -113,6 +113,7 @@ export type UrlRejectionReason =
     | "not_in_allowlist"
     | "cross_origin_blocked"
     | "blocked_by_blocklist"
+    | "stop_requested"
     | "max_pages_reached";
 
 export type EnqueueResult = {
@@ -151,6 +152,8 @@ export type EngineState = {
     ipV6Supported?: boolean;
     ipV4Reachable?: boolean;
     ipV6Reachable?: boolean;
+    stopRequested: boolean;
+    stopConfirmedAt?: string;
 };
 
 export type FindingSeverity = "info" | "warning" | "error";

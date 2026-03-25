@@ -17,6 +17,8 @@ type UrlDecision = { allowed: true } | { allowed: false; reason: UrlRejectionRea
 
 export class CrawlerEngine {
     private readonly rateLimiter: RateLimiter;
+    private stopRequested = false;
+    private currentState?: EngineState;
 
     constructor(
         private opts: CrawlOptions,
@@ -44,7 +46,9 @@ export class CrawlerEngine {
             any: {},
             findings: [],
             inventory: [],
+            stopRequested: false,
         };
+        this.currentState = state;
 
         const queue: { url: string; depth: number }[] = [];
         this.enqueueUrl({ url: start, depth: 0, source: "engine:start" }, queue, state, start);
@@ -240,27 +244,37 @@ export class CrawlerEngine {
             }
         };
 
-        let visited = 0;
-        while (queue.length > 0 && visited < this.opts.maxPages) {
-            const batch: { url: string; depth: number }[] = [];
-            while (
-                batch.length < this.opts.concurrency &&
-                queue.length > 0 &&
-                visited + batch.length < this.opts.maxPages
-            ) {
-                batch.push(queue.shift()!);
+        try {
+            let visited = 0;
+            while (queue.length > 0 && visited < this.opts.maxPages) {
+                const batch: { url: string; depth: number }[] = [];
+                while (
+                    batch.length < this.opts.concurrency &&
+                    queue.length > 0 &&
+                    visited + batch.length < this.opts.maxPages
+                ) {
+                    batch.push(queue.shift()!);
+                }
+
+                state.queueSize = queue.length;
+                await Promise.all(batch.map(processOne));
+                visited += batch.length;
+                state.queueSize = queue.length;
+
+                if (this.stopRequested) {
+                    queue.length = 0;
+                    state.queueSize = 0;
+                    break;
+                }
             }
 
-            state.queueSize = queue.length;
-            await Promise.all(batch.map(processOne));
-            visited += batch.length;
-            state.queueSize = queue.length;
+            await context.close();
+            await browser.close();
+
+            return state;
+        } finally {
+            this.currentState = undefined;
         }
-
-        await context.close();
-        await browser.close();
-
-        return state;
     }
 
     private enqueueUrl(
@@ -269,8 +283,14 @@ export class CrawlerEngine {
         state: EngineState,
         startUrl: string,
     ): EnqueueResult {
-        let normalizedUrl: string;
+        if (this.stopRequested) {
+            return {
+                accepted: false,
+                reason: "stop_requested",
+            };
+        }
 
+        let normalizedUrl: string;
         try {
             normalizedUrl = normalizeUrl(request.url);
         } catch {
@@ -363,5 +383,22 @@ export class CrawlerEngine {
         }
 
         return { allowed: true };
+    }
+
+    public requestStop(): void {
+        if (this.stopRequested) {
+            return;
+        }
+
+        this.stopRequested = true;
+
+        if (this.currentState) {
+            this.currentState.stopRequested = true;
+            this.currentState.stopConfirmedAt ??= new Date().toISOString();
+        }
+    }
+
+    public isStopRequested(): boolean {
+        return this.stopRequested;
     }
 }

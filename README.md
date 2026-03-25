@@ -8,7 +8,7 @@ Built on top of Playwright, it crawls websites and runs a series of customizable
 
 - Website crawling with configurable depth and scope
 - Plugin-based architecture for extensibility
-- Accessibility audits (axe, pa11y, etc.)
+- Accessibility audits (axe, etc.)
 - SEO checks (titles, meta tags, structure)
 - Performance insights (Lighthouse-like audits)
 - Security checks (SSL, headers, certificates)
@@ -19,6 +19,7 @@ Built on top of Playwright, it crawls websites and runs a series of customizable
 ## Plugin System
 
 Web Auditor is built around a flexible plugin system. Each plugin can:
+
 - Analyze pages or resources
 - Emit findings categorized (SEO, A11y, Security, etc.)
 - Be enabled/disabled via configuration
@@ -26,6 +27,7 @@ Web Auditor is built around a flexible plugin system. Each plugin can:
 ## Configuration
 
 The tool can be configured using [environment variables](#environment-variables):
+
 - URL allowlists / blocklists (regex)
 - Plugin activation control
 - Output directory
@@ -51,27 +53,26 @@ The tool can be configured using [environment variables](#environment-variables)
 - Scheduling and automation
 - Advanced performance audits
 - PDF accessibility checks
-- Graceful shutdown
 - Web server to follow the audit and its report
 - Lighthouse plugin every x pages
-- Generate a HTML repport with
-  - Audit summary
-  - Performance report
-  - European compatible accessibility report in french, dutch, german and english
+- Generate a HTML report with
+    - Audit summary
+    - Performance report
+    - European compatible accessibility report in french, dutch, german and english
 - Generate a sitemap.xml report
 - Validate sitemap resources
 - Validate robots.txt
-  - Ensure that the robots.txt has a rule to throttle the robots
-  - Ensure that all page's CSS are not blocked by robots.txt's rules
+    - Ensure that the robots.txt has a rule to throttle the robots
+    - Ensure that all page's CSS are not blocked by robots.txt's rules
 - Images metadata plugin
 - Images integration in HTML pages plugin
-  - Non optimized images
-  - Lazy loading
+    - Non optimized images
+    - Lazy loading
 - Empty anchor links
 - Log link's targets
 - Logs external dependencies
 - Cookie plugin
-  - lifetime
+    - lifetime
 - Language mismatched
 - Stats by locales
 - Extends the IPlugin by a conclusion method
@@ -80,7 +81,7 @@ The tool can be configured using [environment variables](#environment-variables)
 - Soft 404
 - Analyse text's complexity (something like [Scolarius](https://www.scolarius.com/))
 - JSON-LD structure
-  - `@context": "https://schema.org"`
+    - `@context": "https://schema.org"`
 - Check the format validity of email et tel links
 
 ## Installing Playwright and launch an audit locally
@@ -106,8 +107,10 @@ npx playwright install-deps
 Once completed, Playwright is ready to use and the Web Auditor can start crawling and auditing websites.
 
 ```shell
-START_URL=your-site.com RATE_LIMIT_MS=400 WEBSITE_ID=your_site npm start
+START_URL=htttps://your-site.com RATE_LIMIT_MS=400 WEBSITE_ID=your_site npm start
 ```
+
+Press `s` to gracefully stop the audit and generate the report.
 
 ## Build & run a docker image locally
 
@@ -228,12 +231,9 @@ Examples:
 | `500`  | Balanced          |
 | `1000` | Very polite crawl |
 
-
-
 ## Contributing
 
 Contributions are welcome! Feel free to open issues or submit pull requests.
-
 
 ## Code Formatting and Linting
 
@@ -244,6 +244,12 @@ Together, they ensure a consistent code style and help detect potential issues e
 - **ESLint** → enforces coding best practices and detects problematic patterns
 
 Both tools are configured to work together without conflicts.
+
+### TL;DR
+
+```shell
+npm run format && npm run lint:fix && npm run build
+```
 
 ### Format the Entire Project
 
