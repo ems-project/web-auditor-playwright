@@ -129,14 +129,6 @@ export class PdfAccessibilityPlugin extends BasePlugin implements IPlugin {
                         "PDF has no bookmarks / outline.",
                         { pageCount: textStats.pageCount },
                     );
-                } else if (!hasBookmarks) {
-                    this.registerInfo(
-                        ctx,
-                        "a11y",
-                        "PDF_ACCESSIBILITY_BOOKMARKS_NOT_REQUIRED",
-                        "PDF has no bookmarks / outline, but the document is short.",
-                        { pageCount: textStats.pageCount },
-                    );
                 }
 
                 if (ctx.report.links.length === 0) {
@@ -148,15 +140,7 @@ export class PdfAccessibilityPlugin extends BasePlugin implements IPlugin {
                     );
                 }
 
-                if (tagging.isTagged) {
-                    this.registerInfo(
-                        ctx,
-                        "a11y",
-                        "PDF_ACCESSIBILITY_TAGGED",
-                        "PDF appears to be tagged.",
-                        tagging,
-                    );
-                } else {
+                if (!tagging.isTagged) {
                     this.registerWarning(
                         ctx,
                         "a11y",

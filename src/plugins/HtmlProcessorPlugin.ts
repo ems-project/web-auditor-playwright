@@ -1,5 +1,6 @@
 import {
     FindingCategory,
+    FindingCode,
     FindingSeverity,
     IPlugin,
     PluginPhase,
@@ -109,7 +110,7 @@ export class HtmlProcessorPlugin extends BasePlugin implements IPlugin {
             const findings: Array<{
                 type: FindingSeverity;
                 category: FindingCategory;
-                code: string;
+                code: FindingCode;
                 message: string;
             }> = [];
 

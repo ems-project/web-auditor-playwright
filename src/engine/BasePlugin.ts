@@ -1,5 +1,6 @@
 import {
     FindingCategory,
+    FindingCode,
     FindingData,
     FindingSeverity,
     PluginSummary,
@@ -39,7 +40,7 @@ export abstract class BasePlugin {
     protected registerInfo(
         ctx: ResourceContext,
         category: FindingCategory,
-        code: string,
+        code: FindingCode,
         message: string,
         data?: FindingData,
     ): void {
@@ -49,7 +50,7 @@ export abstract class BasePlugin {
     protected registerWarning(
         ctx: ResourceContext,
         category: FindingCategory,
-        code: string,
+        code: FindingCode,
         message: string,
         data?: FindingData,
     ): void {
@@ -59,7 +60,7 @@ export abstract class BasePlugin {
     protected registerError(
         ctx: ResourceContext,
         category: FindingCategory,
-        code: string,
+        code: FindingCode,
         message: string,
         data?: FindingData,
     ): void {
@@ -67,6 +68,28 @@ export abstract class BasePlugin {
     }
 
     protected registerFinding(
+        severity: FindingSeverity,
+        category: FindingCategory,
+        ctx: ResourceContext,
+        code: FindingCode,
+        message: string,
+        data?: FindingData,
+    ) {
+        this.pushFinding(severity, category, ctx, code, message, data);
+    }
+
+    protected registerA11yFinding(
+        severity: FindingSeverity,
+        category: FindingCategory,
+        ctx: ResourceContext,
+        code: string,
+        message: string,
+        data?: FindingData,
+    ) {
+        this.pushFinding(severity, category, ctx, code, message, data);
+    }
+
+    private pushFinding(
         severity: FindingSeverity,
         category: FindingCategory,
         ctx: ResourceContext,

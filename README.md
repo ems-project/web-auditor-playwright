@@ -83,6 +83,7 @@ The tool can be configured using [environment variables](#environment-variables)
 - JSON-LD structure
     - `@context": "https://schema.org"`
 - Check the format validity of email et tel links
+- black list errors envvar
 
 ## Installing Playwright and launch an audit locally
 
@@ -230,6 +231,157 @@ Examples:
 | `200`  | Fast crawl        |
 | `500`  | Balanced          |
 | `1000` | Very polite crawl |
+
+## Finding codes by plugin
+
+### Content / SEO / HTML
+
+| Plugin             | Code                       | Description              | Profiles        | Recommended Actions |
+| ------------------ | -------------------------- | ------------------------ | --------------- | ------------------- |
+| language-detection | LANGUAGE_UNDETERMINED      | Language not detected    | Copywriter      | Define lang         |
+| language-detection | LANGUAGE_DETECTION_SKIPPED | Detection skipped        | Integrator      | Adjust config       |
+| html-processor     | LOW_CONTENT                | Not enough content       | Copywriter      | Add content         |
+| html-processor     | MAIL_OR_TEL_LINK           | mailto/tel link detected | Webmaster       | Validate usage      |
+| html-processor     | TITLE_MISSING              | Missing title            | SEO, Copywriter | Add title           |
+| html-processor     | TITLE_TOO_SHORT            | Too short                | SEO             | Improve             |
+| html-processor     | TITLE_TOO_LONG             | Too long                 | SEO             | Shorten             |
+| html-processor     | TITLE_BRAND_TOO_LONG       | Brand too long           | SEO             | Reduce              |
+| html-processor     | TITLE_BRAND_DUPLICATED     | Brand duplicated         | SEO             | Fix                 |
+| html-processor     | TITLE_MAIN_TOO_SHORT       | Main part too short      | SEO             | Improve             |
+| html-processor     | TITLE_TOO_MANY_PARTS       | Too many segments        | SEO             | Simplify            |
+
+### URL / Crawl
+
+| Plugin              | Code                      | Description           | Profiles       | Recommended Actions |
+| ------------------- | ------------------------- | --------------------- | -------------- | ------------------- |
+| html-processor      | MISSING_URL               | URL missing           | Integrator     | Fix                 |
+| html-processor      | EMPTY_URL                 | Empty URL             | Integrator     | Fix                 |
+| html-processor      | NOT_PARSABLE_URL          | Invalid URL           | Integrator     | Fix                 |
+| standard-urls-audit | STANDARD_URL_NOT_ENQUEUED | Canonical not crawled | Integrator     | Fix crawler         |
+| standard-urls-audit | STANDARD_URL_MISSING      | Canonical URL missing | Webmaster, SEO | Add canonical link  |
+
+### HTML Accessibility
+
+Lowercase finding codes (e.g. `area-alt` or `scrollable-region-focusable`) correspond to accessibility rules detected by the a11y-axe plugin.
+These codes match Axe’s Rule IDs (as defined by Deque Systems) and indicate specific accessibility issues identified during the audit.
+Each rule represents a known accessibility requirement based on standards such as WCAG.
+You can find detailed explanations, examples, and remediation guidance for each rule on the [official Axe documentation website](https://dequeuniversity.com/rules/axe/4.11).
+
+### Content extraction
+
+| Plugin                                        | Code                                  | Description                         | Profiles               | Recommended Actions         |
+| --------------------------------------------- | ------------------------------------- | ----------------------------------- | ---------------------- | --------------------------- |
+| pdf-extractor, docx-extractor, text-extractor | TEXT_EXTRACTION_FAILED                | Text extraction failed              | Integrator             | Check parser / dependencies |
+| text-extractor                                | TEXT_EXTRACTION_SKIPPED_TOO_LARGE     | Extraction skipped due to size      | Infra                  | Same as above               |
+| pdf-extractor                                 | PDF_EXTRACTION_FAILED                 | Extraction failed                   | Integrator             | Check PDF                   |
+| pdf-extractor                                 | PDF_EMPTY_TEXT                        | Empty text                          | Copywriter             | Fix content                 |
+| pdf-extractor                                 | PDF_NO_TEXT                           | No extractable text                 | Integrator             | Use OCR                     |
+| pdf-extractor                                 | PDF_EXTRACTION_SKIPPED_TOO_LARGE      | Too large                           | Infra                  | Adjust limits               |
+| docx-extractor                                | DOCX_EXTRACTION_SKIPPED_TOO_LARGE     | Too large DOCX                      | Infra                  | Adjust limits               |
+| textract-extractor                            | TEXTRACT_NO_CONTENT                   | No content extracted                | Integrator, Copywriter | Verify file content         |
+| textract-extractor                            | TEXTRACT_DEPENDENCY_MISSING           | Missing dependency (e.g. tesseract) | Infra                  | Install dependencies        |
+| textract-extractor                            | TEXTRACT_EXTRACTION_SKIPPED_TOO_LARGE | File too large to process           | Infra                  | Increase limits or skip     |
+
+### PDF Accessibility
+
+| Plugin            | Code                                  | Description       | Profiles   | Recommended Actions |
+| ----------------- | ------------------------------------- | ----------------- | ---------- | ------------------- |
+| pdf-accessibility | PDF_ACCESSIBILITY_AUDIT_FAILED        | Audit failed      | Integrator | Debug               |
+| pdf-accessibility | PDF_ACCESSIBILITY_NOT_TAGGED          | Not tagged        | Integrator | Add tags            |
+| pdf-accessibility | PDF_ACCESSIBILITY_LINKS_NOT_DETECTED  | Links missing     | Integrator | Add links           |
+| pdf-accessibility | PDF_ACCESSIBILITY_BOOKMARKS_MISSING   | Missing bookmarks | Integrator | Add bookmarks       |
+| pdf-accessibility | PDF_ACCESSIBILITY_PROBABLY_SCANNED    | Likely scanned    | Integrator | OCR                 |
+| pdf-accessibility | PDF_ACCESSIBILITY_NO_EXTRACTABLE_TEXT | No text           | Integrator | OCR                 |
+| pdf-accessibility | PDF_ACCESSIBILITY_LANGUAGE_MISSING    | Language missing  | Integrator | Add metadata        |
+| pdf-accessibility | PDF_ACCESSIBILITY_TITLE_MISSING       | Title missing     | Integrator | Add title           |
+
+### Download / Files
+
+| Plugin           | Code                           | Description       | Profiles   | Recommended Actions |
+| ---------------- | ------------------------------ | ----------------- | ---------- | ------------------- |
+| downloader       | MIME_UNKNOWN                   | Unknown MIME type | Integrator | Fix headers         |
+| downloader       | DOWNLOAD_FAILED                | Download failed   | Integrator | Fix URL/server      |
+| clean-downloaded | DOWNLOADED_FILE_CLEANUP_FAILED | Cleanup failed    | Infra      | Fix FS rights       |
+
+### Console
+
+| Plugin  | Code                      | Description      | Profiles   | Recommended Actions |
+| ------- | ------------------------- | ---------------- | ---------- | ------------------- |
+| console | CONSOLE_WARNINGS_DETECTED | Console warnings | Integrator | Fix warnings        |
+| console | CONSOLE_ERRORS_DETECTED   | Console errors   | Integrator | Fix errors          |
+
+### Security Headers
+
+| Plugin           | Code                                | Description                          | Profiles   | Recommended Actions |
+| ---------------- | ----------------------------------- | ------------------------------------ | ---------- | ------------------- |
+| security-headers | SECURITY_HEADERS_SCORE              | Global score                         | Infra      | Improve headers     |
+| security-headers | COOKIE_SAMESITE_NONE_WITHOUT_SECURE | SameSite=None without Secure         | Integrator | Add Secure flag     |
+| security-headers | COOKIE_INVALID_SAMESITE             | Invalid SameSite value               | Integrator | Fix attribute       |
+| security-headers | COOKIE_MISSING_SAMESITE             | Missing SameSite                     | Integrator | Add SameSite        |
+| security-headers | COOKIE_MISSING_HTTPONLY             | Missing HttpOnly                     | Integrator | Add HttpOnly        |
+| security-headers | COOKIE_MISSING_SECURE               | Missing Secure flag                  | Integrator | Add Secure          |
+| security-headers | MISSING_CORP                        | Missing Cross-Origin-Resource-Policy | Infra      | Add header          |
+| security-headers | MISSING_COOP                        | Missing Cross-Origin-Opener-Policy   | Infra      | Add header          |
+| security-headers | MISSING_PERMISSIONS_POLICY          | Missing Permissions-Policy           | Infra      | Define policy       |
+| security-headers | WEAK_REFERRER_POLICY                | Weak policy                          | Infra      | Use strict policy   |
+| security-headers | INVALID_REFERRER_POLICY             | Invalid value                        | Infra      | Fix value           |
+| security-headers | MISSING_REFERRER_POLICY             | Missing header                       | Infra      | Add header          |
+| security-headers | INVALID_X_CONTENT_TYPE_OPTIONS      | Invalid header                       | Infra      | Fix                 |
+| security-headers | MISSING_X_CONTENT_TYPE_OPTIONS      | Missing header                       | Infra      | Add nosniff         |
+| security-headers | WEAK_X_FRAME_OPTIONS                | Weak protection                      | Infra      | Use DENY/SAMEORIGIN |
+| security-headers | MISSING_CLICKJACKING_PROTECTION     | Missing XFO/CSP                      | Infra      | Add protection      |
+| security-headers | MISSING_CSP                         | No Content-Security-Policy           | Infra      | Define CSP          |
+| security-headers | CSP_REPORT_ONLY_ONLY                | CSP report-only only                 | Infra      | Enforce CSP         |
+| security-headers | WEAK_CSP                            | Weak CSP rules                       | Infra      | Harden CSP          |
+| security-headers | MISSING_HSTS                        | Missing HSTS                         | Infra      | Add HSTS            |
+| security-headers | WEAK_HSTS_MAX_AGE                   | Low max-age                          | Infra      | Increase duration   |
+| security-headers | INVALID_HSTS                        | Invalid config                       | Infra      | Fix                 |
+| security-headers | HSTS_NOT_APPLICABLE                 | Not applicable                       | Infra      | None                |
+| security-headers | SECURITY_HEADERS_NOT_AUDITED        | Not audited                          | Infra      | Ensure audit runs   |
+
+### TLS/Certificate
+
+| Plugin          | Code                            | Description                                  | Profiles         | Recommended Actions                               |
+| --------------- | ------------------------------- | -------------------------------------------- | ---------------- | ------------------------------------------------- |
+| tls-certificate | TLS_CERTIFICATE_SHORT_CHAIN     | Certificate chain is incomplete or too short | Infra, Webmaster | Fix certificate chain, include intermediate certs |
+| tls-certificate | TLS_CERTIFICATE_WEAK_CIPHER     | Weak cipher suites detected                  | Infra            | Disable weak ciphers, enforce modern TLS          |
+| tls-certificate | TLS_CERTIFICATE_OLD_TLS_VERSION | Deprecated TLS version used                  | Infra            | Enforce TLS 1.2+ or 1.3                           |
+| tls-certificate | TLS_CERTIFICATE_NO_SAN          | Missing Subject Alternative Name             | Infra            | Regenerate certificate with SAN                   |
+| tls-certificate | TLS_CERTIFICATE_SELF_SIGNED     | Self-signed certificate                      | Infra            | Use trusted CA                                    |
+| tls-certificate | TLS_CERTIFICATE_EXPIRING_SOON   | Certificate close to expiration              | Infra            | Renew certificate                                 |
+| tls-certificate | TLS_CERTIFICATE_EXPIRED         | Certificate expired                          | Infra            | Renew immediately                                 |
+| tls-certificate | TLS_CERTIFICATE_INVALID         | Invalid certificate                          | Infra            | Fix certificate configuration                     |
+| tls-certificate | TLS_CERTIFICATE_SCORE           | Overall TLS quality score                    | Infra            | Improve configuration                             |
+| tls-certificate | TLS_CERTIFICATE_AUDIT_FAILED    | TLS audit failed                             | Infra            | Check connectivity / TLS setup                    |
+| tls-certificate | TLS_CERTIFICATE_DETAILS         | Informational certificate details            | Infra            | Review configuration                              |
+| tls-certificate | TLS_CERTIFICATE_NOT_APPLICABLE  | TLS not applicable                           | Infra            | Install a certificate                             |
+| tls-certificate | TLS_CERTIFICATE_INVALID_URL     | Invalid URL for TLS check                    | Webmaster        | Fix URL                                           |
+| tls-certificate | TLS_CERTIFICATE_NOT_AUDITED     | TLS not audited                              | Infra            | Ensure audit runs                                 |
+
+### Network / IP
+
+| Plugin     | Code                   | Description        | Profiles  | Recommended Actions |
+| ---------- | ---------------------- | ------------------ | --------- | ------------------- |
+| ip-support | IPV6_UNREACHABLE       | IPv6 not reachable | Infra     | Fix network         |
+| ip-support | IPV4_UNREACHABLE       | IPv4 not reachable | Infra     | Fix network         |
+| ip-support | IPV6_MISSING           | No IPv6 support    | Infra     | Add IPv6            |
+| ip-support | IPV4_MISSING           | No IPv4            | Infra     | Add IPv4            |
+| ip-support | IP_SUPPORT_DETAILS     | Info               | Infra     | Review              |
+| ip-support | IP_SUPPORT_INVALID_URL | Invalid URL        | Webmaster | Fix                 |
+| ip-support | IP_SUPPORT_NOT_AUDITED | Not audited        | Infra     | Enable audit        |
+
+### Performances
+
+| Plugin              | Code                      | Description         | Profiles   | Recommended Actions    |
+| ------------------- | ------------------------- | ------------------- | ---------- | ---------------------- |
+| performance-metrics | LARGE_RESOURCES_DETECTED  | Large assets        | Integrator | Optimize images/assets |
+| performance-metrics | SLOW_RESOURCES_DETECTED   | Slow resources      | Integrator | Optimize loading       |
+| performance-metrics | FAILED_RESOURCES_DETECTED | Failed requests     | Integrator | Fix broken resources   |
+| performance-metrics | LARGE_TOTAL_TRANSFER_SIZE | Page too heavy      | Integrator | Reduce weight          |
+| performance-metrics | HIGH_RESOURCE_COUNT       | Too many requests   | Integrator | Bundle/minify          |
+| performance-metrics | SLOW_PAGE_LOAD            | Slow load time      | Integrator | Optimize performance   |
+| performance-metrics | SLOW_DOM_CONTENT_LOADED   | Slow DOM ready      | Integrator | Optimize scripts       |
+| performance-metrics | PERFORMANCE_MEASURED      | Performance metrics | Integrator | Analyze                |
 
 ## Contributing
 

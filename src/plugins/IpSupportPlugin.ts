@@ -143,15 +143,7 @@ export class IpSupportPlugin extends BasePlugin implements IPlugin {
             result,
         );
 
-        if (result.ipv4.supported) {
-            this.registerInfo(
-                ctx,
-                "network",
-                "IPV4_SUPPORTED",
-                `The hostname resolves to ${result.ipv4.addresses.length} IPv4 address(es).`,
-                result.ipv4,
-            );
-        } else {
+        if (!result.ipv4.supported) {
             this.registerWarning(
                 ctx,
                 "network",
@@ -161,15 +153,7 @@ export class IpSupportPlugin extends BasePlugin implements IPlugin {
             );
         }
 
-        if (result.ipv6.supported) {
-            this.registerInfo(
-                ctx,
-                "network",
-                "IPV6_SUPPORTED",
-                `The hostname resolves to ${result.ipv6.addresses.length} IPv6 address(es).`,
-                result.ipv6,
-            );
-        } else {
+        if (!result.ipv6.supported) {
             this.registerWarning(
                 ctx,
                 "network",
