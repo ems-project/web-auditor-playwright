@@ -119,6 +119,7 @@ export type UrlRejectionReason =
 export type FindingCode =
     // Content / SEO / HTML
     | "LANGUAGE_UNDETERMINED"
+    | "LANGUAGE_MISMATCHED"
     | "LANGUAGE_DETECTION_SKIPPED"
     | "LOW_CONTENT"
     | "MAIL_OR_TEL_LINK"

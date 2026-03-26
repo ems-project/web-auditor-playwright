@@ -36,10 +36,6 @@ export class LanguageDetectionPlugin extends BasePlugin implements IPlugin {
             return;
         }
 
-        if (ctx.report.locale && !this.overwriteExistingLocale) {
-            return;
-        }
-
         const sample = TextUtils.normalizeText(content, this.maxSampleLength);
 
         if (sample.length < this.minLength) {
@@ -64,7 +60,25 @@ export class LanguageDetectionPlugin extends BasePlugin implements IPlugin {
             return;
         }
         const lang1 = LocaleUtils.toIso639_1(lang3);
-        ctx.report.locale = typeof lang1 === "string" && lang1.length > 0 ? lang1 : lang3;
+        const locale = typeof lang1 === "string" && lang1.length > 0 ? lang1 : lang3;
+        if (ctx.report.locale && ctx.report.locale !== locale) {
+            this.registerWarning(
+                ctx,
+                "content",
+                "LANGUAGE_MISMATCHED",
+                "Detected language does not match the resource's defined language.",
+                {
+                    detected: locale,
+                    resource: ctx.report.locale,
+                },
+            );
+            if (this.overwriteExistingLocale) {
+                ctx.report.locale = locale;
+            }
+            return;
+        } else if (!ctx.report.locale) {
+            ctx.report.locale = locale;
+        }
 
         this.register(ctx);
     }
