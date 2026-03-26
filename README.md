@@ -236,19 +236,20 @@ Examples:
 
 ### Content / SEO / HTML
 
-| Plugin             | Code                       | Description              | Profiles        | Recommended Actions |
-| ------------------ | -------------------------- | ------------------------ | --------------- | ------------------- |
-| language-detection | LANGUAGE_UNDETERMINED      | Language not detected    | Copywriter      | Define lang         |
-| language-detection | LANGUAGE_DETECTION_SKIPPED | Detection skipped        | Integrator      | Adjust config       |
-| html-processor     | LOW_CONTENT                | Not enough content       | Copywriter      | Add content         |
-| html-processor     | MAIL_OR_TEL_LINK           | mailto/tel link detected | Webmaster       | Validate usage      |
-| html-processor     | TITLE_MISSING              | Missing title            | SEO, Copywriter | Add title           |
-| html-processor     | TITLE_TOO_SHORT            | Too short                | SEO             | Improve             |
-| html-processor     | TITLE_TOO_LONG             | Too long                 | SEO             | Shorten             |
-| html-processor     | TITLE_BRAND_TOO_LONG       | Brand too long           | SEO             | Reduce              |
-| html-processor     | TITLE_BRAND_DUPLICATED     | Brand duplicated         | SEO             | Fix                 |
-| html-processor     | TITLE_MAIN_TOO_SHORT       | Main part too short      | SEO             | Improve             |
-| html-processor     | TITLE_TOO_MANY_PARTS       | Too many segments        | SEO             | Simplify            |
+| Plugin             | Code                       | Description                                                       | Profiles        | Recommended Actions |
+| ------------------ | -------------------------- | ----------------------------------------------------------------- | --------------- | ------------------- |
+| language-detection | LANGUAGE_UNDETERMINED      | Language not detected                                             | Copywriter      | Define lang         |
+| language-detection | LANGUAGE_DETECTION_SKIPPED | Detection skipped                                                 | Integrator      | Adjust config       |
+| language-detection | LANGUAGE_MISMATCHED        | Detected language does not match the resource's defined language. | Copywriter      | Adjust content      |
+| html-processor     | LOW_CONTENT                | Not enough content                                                | Copywriter      | Add content         |
+| html-processor     | MAIL_OR_TEL_LINK           | mailto/tel link detected                                          | Webmaster       | Validate usage      |
+| html-processor     | TITLE_MISSING              | Missing title                                                     | SEO, Copywriter | Add title           |
+| html-processor     | TITLE_TOO_SHORT            | Too short                                                         | SEO             | Improve             |
+| html-processor     | TITLE_TOO_LONG             | Too long                                                          | SEO             | Shorten             |
+| html-processor     | TITLE_BRAND_TOO_LONG       | Brand too long                                                    | SEO             | Reduce              |
+| html-processor     | TITLE_BRAND_DUPLICATED     | Brand duplicated                                                  | SEO             | Fix                 |
+| html-processor     | TITLE_MAIN_TOO_SHORT       | Main part too short                                               | SEO             | Improve             |
+| html-processor     | TITLE_TOO_MANY_PARTS       | Too many segments                                                 | SEO             | Simplify            |
 
 ### URL / Crawl
 
