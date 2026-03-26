@@ -4,7 +4,7 @@ import path from "node:path";
 import { PluginRegistry } from "./engine/PluginRegistry.js";
 import { CrawlerEngine } from "./engine/CrawlerEngine.js";
 import { GracefulStopController } from "./engine/GracefulStopController.js";
-import { printPluginSummaryTable } from "./engine/summaryPrinter.js";
+import { printPluginSummaryTable, printReports } from "./engine/outputPrinters.js";
 
 import { TimeUtils } from "./utils/TimeUtils.js";
 
@@ -274,25 +274,7 @@ async function main() {
     });
 
     if (outputFormat === "table" || outputFormat === "both") {
-        console.log("\n\n=== Audit reports ===\n");
-        for (const reportIndex in reports) {
-            const report = reports[reportIndex];
-            if (report.items.length === 0) {
-                continue;
-            }
-            console.log(` - ${report.label} (${report.plugin})`);
-            const labelLength =
-                report.items.reduce(
-                    (max, report) => (report.label.length > max ? report.label.length : max),
-                    0,
-                ) + 1;
-            for (const itemIndex in report.items) {
-                const item = report.items[itemIndex];
-                console.log(
-                    `   - ${item.label.padEnd(labelLength)} : ${typeof item.value === "boolean" ? (item.value ? "✔ yes" : "✖ no") : item.value}`,
-                );
-            }
-        }
+        printReports(reports);
         printPluginSummaryTable(pluginSummaries);
     }
 

@@ -1,7 +1,29 @@
-import type { PluginSummary } from "./types.js";
+import type { PluginSummary, Report } from "./types.js";
 
 function pad(value: string | number, length: number): string {
     return String(value).padEnd(length, " ");
+}
+
+export function printReports(reports: Report[]) {
+    console.log("\n\n=== Audit reports ===\n");
+    for (const reportIndex in reports) {
+        const report = reports[reportIndex];
+        if (report.items.length === 0) {
+            continue;
+        }
+        console.log(` - ${report.label} (${report.plugin})`);
+        const labelLength =
+            report.items.reduce(
+                (max, report) => (report.label.length > max ? report.label.length : max),
+                0,
+            ) + 1;
+        for (const itemIndex in report.items) {
+            const item = report.items[itemIndex];
+            console.log(
+                `   - ${item.label.padEnd(labelLength)} : ${typeof item.value === "boolean" ? (item.value ? "✔ yes" : "✖ no") : item.value}`,
+            );
+        }
+    }
 }
 
 export function printPluginSummaryTable(summaries: PluginSummary[]): void {
