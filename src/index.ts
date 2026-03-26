@@ -279,15 +279,6 @@ async function main() {
     }
 
     const globalReport = {
-        state: {
-            startedAt: state.startedAt.toISOString(),
-            endedAt: endedAt.toISOString(),
-            durationMs: durationMs,
-            stopRequested: state.stopRequested ?? false,
-            stopConfirmedAt: state.stopConfirmedAt ?? null,
-            origin: state.origin,
-            seenCount: state.seen.size,
-        },
         reports,
         plugins: pluginSummaries,
         issues: state.findings,

@@ -1,9 +1,10 @@
 import ExcelJS from "exceljs";
 import path from "node:path";
 import fs from "node:fs/promises";
+import { Report } from "../engine/types.js";
 
 export interface AuditConsoleReport {
-    state: Record<string, unknown>;
+    reports: Report[];
     plugins: PluginSummary[];
     issues: IssueEntry[];
     inventory: InventoryEntry[];
@@ -40,7 +41,7 @@ export interface InventoryEntry {
 export interface XlsxExporterOptions {
     outputPath: string;
     creator?: string;
-    engineSheetName?: string;
+    reportsSheetName?: string;
     pluginsSheetName?: string;
     issuesSheetName?: string;
     inventorySheetName?: string;
@@ -53,7 +54,7 @@ export class XlsxExporter {
         this.options = {
             outputPath: options.outputPath,
             creator: options.creator ?? "web-auditor-playwright",
-            engineSheetName: options.engineSheetName ?? "engine",
+            reportsSheetName: options.reportsSheetName ?? "reports",
             pluginsSheetName: options.pluginsSheetName ?? "plugins",
             issuesSheetName: options.issuesSheetName ?? "issues",
             inventorySheetName: options.inventorySheetName ?? "inventory",
@@ -70,7 +71,7 @@ export class XlsxExporter {
         workbook.title = "Web Auditor report";
         workbook.subject = "Export of console JSON report";
 
-        this.addEngineSheet(workbook, report.state);
+        this.addReportsSheet(workbook, report.reports);
         this.addPluginsSheet(workbook, report.plugins);
         this.addIssuesSheet(workbook, report.issues);
         this.addInventorySheet(workbook, report.inventory);
@@ -78,18 +79,22 @@ export class XlsxExporter {
         await workbook.xlsx.writeFile(this.options.outputPath);
     }
 
-    private addEngineSheet(workbook: ExcelJS.Workbook, state: Record<string, unknown>): void {
-        const ws = workbook.addWorksheet(this.safeSheetName(this.options.engineSheetName));
+    private addReportsSheet(workbook: ExcelJS.Workbook, reports: Report[]): void {
+        const ws = workbook.addWorksheet(this.safeSheetName(this.options.reportsSheetName));
         ws.columns = [
+            { header: "plugin", key: "plugin", width: 28 },
             { header: "key", key: "key", width: 28 },
             { header: "value", key: "value", width: 60 },
         ];
 
-        for (const [key, value] of Object.entries(state)) {
-            ws.addRow({
-                key,
-                value: this.stringifyCellValue(value),
-            });
+        for (const report of reports) {
+            for (const item of report.items) {
+                ws.addRow({
+                    plugin: report.plugin,
+                    key: item.key,
+                    value: this.stringifyCellValue(item.value),
+                });
+            }
         }
 
         this.styleHeader(ws);
