@@ -245,10 +245,6 @@ export type EngineState = {
     any: Record<string, unknown>;
     findings: Finding[];
     inventory: InventoryItem[];
-    ipV4Supported?: boolean;
-    ipV6Supported?: boolean;
-    ipV4Reachable?: boolean;
-    ipV6Reachable?: boolean;
     stopRequested: boolean;
     stopConfirmedAt?: string;
 };

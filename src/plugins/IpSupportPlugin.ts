@@ -1,7 +1,7 @@
 import dns from "node:dns/promises";
 import net from "node:net";
 import { BasePlugin } from "../engine/BasePlugin.js";
-import { IPlugin, PluginPhase, ResourceContext } from "../engine/types.js";
+import { EngineState, IPlugin, PluginPhase, Report, ResourceContext } from "../engine/types.js";
 
 type IpSupportPluginOptions = {
     auditOnlyStartUrl?: boolean;
@@ -24,6 +24,13 @@ type IpSupportResult = {
         reachable: boolean | null;
         error: string | null;
     };
+};
+
+type IpSupportState = {
+    ipV4Supported?: boolean;
+    ipV6Supported?: boolean;
+    ipV4Reachable?: boolean;
+    ipV6Reachable?: boolean;
 };
 
 export class IpSupportPlugin extends BasePlugin implements IPlugin {
@@ -184,11 +191,11 @@ export class IpSupportPlugin extends BasePlugin implements IPlugin {
                 );
             }
         }
-
-        ctx.engineState.ipV4Supported = result.ipv4.supported;
-        ctx.engineState.ipV6Supported = result.ipv6.supported;
-        ctx.engineState.ipV4Reachable = result.ipv4.reachable ?? undefined;
-        ctx.engineState.ipV6Reachable = result.ipv6.reachable ?? undefined;
+        const state = this.getState(ctx.engineState);
+        state.ipV4Supported = result.ipv4.supported;
+        state.ipV6Supported = result.ipv6.supported;
+        state.ipV4Reachable = result.ipv4.reachable ?? undefined;
+        state.ipV6Reachable = result.ipv6.reachable ?? undefined;
 
         this.register(ctx);
     }
@@ -219,5 +226,73 @@ export class IpSupportPlugin extends BasePlugin implements IPlugin {
                 resolve(false);
             });
         });
+    }
+
+    private getState(state: EngineState): IpSupportState {
+        const existing = state.any[this.name];
+        if (this.isIpSupportState(existing)) {
+            return existing;
+        }
+
+        const created: IpSupportState = {};
+        state.any[this.name] = created;
+        return created;
+    }
+
+    private isIpSupportState(value: unknown): value is IpSupportState {
+        if (!value || typeof value !== "object") {
+            return false;
+        }
+
+        const record = value as Record<string, unknown>;
+        return (
+            (typeof record.ipV4Supported === "boolean" ||
+                typeof record.ipV4Supported === "undefined") &&
+            (typeof record.ipV6Supported === "boolean" ||
+                typeof record.ipV6Supported === "undefined") &&
+            (typeof record.ipV4Reachable === "boolean" ||
+                typeof record.ipV4Reachable === "undefined") &&
+            (typeof record.ipV6Reachable === "boolean" ||
+                typeof record.ipV6Reachable === "undefined")
+        );
+    }
+
+    public getReport(engineState: EngineState): Report {
+        const state = this.getState(engineState);
+        const items = [];
+        if (typeof state.ipV4Supported === "boolean") {
+            items.push({
+                key: "ipV4Supported",
+                label: "IPv4 Supported",
+                value: state.ipV4Supported,
+            });
+        }
+        if (typeof state.ipV4Reachable === "boolean") {
+            items.push({
+                key: "ipV4Reachable",
+                label: "IPv4 Reachable",
+                value: state.ipV4Reachable,
+            });
+        }
+        if (typeof state.ipV6Supported === "boolean") {
+            items.push({
+                key: "ipV6Supported",
+                label: "IPv6 Supported",
+                value: state.ipV6Supported,
+            });
+        }
+        if (typeof state.ipV6Reachable === "boolean") {
+            items.push({
+                key: "ipV6Reachable",
+                label: "IPv6 Reachable",
+                value: state.ipV6Reachable,
+            });
+        }
+
+        return {
+            plugin: this.name,
+            label: "Network / IP",
+            items,
+        };
     }
 }
