@@ -88,7 +88,7 @@ async function main() {
         .register(new HtmlProcessorPlugin())
         .register(
             new A11yAxePlugin({
-                relevantTags: (process.env.A11Y_AXE_RELEVANT_TAGS ?? "EN-301-549")
+                relevantTags: (process.env.A11Y_AXE_RELEVANT_TAGS ?? "EN-301-549,best-practice")
                     .split(",")
                     .map((tag) => tag.trim())
                     .filter(Boolean),
