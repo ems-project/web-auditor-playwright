@@ -36,6 +36,10 @@ async function main() {
     const websiteId = process.env.WEBSITE_ID ?? "my_website";
     const urlAllowlist = TextUtils.parseRegexList(process.env.URL_ALLOWLIST_REGEX);
     const urlBlocklist = TextUtils.parseRegexList(process.env.URL_BLOCKLIST_REGEX);
+    const findingCodesBlocklist = (process.env.FINDING_CODES_BLOCKLIST ?? "")
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean);
     const registry = new PluginRegistry({
         disabledPlugins: (process.env.DISABLED_PLUGINS ?? "")
             .split(",")
@@ -281,7 +285,7 @@ async function main() {
     const globalReport = {
         reports,
         plugins: pluginSummaries,
-        issues: state.findings,
+        issues: state.findings.filter((f) => !findingCodesBlocklist.includes(f.code)),
         inventory: state.inventory,
     };
     const jsonReport = JSON.stringify(globalReport, null, 4);
