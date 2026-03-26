@@ -45,17 +45,26 @@ export class A11yAxePlugin extends BasePlugin implements IPlugin {
                 });
             }
             const message = `${violation.help} (${violation.impact ?? "unknown"})`;
-            this.registerA11yFinding("error", "a11y", ctx, violation.id, message, {
-                description: violation.description,
-                help: violation.help,
-                help_url: violation.helpUrl,
-                id: violation.id,
-                impact: violation.impact,
-                nodes,
-                tags: violation.tags,
-                wcag_criteria: this.extractWcagCriteria(violation.tags),
-                en301549_criteria: this.extractEn301549Criteria(violation.tags),
-            });
+            const wcagCriteria = this.extractWcagCriteria(violation.tags);
+            const en301549Criteria = this.extractEn301549Criteria(violation.tags);
+            this.registerA11yFinding(
+                en301549Criteria.length === 0 && wcagCriteria.length === 0 ? "warning" : "error",
+                "a11y",
+                ctx,
+                violation.id,
+                message,
+                {
+                    description: violation.description,
+                    help: violation.help,
+                    help_url: violation.helpUrl,
+                    id: violation.id,
+                    impact: violation.impact,
+                    nodes,
+                    tags: violation.tags,
+                    wcag_criteria: wcagCriteria,
+                    en301549_criteria: en301549Criteria,
+                },
+            );
         }
 
         this.register(ctx);
