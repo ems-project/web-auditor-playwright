@@ -3,9 +3,7 @@ import test from "node:test";
 
 import { HtmlProcessorPlugin } from "../src/plugins/HtmlProcessorPlugin.js";
 
-type ValidateSpecialHref = (href: string) =>
-    | { code: string; message: string }
-    | null;
+type ValidateSpecialHref = (href: string) => { code: string; message: string } | null;
 
 function createValidator(): ValidateSpecialHref {
     const plugin = new HtmlProcessorPlugin() as HtmlProcessorPlugin & {
