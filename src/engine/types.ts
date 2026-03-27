@@ -123,6 +123,8 @@ export type FindingCode =
     | "LANGUAGE_DETECTION_SKIPPED"
     | "LOW_CONTENT"
     | "MAIL_OR_TEL_LINK"
+    | "INVALID_MAILTO_HREF"
+    | "INVALID_TEL_HREF"
     | "TITLE_MISSING"
     | "TITLE_TOO_SHORT"
     | "TITLE_TOO_LONG"
