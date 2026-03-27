@@ -92,7 +92,6 @@ function isSitemapEligibleMime(mime: string | undefined): boolean {
         "application/vnd.oasis.opendocument.text",
         "application/vnd.oasis.opendocument.spreadsheet",
         "application/vnd.oasis.opendocument.presentation",
-        "text/plain",
         "text/csv",
     ].includes(mime);
 }
