@@ -1,7 +1,13 @@
 import type { Page, Request, Response } from "playwright";
 
 import { BasePlugin } from "../engine/BasePlugin.js";
-import { IPlugin, PluginPhase, ResourceContext } from "../engine/types.js";
+import type {
+    EngineState,
+    IPlugin,
+    PluginPhase,
+    Report,
+    ResourceContext,
+} from "../engine/types.js";
 
 type PerformanceMetricsPluginOptions = {
     auditOnlyStartUrl?: boolean;
@@ -39,12 +45,30 @@ type NavigationMetrics = {
     decodedBodySize: number | null;
 };
 
-type PerformanceState = {
+type PagePerformanceState = {
     attached: boolean;
     trackedByUrl: Map<string, TrackedResource>;
     requestListener: ((request: Request) => void) | null;
     requestFinishedListener: ((request: Request) => void) | null;
     requestFailedListener: ((request: Request) => void) | null;
+};
+
+type PerformanceMetricsState = {
+    pagesMeasured: number;
+    domContentLoadedMs: number[];
+    loadMs: number[];
+    responseEndMs: number[];
+    domInteractiveMs: number[];
+    totalTransferSize: number[];
+    resourceCount: number[];
+    failedRequestCount: number[];
+};
+
+type NumericStats = {
+    min: number;
+    mean: number;
+    median: number;
+    max: number;
 };
 
 export class PerformanceMetricsPlugin extends BasePlugin implements IPlugin {
@@ -59,6 +83,7 @@ export class PerformanceMetricsPlugin extends BasePlugin implements IPlugin {
     private readonly largeTransferThresholdBytes: number;
     private readonly slowLoadThresholdMs: number;
     private readonly slowDomContentLoadedThresholdMs: number;
+    private readonly pageStates = new WeakMap<Page, PagePerformanceState>();
 
     constructor(options: PerformanceMetricsPluginOptions = {}) {
         super();
@@ -81,27 +106,129 @@ export class PerformanceMetricsPlugin extends BasePlugin implements IPlugin {
             return;
         }
 
-        const state = this.getState(ctx);
+        const pageState = this.getPageState(ctx.page);
 
         if (phase === "beforeGoto") {
-            this.attachListeners(ctx.page, state);
+            this.resetPageState(pageState);
+            this.attachListeners(ctx.page, pageState);
             this.register(ctx);
             return;
         }
 
         if (phase === "afterGoto") {
-            await this.collectNavigationMetrics(ctx, state);
+            const metricsState = this.getMetricsState(ctx.engineState);
+            await this.collectNavigationMetrics(ctx, pageState, metricsState);
             this.register(ctx);
             return;
         }
 
         if (phase === "finally") {
-            this.detachListeners(ctx.page, state);
+            this.detachListeners(ctx.page, pageState);
             this.register(ctx);
         }
     }
 
-    private attachListeners(page: Page, state: PerformanceState): void {
+    public getReport(engineState: EngineState): Report {
+        const state = this.getMetricsState(engineState);
+        const domContentLoadedStats = this.computeStats(state.domContentLoadedMs);
+        const loadStats = this.computeStats(state.loadMs);
+        const resourceCountStats = this.computeStats(state.resourceCount);
+        const transferSizeStats = this.computeStats(state.totalTransferSize);
+
+        return {
+            plugin: this.name,
+            label: "Performance Metrics",
+            items: [
+                {
+                    key: "pagesMeasured",
+                    label: "Pages measured",
+                    value: state.pagesMeasured,
+                },
+                {
+                    key: "domContentLoadedMinMs",
+                    label: "DOMContentLoaded min (ms)",
+                    value: this.formatStatValue(domContentLoadedStats?.min),
+                },
+                {
+                    key: "domContentLoadedMeanMs",
+                    label: "DOMContentLoaded mean (ms)",
+                    value: this.formatStatValue(domContentLoadedStats?.mean),
+                },
+                {
+                    key: "domContentLoadedMedianMs",
+                    label: "DOMContentLoaded median (ms)",
+                    value: this.formatStatValue(domContentLoadedStats?.median),
+                },
+                {
+                    key: "domContentLoadedMaxMs",
+                    label: "DOMContentLoaded max (ms)",
+                    value: this.formatStatValue(domContentLoadedStats?.max),
+                },
+                {
+                    key: "loadMinMs",
+                    label: "Load min (ms)",
+                    value: this.formatStatValue(loadStats?.min),
+                },
+                {
+                    key: "loadMeanMs",
+                    label: "Load mean (ms)",
+                    value: this.formatStatValue(loadStats?.mean),
+                },
+                {
+                    key: "loadMedianMs",
+                    label: "Load median (ms)",
+                    value: this.formatStatValue(loadStats?.median),
+                },
+                {
+                    key: "loadMaxMs",
+                    label: "Load max (ms)",
+                    value: this.formatStatValue(loadStats?.max),
+                },
+                {
+                    key: "resourceCountMin",
+                    label: "Resources min",
+                    value: this.formatStatValue(resourceCountStats?.min),
+                },
+                {
+                    key: "resourceCountMean",
+                    label: "Resources mean",
+                    value: this.formatStatValue(resourceCountStats?.mean),
+                },
+                {
+                    key: "resourceCountMedian",
+                    label: "Resources median",
+                    value: this.formatStatValue(resourceCountStats?.median),
+                },
+                {
+                    key: "resourceCountMax",
+                    label: "Resources max",
+                    value: this.formatStatValue(resourceCountStats?.max),
+                },
+                {
+                    key: "transferSizeMinBytes",
+                    label: "Transfer min (bytes)",
+                    value: this.formatStatValue(transferSizeStats?.min),
+                },
+                {
+                    key: "transferSizeMeanBytes",
+                    label: "Transfer mean (bytes)",
+                    value: this.formatStatValue(transferSizeStats?.mean),
+                },
+                {
+                    key: "transferSizeMedianBytes",
+                    label: "Transfer median (bytes)",
+                    value: this.formatStatValue(transferSizeStats?.median),
+                },
+                {
+                    key: "transferSizeMaxBytes",
+                    label: "Transfer max (bytes)",
+                    value: this.formatStatValue(transferSizeStats?.max),
+                },
+            ],
+        };
+    }
+
+    private attachListeners(page: Page, state: PagePerformanceState): void {
         if (state.attached) {
             return;
         }
@@ -158,7 +285,7 @@ export class PerformanceMetricsPlugin extends BasePlugin implements IPlugin {
         state.attached = true;
     }
 
-    private detachListeners(page: Page, state: PerformanceState): void {
+    private detachListeners(page: Page, state: PagePerformanceState): void {
         if (!state.attached) {
             return;
         }
@@ -179,12 +306,17 @@ export class PerformanceMetricsPlugin extends BasePlugin implements IPlugin {
         state.attached = false;
     }
 
+    private resetPageState(state: PagePerformanceState): void {
+        state.trackedByUrl.clear();
+    }
+
     private async collectNavigationMetrics(
         ctx: ResourceContext,
-        state: PerformanceState,
+        pageState: PagePerformanceState,
+        metricsState: PerformanceMetricsState,
     ): Promise<void> {
         const navigation = await this.readNavigationMetrics(ctx.page);
-        const resources = [...state.trackedByUrl.values()];
+        const resources = [...pageState.trackedByUrl.values()];
 
         const failedResources = resources.filter((resource) => resource.failed);
         const slowResources = resources
@@ -211,6 +343,15 @@ export class PerformanceMetricsPlugin extends BasePlugin implements IPlugin {
                 (sum, resource) => sum + (resource.transferSize ?? resource.encodedBodySize ?? 0),
                 0,
             );
+
+        this.pushMetric(metricsState.domContentLoadedMs, navigation.domContentLoadedMs);
+        this.pushMetric(metricsState.loadMs, navigation.loadMs);
+        this.pushMetric(metricsState.responseEndMs, navigation.responseEndMs);
+        this.pushMetric(metricsState.domInteractiveMs, navigation.domInteractiveMs);
+        this.pushMetric(metricsState.totalTransferSize, totalTransferSize);
+        this.pushMetric(metricsState.resourceCount, resources.length);
+        this.pushMetric(metricsState.failedRequestCount, failedResources.length);
+        metricsState.pagesMeasured += 1;
 
         const performanceData = {
             domContentLoadedMs: navigation.domContentLoadedMs,
@@ -409,15 +550,13 @@ export class PerformanceMetricsPlugin extends BasePlugin implements IPlugin {
         return `${request.method()}|${request.resourceType()}|${request.url()}`;
     }
 
-    private getState(ctx: ResourceContext): PerformanceState {
-        const key = "performanceMetricsPlugin";
-        const existing = ctx.engineState.any[key];
-
-        if (this.isPerformanceState(existing)) {
+    private getPageState(page: Page): PagePerformanceState {
+        const existing = this.pageStates.get(page);
+        if (existing) {
             return existing;
         }
 
-        const created: PerformanceState = {
+        const created: PagePerformanceState = {
             attached: false,
             trackedByUrl: new Map<string, TrackedResource>(),
             requestListener: null,
@@ -425,16 +564,78 @@ export class PerformanceMetricsPlugin extends BasePlugin implements IPlugin {
             requestFailedListener: null,
         };
 
-        ctx.engineState.any[key] = created;
+        this.pageStates.set(page, created);
         return created;
     }
 
-    private isPerformanceState(value: unknown): value is PerformanceState {
+    private getMetricsState(engineState: EngineState): PerformanceMetricsState {
+        const key = "performanceMetricsState";
+        const existing = engineState.any[key];
+
+        if (this.isPerformanceMetricsState(existing)) {
+            return existing;
+        }
+
+        const created: PerformanceMetricsState = {
+            pagesMeasured: 0,
+            domContentLoadedMs: [],
+            loadMs: [],
+            responseEndMs: [],
+            domInteractiveMs: [],
+            totalTransferSize: [],
+            resourceCount: [],
+            failedRequestCount: [],
+        };
+
+        engineState.any[key] = created;
+        return created;
+    }
+
+    private isPerformanceMetricsState(value: unknown): value is PerformanceMetricsState {
         if (!value || typeof value !== "object") {
             return false;
         }
 
         const record = value as Record<string, unknown>;
-        return typeof record.attached === "boolean" && record.trackedByUrl instanceof Map;
+        return (
+            typeof record.pagesMeasured === "number" &&
+            Array.isArray(record.domContentLoadedMs) &&
+            Array.isArray(record.loadMs) &&
+            Array.isArray(record.resourceCount) &&
+            Array.isArray(record.totalTransferSize)
+        );
+    }
+
+    private pushMetric(target: number[], value: number | null): void {
+        if (typeof value === "number" && Number.isFinite(value)) {
+            target.push(value);
+        }
+    }
+
+    private computeStats(values: number[]): NumericStats | null {
+        if (values.length === 0) {
+            return null;
+        }
+
+        const sorted = [...values].sort((a, b) => a - b);
+        const sum = sorted.reduce((acc, value) => acc + value, 0);
+        const middle = Math.floor(sorted.length / 2);
+        const median =
+            sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
+
+        return {
+            min: sorted[0],
+            mean: sum / sorted.length,
+            median,
+            max: sorted[sorted.length - 1],
+        };
+    }
+
+    private formatStatValue(value: number | undefined): string {
+        if (typeof value !== "number" || !Number.isFinite(value)) {
+            return "n/a";
+        }
+
+        return String(Math.round(value * 100) / 100);
     }
 }
