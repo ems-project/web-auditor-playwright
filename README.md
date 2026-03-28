@@ -56,7 +56,6 @@ The tool can be configured using [environment variables](#environment-variables)
 - Generate a HTML report with
     - Reports summary
     - European compatible accessibility report in french, dutch, german and english
-- Generate a sitemap.xml report
 - Validate sitemap resources
 - Validate robots.txt
     - Ensure that the robots.txt has a rule to throttle the robots
@@ -67,17 +66,16 @@ The tool can be configured using [environment variables](#environment-variables)
     - Lazy loading
 - Empty anchor links
 - Log link's targets
-- Logs external dependencies
-- Cookie plugin
-    - lifetime
+- Cookie plugin (lifetime)
 - Stats by locales
 - Tests runner's IPs like https://ipv4.icanhazip.com/ and https://ipv6.icanhazip.com/
 - hreflang
-- Soft 404
 - Analyse text's complexity (something like [Scolarius](https://www.scolarius.com/))
-- JSON-LD structure
-    - `@context": "https://schema.org"`
-- Check the format validity of email et tel links
+- JSON-LD structure (`@context": "https://schema.org"`)
+- Detects duplicates
+- Detects page with Inline code
+- Generate Information Architecture schema
+- Test external links in a 2nd phase
 
 ## Installing Playwright and launch an audit locally
 
@@ -151,7 +149,7 @@ npm start
 | `USER_AGENT`                                | `undefined`                                                      | If defined, it will overwrite the Playright's user agent.                                                                                                                                                                                                               |
 | `IGNORE_HTTPS_ERRORS`                       | `false`                                                          | If set to true, Playwright ignores HTTPS certificate errors (e.g. self-signed or invalid certificates).                                                                                                                                                                 |
 | `DISABLED_PLUGINS`                          | empty                                                            | Comma-separated list of plugin names that must not be registered or executed. E.g. `ip-support,tls-certificate`.                                                                                                                                                        |
-| `FINDING_CODES_BLOCKLIST`                   | empty                                                            | Comma-separated list of finding codes to exclude from the report; any matching findings will be ignored. E.g. `MAIL_OR_TEL_LINK`.                                                                                                                                       |
+| `FINDING_CODES_BLOCKLIST`                   | empty                                                            | Comma-separated list of finding codes to exclude from the report; any matching findings will be ignored. E.g. `MAIL_OR_TEL_LINK,INVALID_MAILTO_HREF,INVALID_TEL_HREF`.                                                                                                  |
 | `RATE_LIMIT_MS`                             | `500`                                                            | Minimum delay (in milliseconds) between navigation requests. This helps avoid overloading the target server.                                                                                                                                                            |
 | `NAV_TIMEOUT_MS`                            | `30000`                                                          | Maximum time (in milliseconds) allowed for page navigation before it is considered a failure.                                                                                                                                                                           |
 | `SAME_ORIGIN_ONLY`                          | `true`                                                           | If enabled, the crawler only follows links that belong to the same origin as the `START_URL`.                                                                                                                                                                           |
@@ -160,6 +158,7 @@ npm start
 | `CHECK_EXTERNAL_LINKS`                      | `false`                                                          | If enabled, dead link detection will also test external links. Otherwise only internal links are checked.                                                                                                                                                               |
 | `LH_EVERY_N`                                | `10`                                                             | Run a Lighthouse audit every N HTML pages visited.                                                                                                                                                                                                                      |
 | `REPORT_OUTPUT_DIR`                         | `./reports` (`/opt/reports` in the docker image)                 | Path to the directory used to store URL reports (one JSON file per URL).                                                                                                                                                                                                |
+| `DUMP_DIR`                                  | empty                                                            | If defined, enables the `site-dump` plugin and writes a local copy of crawled HTML pages and downloaded documents into this directory, rewriting internal `href` and `src` links as relative paths.                                                                     |
 | `OUTPUT_FORMAT`                             | `table`                                                          | Controls output format of the crawler results (`json`, `table`, `both` or `none`).                                                                                                                                                                                      |
 | `A11Y_AXE_RELEVANT_TAGS`                    | `EN-301-549,best-practice`                                       | Comma-separated list of Axe rule tags to include in accessibility results filtering (e.g. `wcag2a,wcag2aa`).                                                                                                                                                            |
 | `DOWNLOAD_OUTPUT_DIR`                       | `./downloads` (`/opt/downloads` in the docker image) `           | Directory where downloaded files are temporarily stored during analysis.                                                                                                                                                                                                |
@@ -176,6 +175,9 @@ npm start
 | `CONSOLE_AUDIT_ONLY_START_URL`              | `false`                                                          | If set to `true`, console messages are collected only on the start URL instead of on all crawled pages.                                                                                                                                                                 |
 | `CONSOLE_INCLUDE_WARNINGS`                  | `true`                                                           | If set to `false`, console warnings are ignored and only errors are reported.                                                                                                                                                                                           |
 | `CONSOLE_IGNORED_PATTERNS`                  | `favicon\.ico,chrome-extension:\/\/,Failed to load resource: .*` | Comma-separated list of regex patterns used to ignore specific console messages.                                                                                                                                                                                        |
+| `MAX_URL_LENGTH`                            | `120`                                                            | Maximum recommended URL length used by the `seo-url-rules` plugin before reporting the `URL_TOO_LONG` finding on HTML pages.                                                                                                                                            |
+| `SOFT_404_PATTERNS`                         | built-in multilingual defaults for en, fr, nl and de             | Comma-separated list of regex patterns used by the `soft-http-error` plugin to detect soft 404 pages returned with a successful HTTP status. When defined, it overrides the default soft 404 patterns.                                                                  |
+| `SOFT_500_PATTERNS`                         | built-in multilingual defaults for en, fr, nl and de             | Comma-separated list of regex patterns used by the `soft-http-error` plugin to detect soft 500 pages returned with a successful HTTP status. When defined, it overrides the default soft 500 patterns.                                                                  |
 | `PDF_A11Y_MIN_EXTRACTED_CHARS`              | `30`                                                             | Minimum number of extracted characters required before considering that a PDF contains usable text.                                                                                                                                                                     |
 | `PDF_A11Y_MAX_PAGES`                        | `200`                                                            | Maximum number of PDF pages analyzed during accessibility heuristics.                                                                                                                                                                                                   |
 | `PDF_A11Y_LOW_TEXT_THRESHOLD`               | `20`                                                             | Average number of extracted characters per page below which a PDF is considered likely scanned or image-only.                                                                                                                                                           |
@@ -238,6 +240,8 @@ Examples:
 | language-detection | LANGUAGE_MISMATCHED        | Detected language does not match the resource's defined language. | Copywriter      | Adjust content      |
 | html-processor     | LOW_CONTENT                | Not enough content                                                | Copywriter      | Add content         |
 | html-processor     | MAIL_OR_TEL_LINK           | mailto/tel link detected                                          | Webmaster       | Validate usage      |
+| html-processor     | INVALID_MAILTO_HREF        | Invalid mailto href format                                        | Webmaster       | Fix the email link  |
+| html-processor     | INVALID_TEL_HREF           | Invalid tel href format                                           | Webmaster       | Fix the phone link  |
 | html-processor     | TITLE_MISSING              | Missing title                                                     | SEO, Copywriter | Add title           |
 | html-processor     | TITLE_TOO_SHORT            | Too short                                                         | SEO             | Improve             |
 | html-processor     | TITLE_TOO_LONG             | Too long                                                          | SEO             | Shorten             |
@@ -245,6 +249,15 @@ Examples:
 | html-processor     | TITLE_BRAND_DUPLICATED     | Brand duplicated                                                  | SEO             | Fix                 |
 | html-processor     | TITLE_MAIN_TOO_SHORT       | Main part too short                                               | SEO             | Improve             |
 | html-processor     | TITLE_TOO_MANY_PARTS       | Too many segments                                                 | SEO             | Simplify            |
+| seo-url-rules      | URL_CONSECUTIVE_HYPHENS    | URL contains consecutive hyphens                                  | SEO, Integrator | Simplify slug       |
+| seo-url-rules      | URL_UNDERSCORE             | URL contains an underscore                                        | SEO, Integrator | Replace with hyphen |
+| seo-url-rules      | URL_TECHNICAL_EXTENSION    | URL exposes a technical file extension                            | SEO, Integrator | Remove extension    |
+| seo-url-rules      | URL_UPPERCASE              | URL contains uppercase characters                                 | SEO, Integrator | Use lowercase       |
+| seo-url-rules      | URL_TOO_LONG               | URL is excessively long                                           | SEO, Integrator | Shorten URL         |
+| seo-url-rules      | URL_SPECIAL_CHARACTERS     | URL contains special or accented characters                       | SEO, Integrator | Normalize slug      |
+| seo-url-rules      | URL_SPACE                  | URL contains spaces                                               | SEO, Integrator | Remove spaces       |
+| soft-http-error    | SOFT_404_DETECTED          | Page looks like a soft 404 while returning a successful HTTP code | Webmaster       | Fix status or page  |
+| soft-http-error    | SOFT_500_DETECTED          | Page looks like a soft 500 while returning a successful HTTP code | Webmaster       | Fix status or page  |
 
 ### URL / Crawl
 
