@@ -27,6 +27,8 @@ export interface PersistedLinkInput {
     toUrl: string;
     normalizedToUrl: string;
     linkText?: string | null;
+    tag?: string | null;
+    target?: string | null;
     nofollow?: boolean;
     isInternal: boolean;
 }
@@ -107,6 +109,8 @@ export type ResourceReportLink = {
     type: string;
     text: string;
     url: string;
+    tag?: string | null;
+    target?: string | null;
 };
 
 export type ResourceReportA11yAxeNode = {
