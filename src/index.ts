@@ -34,6 +34,7 @@ import { TextUtils } from "./utils/TextUtils.js";
 import { XlsxExporter } from "./reporting/XlsxExporter.js";
 import { Report } from "./engine/types.js";
 import { AuditStore } from "./engine/AuditStore.js";
+import { CrawlProgressServer } from "./engine/CrawlProgressServer.js";
 import fsp from "node:fs/promises";
 
 function buildSitemapXml(urls: string[]): string {
@@ -127,6 +128,12 @@ async function main() {
     const soft404Patterns = TextUtils.parseRegexList(process.env.SOFT_404_PATTERNS);
     const soft500Patterns = TextUtils.parseRegexList(process.env.SOFT_500_PATTERNS);
     const dumpDir = process.env.DUMP_DIR?.trim() || null;
+    const webUiPortValue = process.env.WEB_UI_PORT ?? "3000";
+    const webUiPort = Number(webUiPortValue);
+    if (!Number.isInteger(webUiPort) || webUiPort < 0 || webUiPort > 65535) {
+        throw new Error("Invalid WEB_UI_PORT: " + webUiPortValue);
+    }
+    const webUiHost = process.env.WEB_UI_HOST ?? "127.0.0.1";
     const findingCodesBlocklist = (process.env.FINDING_CODES_BLOCKLIST ?? "")
         .split(",")
         .map((tag) => tag.trim())
@@ -315,6 +322,21 @@ async function main() {
         registry,
     );
 
+    const progressServer =
+        webUiPort > 0
+            ? new CrawlProgressServer({
+                  auditDbPath: path.join(reportOutputDir, websiteId, "audit.db"),
+                  port: webUiPort,
+                  host: webUiHost,
+                  getRunId: () => engine.getCurrentRunId(),
+              })
+            : null;
+
+    if (progressServer) {
+        await progressServer.start();
+        console.log("Crawl monitor available at " + progressServer.getUrl());
+    }
+
     const stopController = new GracefulStopController({
         onConfirmedStop: () => engine.requestStop(),
         isStopAlreadyRequested: () => engine.isStopRequested(),
@@ -326,6 +348,7 @@ async function main() {
         state = await engine.run();
     } finally {
         stopController.stop();
+        await progressServer?.stop();
     }
     const endedAt = new Date();
     const durationMs = endedAt.getTime() - state.startedAt.getTime();

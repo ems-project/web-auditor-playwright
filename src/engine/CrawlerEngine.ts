@@ -31,6 +31,7 @@ export class CrawlerEngine {
     private stopRequested = false;
     private currentState?: EngineState;
     private readonly store: AuditStore;
+    private currentRunId?: number;
 
     constructor(
         private opts: CrawlOptions,
@@ -107,6 +108,7 @@ export class CrawlerEngine {
             );
         }
 
+        this.currentRunId = runId;
         state.any["runId"] = runId;
         this.currentState = state;
 
@@ -516,6 +518,10 @@ export class CrawlerEngine {
         }
 
         return allowedHosts;
+    }
+
+    getCurrentRunId(): number | undefined {
+        return this.currentRunId;
     }
 
     requestStop(): void {

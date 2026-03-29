@@ -464,6 +464,153 @@ export class AuditStore {
             });
     }
 
+    public getLiveSnapshot(runId?: number): {
+        run: {
+            id: number;
+            startUrl: string;
+            startedAt: string;
+            finishedAt: string | null;
+            status: string;
+        } | null;
+        urlCounts: Record<string, number>;
+        findingCounts: Record<string, number>;
+        recentUrls: Array<{
+            url: string;
+            status: string;
+            depth: number | null;
+            httpStatus: number | null;
+        }>;
+        recentFindings: Array<{
+            severity: string;
+            code: string;
+            plugin: string;
+            message: string;
+        }>;
+    } {
+        const effectiveRunId = runId ?? this.getLatestRunId();
+        if (!effectiveRunId) {
+            return {
+                run: null,
+                urlCounts: {},
+                findingCounts: { total: 0 },
+                recentUrls: [],
+                recentFindings: [],
+            };
+        }
+
+        const runRow = this.db
+            .prepare(
+                `
+      SELECT id, start_url, started_at, finished_at, status
+      FROM crawl_runs
+      WHERE id = ?
+    `,
+            )
+            .get(effectiveRunId) as
+            | {
+                  id: number;
+                  start_url: string;
+                  started_at: string;
+                  finished_at: string | null;
+                  status: string;
+              }
+            | undefined;
+
+        if (!runRow) {
+            return {
+                run: null,
+                urlCounts: {},
+                findingCounts: { total: 0 },
+                recentUrls: [],
+                recentFindings: [],
+            };
+        }
+
+        const urlCounts = Object.fromEntries(
+            (
+                this.db
+                    .prepare(
+                        `
+      SELECT status, COUNT(*) AS count
+      FROM urls
+      WHERE run_id = ?
+      GROUP BY status
+    `,
+                    )
+                    .all(effectiveRunId) as Array<{ status: string; count: number }>
+            ).map((row) => [row.status, Number(row.count)]),
+        );
+
+        const findingCounts = Object.fromEntries(
+            (
+                this.db
+                    .prepare(
+                        `
+      SELECT severity, COUNT(*) AS count
+      FROM findings
+      WHERE run_id = ?
+      GROUP BY severity
+    `,
+                    )
+                    .all(effectiveRunId) as Array<{ severity: string; count: number }>
+            ).map((row) => [row.severity, Number(row.count)]),
+        ) as Record<string, number>;
+        findingCounts.total = Object.values(findingCounts).reduce((sum, value) => sum + value, 0);
+
+        const recentUrls = this.db
+            .prepare(
+                `
+      SELECT url, status, depth, http_status
+      FROM urls
+      WHERE run_id = ?
+      ORDER BY COALESCE(visited_at, queued_at, discovered_at) DESC, id DESC
+      LIMIT 20
+    `,
+            )
+            .all(effectiveRunId) as Array<{
+            url: string;
+            status: string;
+            depth: number | null;
+            http_status: number | null;
+        }>;
+
+        const recentFindings = this.db
+            .prepare(
+                `
+      SELECT severity, code, plugin, message
+      FROM findings
+      WHERE run_id = ?
+      ORDER BY id DESC
+      LIMIT 20
+    `,
+            )
+            .all(effectiveRunId) as Array<{
+            severity: string;
+            code: string;
+            plugin: string;
+            message: string;
+        }>;
+
+        return {
+            run: {
+                id: runRow.id,
+                startUrl: runRow.start_url,
+                startedAt: runRow.started_at,
+                finishedAt: runRow.finished_at,
+                status: runRow.status,
+            },
+            urlCounts,
+            findingCounts,
+            recentUrls: recentUrls.map((row) => ({
+                url: row.url,
+                status: row.status,
+                depth: row.depth,
+                httpStatus: row.http_status,
+            })),
+            recentFindings,
+        };
+    }
+
     private ensureMigrationsTable(): void {
         this.db.exec(`
       CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -472,6 +619,21 @@ export class AuditStore {
           applied_at TEXT NOT NULL
       )
     `);
+    }
+
+    private getLatestRunId(): number | undefined {
+        const row = this.db
+            .prepare(
+                `
+      SELECT id
+      FROM crawl_runs
+      ORDER BY id DESC
+      LIMIT 1
+    `,
+            )
+            .get() as { id: number } | undefined;
+
+        return row?.id;
     }
 
     private getPendingMigrations(): Array<{ version: number; name: string; path: string }> {

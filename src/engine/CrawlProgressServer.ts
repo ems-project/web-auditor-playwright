@@ -1,0 +1,306 @@
+import http from "node:http";
+
+import { AuditStore } from "./AuditStore.js";
+
+type CrawlProgressServerOptions = {
+    auditDbPath: string;
+    port: number;
+    getRunId?: () => number | undefined;
+    host?: string;
+};
+
+export class CrawlProgressServer {
+    private readonly host: string;
+    private readonly store: AuditStore;
+    private server?: http.Server;
+    private readonly sockets = new Set<import("node:net").Socket>();
+
+    constructor(private readonly options: CrawlProgressServerOptions) {
+        this.host = options.host ?? "127.0.0.1";
+        this.store = new AuditStore(options.auditDbPath);
+        this.store.initSchema();
+    }
+
+    async start(): Promise<void> {
+        if (this.server) {
+            return;
+        }
+
+        this.server = http.createServer((req, res) => {
+            res.setHeader("Connection", "close");
+            const requestUrl = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+
+            if (requestUrl.pathname === "/api/status") {
+                const snapshot = this.store.getLiveSnapshot(this.options.getRunId?.());
+                res.writeHead(200, { "content-type": "application/json; charset=utf-8" });
+                res.end(JSON.stringify(snapshot));
+                return;
+            }
+
+            if (requestUrl.pathname === "/" || requestUrl.pathname === "/index.html") {
+                res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+                res.end(this.renderHtml());
+                return;
+            }
+
+            res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+            res.end("Not found");
+        });
+
+        this.server.on("connection", (socket) => {
+            this.sockets.add(socket);
+            socket.on("close", () => this.sockets.delete(socket));
+        });
+
+        await new Promise<void>((resolve, reject) => {
+            this.server?.once("error", reject);
+            this.server?.listen(this.options.port, this.host, () => {
+                this.server?.off("error", reject);
+                resolve();
+            });
+        });
+    }
+
+    async stop(): Promise<void> {
+        if (!this.server) {
+            return;
+        }
+
+        for (const socket of this.sockets) {
+            socket.destroy();
+        }
+        this.sockets.clear();
+
+        await new Promise<void>((resolve, reject) => {
+            this.server?.close((error) => {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve();
+            });
+        });
+        this.server = undefined;
+    }
+
+    getUrl(): string {
+        return `http://${this.host}:${this.options.port}`;
+    }
+
+    private renderHtml(): string {
+        return String.raw`<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Web Auditor Crawl Monitor</title>
+<style>
+:root {
+  --bg: #f4efe6;
+  --panel: rgba(255,255,255,0.82);
+  --text: #1f2328;
+  --muted: #5d6670;
+  --line: rgba(31,35,40,0.12);
+  --accent: #0d6b5f;
+  --accent-soft: rgba(13,107,95,0.12);
+  --warn: #a35d00;
+  --error: #9f1d35;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(13,107,95,0.18), transparent 28%),
+    radial-gradient(circle at right, rgba(195,129,66,0.18), transparent 24%),
+    linear-gradient(180deg, #f8f4ec 0%, var(--bg) 100%);
+}
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 20px;
+}
+header h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 3rem);
+  line-height: 1;
+}
+header p { margin: 8px 0 0; color: var(--muted); }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.card, section {
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.05);
+}
+.card { padding: 16px; }
+.card .label { color: var(--muted); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.card .value { margin-top: 8px; font-size: 1.8rem; font-weight: 700; }
+section { padding: 18px; margin-top: 16px; }
+section h2 { margin: 0 0 14px; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.table-wrap { overflow: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 0.82rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.badge {
+  display: inline-flex;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.78rem;
+}
+.badge.warning { background: rgba(163,93,0,0.12); color: var(--warn); }
+.badge.error { background: rgba(159,29,53,0.12); color: var(--error); }
+.two-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+.empty { color: var(--muted); font-style: italic; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Crawl Monitor</h1>
+      <p id="subtitle">Waiting for crawl data...</p>
+    </div>
+    <div class="badge" id="status-badge">idle</div>
+  </header>
+  <div class="grid" id="cards"></div>
+  <div class="two-cols">
+    <section>
+      <h2>Recent URLs</h2>
+      <div class="table-wrap"><table><thead><tr><th>URL</th><th>Status</th><th>HTTP</th><th>Depth</th></tr></thead><tbody id="urls-body"><tr><td colspan="4" class="empty">No data yet.</td></tr></tbody></table></div>
+    </section>
+    <section>
+      <h2>Recent Findings</h2>
+      <div class="table-wrap"><table><thead><tr><th>Severity</th><th>Code</th><th>Plugin</th><th>Message</th></tr></thead><tbody id="findings-body"><tr><td colspan="4" class="empty">No findings yet.</td></tr></tbody></table></div>
+    </section>
+  </div>
+</main>
+<script>
+const cards = document.getElementById("cards");
+const subtitle = document.getElementById("subtitle");
+const statusBadge = document.getElementById("status-badge");
+const urlsBody = document.getElementById("urls-body");
+const findingsBody = document.getElementById("findings-body");
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function badgeClass(value) {
+  if (value === "failed" || value === "error") return "badge error";
+  if (value === "running" || value === "processing" || value === "warning") return "badge warning";
+  return "badge";
+}
+
+function renderCards(metrics) {
+  return metrics.map(function (entry) {
+    return '<article class="card">' +
+      '<div class="label">' + escapeHtml(entry[0]) + '</div>' +
+      '<div class="value">' + escapeHtml(entry[1]) + '</div>' +
+      '</article>';
+  }).join('');
+}
+
+function renderRecentUrls(rows) {
+  if (!rows || rows.length === 0) {
+    return '<tr><td colspan="4" class="empty">No crawled URLs yet.</td></tr>';
+  }
+
+  return rows.map(function (row) {
+    return '<tr>' +
+      '<td>' + escapeHtml(row.url) + '</td>' +
+      '<td><span class="' + badgeClass(row.status) + '">' + escapeHtml(row.status) + '</span></td>' +
+      '<td>' + escapeHtml(row.httpStatus ?? '') + '</td>' +
+      '<td>' + escapeHtml(row.depth ?? '') + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function renderRecentFindings(rows) {
+  if (!rows || rows.length === 0) {
+    return '<tr><td colspan="4" class="empty">No findings yet.</td></tr>';
+  }
+
+  return rows.map(function (row) {
+    return '<tr>' +
+      '<td><span class="' + badgeClass(row.severity) + '">' + escapeHtml(row.severity) + '</span></td>' +
+      '<td>' + escapeHtml(row.code) + '</td>' +
+      '<td>' + escapeHtml(row.plugin) + '</td>' +
+      '<td>' + escapeHtml(row.message) + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function render(snapshot) {
+  if (!snapshot || !snapshot.run) {
+    subtitle.textContent = 'Waiting for the first crawl run...';
+    statusBadge.className = 'badge';
+    statusBadge.textContent = 'idle';
+    cards.innerHTML = '';
+    urlsBody.innerHTML = '<tr><td colspan="4" class="empty">No data yet.</td></tr>';
+    findingsBody.innerHTML = '<tr><td colspan="4" class="empty">No findings yet.</td></tr>';
+    return;
+  }
+
+  subtitle.textContent = snapshot.run.startUrl + ' | started ' + snapshot.run.startedAt;
+  statusBadge.className = badgeClass(snapshot.run.status);
+  statusBadge.textContent = snapshot.run.status;
+
+  const metrics = [
+    ['Run ID', snapshot.run.id],
+    ['Queued', snapshot.urlCounts.queued ?? 0],
+    ['Processing', snapshot.urlCounts.processing ?? 0],
+    ['Done', snapshot.urlCounts.done ?? 0],
+    ['Failed', snapshot.urlCounts.failed ?? 0],
+    ['Findings', snapshot.findingCounts.total ?? 0],
+    ['Warnings', snapshot.findingCounts.warning ?? 0],
+    ['Errors', snapshot.findingCounts.error ?? 0],
+  ];
+
+  cards.innerHTML = renderCards(metrics);
+  urlsBody.innerHTML = renderRecentUrls(snapshot.recentUrls);
+  findingsBody.innerHTML = renderRecentFindings(snapshot.recentFindings);
+}
+
+async function refresh() {
+  try {
+    const response = await fetch('/api/status', { cache: 'no-store' });
+    render(await response.json());
+  } catch (_error) {
+    subtitle.textContent = 'Failed to load crawl status.';
+  }
+}
+
+refresh();
+setInterval(refresh, 2000);
+</script>
+</body>
+</html>`;
+    }
+}
