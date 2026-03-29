@@ -22,6 +22,7 @@
         "textract": "2.5.0"
     },
     "devDependencies": {
+        "@types/better-sqlite3": "^7.6.13",
         "@types/node": "^25.3.5",
         "@typescript-eslint/eslint-plugin": "^8.56.1",
         "@typescript-eslint/parser": "^8.56.1",
