@@ -68,8 +68,7 @@ function collectValidSitemapUrls(
                 continue;
             }
             uniqueUrls.add(parsed.href);
-        } catch {
-        }
+        } catch {}
     }
 
     return [...uniqueUrls].sort((a, b) => a.localeCompare(b));

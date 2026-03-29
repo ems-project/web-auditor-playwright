@@ -114,6 +114,7 @@ const urlsBody = document.getElementById("urls-body");
 const findingsBody = document.getElementById("findings-body");
 const statusApiPath = <%- JSON.stringify(statusApiPath) %>;
 const refreshIntervalMs = <%- JSON.stringify(refreshIntervalMs) %>;
+let completionReloadScheduled = false;
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -183,6 +184,13 @@ function render(snapshot) {
   subtitle.textContent = snapshot.run.startUrl + ' | started ' + snapshot.run.startedAt;
   statusBadge.className = badgeClass(snapshot.run.status);
   statusBadge.textContent = snapshot.run.status;
+
+  if ((snapshot.run.status === 'finished' || snapshot.run.status === 'failed') && !completionReloadScheduled) {
+    completionReloadScheduled = true;
+    window.setTimeout(function () {
+      window.location.reload();
+    }, 300);
+  }
 
   const metrics = [
     ['Run ID', snapshot.run.id],
