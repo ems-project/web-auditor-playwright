@@ -33,7 +33,9 @@ import { IpSupportPlugin } from "./plugins/IpSupportPlugin.js";
 import { TextUtils } from "./utils/TextUtils.js";
 import { XlsxExporter } from "./reporting/XlsxExporter.js";
 import { Report } from "./engine/types.js";
+import { buildCrawlCompletionSummary } from "./engine/CrawlCompletionSummary.js";
 import { AuditStore } from "./engine/AuditStore.js";
+import { CrawlProgressServer } from "./engine/CrawlProgressServer.js";
 import fsp from "node:fs/promises";
 
 function buildSitemapXml(urls: string[]): string {
@@ -66,9 +68,7 @@ function collectValidSitemapUrls(
                 continue;
             }
             uniqueUrls.add(parsed.href);
-        } catch {
-            continue;
-        }
+        } catch {}
     }
 
     return [...uniqueUrls].sort((a, b) => a.localeCompare(b));
@@ -109,6 +109,19 @@ function escapeXml(value: string): string {
         .replace(/'/g, "&apos;");
 }
 
+async function waitForTerminationSignal(): Promise<void> {
+    await new Promise<void>((resolve) => {
+        const onSignal = (): void => {
+            process.off("SIGINT", onSignal);
+            process.off("SIGTERM", onSignal);
+            resolve();
+        };
+
+        process.on("SIGINT", onSignal);
+        process.on("SIGTERM", onSignal);
+    });
+}
+
 async function main() {
     const reportOutputDir = process.env.REPORT_OUTPUT_DIR ?? "./reports";
     const websiteId = process.env.WEBSITE_ID ?? "my_website";
@@ -127,6 +140,13 @@ async function main() {
     const soft404Patterns = TextUtils.parseRegexList(process.env.SOFT_404_PATTERNS);
     const soft500Patterns = TextUtils.parseRegexList(process.env.SOFT_500_PATTERNS);
     const dumpDir = process.env.DUMP_DIR?.trim() || null;
+    const webUiEnabled = (process.env.WEB_UI_ENABLED ?? "true") === "true";
+    const webUiPortValue = process.env.WEB_UI_PORT ?? "3000";
+    const webUiPort = Number(webUiPortValue);
+    if (!Number.isInteger(webUiPort) || webUiPort < 0 || webUiPort > 65535) {
+        throw new Error("Invalid WEB_UI_PORT: " + webUiPortValue);
+    }
+    const webUiHost = process.env.WEB_UI_HOST ?? "127.0.0.1";
     const findingCodesBlocklist = (process.env.FINDING_CODES_BLOCKLIST ?? "")
         .split(",")
         .map((tag) => tag.trim())
@@ -315,6 +335,21 @@ async function main() {
         registry,
     );
 
+    const progressServer =
+        webUiEnabled && webUiPort > 0
+            ? new CrawlProgressServer({
+                  auditDbPath: path.join(reportOutputDir, websiteId, "audit.db"),
+                  port: webUiPort,
+                  host: webUiHost,
+                  getRunId: () => engine.getCurrentRunId(),
+              })
+            : null;
+
+    if (progressServer) {
+        await progressServer.start();
+        console.log("Crawl monitor available at " + progressServer.getUrl());
+    }
+
     const stopController = new GracefulStopController({
         onConfirmedStop: () => engine.requestStop(),
         isStopAlreadyRequested: () => engine.isStopRequested(),
@@ -335,6 +370,7 @@ async function main() {
         .getFindings(runId)
         .filter((finding) => !findingCodesBlocklist.includes(finding.code));
     const inventory = auditStore.getInventory(runId);
+    const run = auditStore.getRun(runId);
 
     const pluginSummaries = registry.getSummaries(state);
     const engineReport = {
@@ -426,6 +462,60 @@ async function main() {
     await xlsxExporter.export(globalReport);
 
     const hasErrors = pluginSummaries.reduce((sum, p) => sum + p.errors, 0) > 0;
+
+    if (progressServer) {
+        progressServer.setCompletionSummary(
+            buildCrawlCompletionSummary({
+                registry,
+                state,
+                status: run?.status ?? "finished",
+                title: "Audit Summary",
+                subtitle: `${state.origin} | started ${state.startedAt.toISOString()} | ended ${endedAt.toISOString()}`,
+                overviewCards: [
+                    {
+                        key: "runId",
+                        label: "Run ID",
+                        value: runId,
+                    },
+                    {
+                        key: "duration",
+                        label: "Duration",
+                        value: TimeUtils.formatHuman(durationMs),
+                    },
+                    {
+                        key: "urlsSeen",
+                        label: "URLs Seen",
+                        value: state.seen.size,
+                    },
+                    {
+                        key: "findings",
+                        label: "Findings",
+                        value: issues.length,
+                    },
+                    {
+                        key: "warnings",
+                        label: "Warnings",
+                        value: pluginSummaries.reduce((sum, plugin) => sum + plugin.warnings, 0),
+                    },
+                    {
+                        key: "errors",
+                        label: "Errors",
+                        value: pluginSummaries.reduce((sum, plugin) => sum + plugin.errors, 0),
+                    },
+                ],
+                runDetails: engineReport.items,
+                reports,
+                issues,
+            }),
+        );
+        console.log("Audit summary available at " + progressServer.getUrl());
+        console.log("Press Ctrl+C to stop the HTTP server.");
+        process.exitCode = hasErrors ? 2 : 0;
+        await waitForTerminationSignal();
+        await progressServer.stop();
+        return;
+    }
+
     process.exit(hasErrors ? 2 : 0);
 }
 
