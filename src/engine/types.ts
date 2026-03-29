@@ -1,5 +1,46 @@
 import type { BrowserContext, Download, Page, Response } from "playwright";
 
+export interface EnqueueUrlInput {
+    runId: number;
+    url: string;
+    normalizedUrl: string;
+    depth: number;
+    sourceUrl?: string | null;
+}
+
+export interface NextUrlCandidate {
+    id: number;
+    url: string;
+    depth: number;
+}
+export interface PersistedFindingInput {
+    plugin: string;
+    category?: string | null;
+    code: string;
+    severity: string;
+    message: string;
+    resourceUrl?: string | null;
+    payload?: unknown;
+}
+
+export interface PersistedLinkInput {
+    toUrl: string;
+    normalizedToUrl: string;
+    linkText?: string | null;
+    nofollow?: boolean;
+    isInternal: boolean;
+}
+
+export interface PersistPageResultInput {
+    runId: number;
+    urlId: number;
+    httpStatus?: number | null;
+    contentType?: string | null;
+    pageTitle?: string | null;
+    findings: PersistedFindingInput[];
+    discoveredLinks: PersistedLinkInput[];
+}
+
 export type Mime = string;
 
 export type CrawlOptions = {
@@ -14,6 +55,7 @@ export type CrawlOptions = {
     rateLimitMs: number;
     urlAllowlist?: RegExp[];
     urlBlocklist?: RegExp[];
+    reportDir: string;
 };
 
 export type DownloadArtifact = {
