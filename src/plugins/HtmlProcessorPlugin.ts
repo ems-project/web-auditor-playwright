@@ -87,16 +87,18 @@ export class HtmlProcessorPlugin extends BasePlugin implements IPlugin {
         ctx.report.description = extracted.description;
         ctx.report.content = extracted.content;
         ctx.report.title = extracted.h1s.length > 0 ? extracted.h1s[0] : null;
-        ctx.report.links = this.maxLinksPerPage
-            ? extracted.links.slice(0, this.maxLinksPerPage)
-            : extracted.links;
 
         for (const link of extracted.links) {
-            ctx.crawler.enqueueUrl({
+            const enqueueResult = ctx.crawler.enqueueUrl({
                 url: link.url,
                 source: this.name,
             });
+            link.enqueueResult = enqueueResult.reason;
         }
+
+        ctx.report.links = this.maxLinksPerPage
+            ? extracted.links.slice(0, this.maxLinksPerPage)
+            : extracted.links;
         this.register(ctx);
     }
 

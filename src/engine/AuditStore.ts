@@ -242,8 +242,8 @@ export class AuditStore {
             const insertLink = this.db.prepare(`
         INSERT INTO links (
           run_id, from_url_id, to_url, normalized_to_url, link_text,
-          tag, target, nofollow, is_internal, discovered_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          tag, target, enqueue_result, nofollow, is_internal, discovered_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
             for (const link of input.discoveredLinks) {
@@ -255,6 +255,7 @@ export class AuditStore {
                     link.linkText ?? null,
                     link.tag ?? null,
                     link.target ?? null,
+                    link.enqueueResult ?? null,
                     link.nofollow ? 1 : 0,
                     link.isInternal ? 1 : 0,
                     new Date().toISOString(),

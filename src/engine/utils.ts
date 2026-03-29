@@ -13,6 +13,29 @@ export function isSameOrigin(a: string, b: string): boolean {
     return new URL(a).origin === new URL(b).origin;
 }
 
+export function normalizeHost(value: string): string {
+    const trimmed = value.trim();
+    if (trimmed.length === 0) {
+        throw new Error("Host value cannot be empty");
+    }
+
+    if (/^[a-z][a-z0-9+.-]*:\/\//i.test(trimmed)) {
+        return new URL(trimmed).host.toLowerCase();
+    }
+
+    return new URL(`https://${trimmed}`).host.toLowerCase();
+}
+
+export function isAllowedHost(url: string, allowedHosts: Iterable<string>): boolean {
+    const host = new URL(url).host.toLowerCase();
+    for (const allowedHost of allowedHosts) {
+        if (host === allowedHost.toLowerCase()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 export function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }

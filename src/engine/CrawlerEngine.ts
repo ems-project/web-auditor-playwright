@@ -16,7 +16,13 @@ import type {
     ResourceContext,
     UrlRejectionReason,
 } from "./types.js";
-import { getStatusMessage, isSameOrigin, normalizeUrl, parseMime } from "./utils.js";
+import {
+    getStatusMessage,
+    isAllowedHost,
+    normalizeHost,
+    normalizeUrl,
+    parseMime,
+} from "./utils.js";
 
 type UrlDecision = { allowed: true } | { allowed: false; reason: UrlRejectionReason };
 
@@ -41,6 +47,7 @@ export class CrawlerEngine {
         let runId: number;
         let start = initialStart;
         let state: EngineState;
+        let allowedHosts: ReadonlySet<string>;
 
         if (typeof this.opts.resumeRunId === "number") {
             const resumeRunId = this.opts.resumeRunId;
@@ -73,6 +80,7 @@ export class CrawlerEngine {
                 any: this.store.loadPluginState(resumeRunId),
                 stopRequested: false,
             };
+            allowedHosts = this.buildAllowedHosts(start);
         } else {
             runId = this.store.createRun({ startUrl: start });
             state = {
@@ -90,7 +98,13 @@ export class CrawlerEngine {
                 any: {},
                 stopRequested: false,
             };
-            this.enqueueUrl({ url: start, depth: 0, source: "engine:start" }, runId, state, start);
+            allowedHosts = this.buildAllowedHosts(start);
+            this.enqueueUrl(
+                { url: start, depth: 0, source: "engine:start" },
+                runId,
+                state,
+                allowedHosts,
+            );
         }
 
         state.any["runId"] = runId;
@@ -146,7 +160,7 @@ export class CrawlerEngine {
                             },
                             runId,
                             state,
-                            start,
+                            allowedHosts,
                         );
                     },
                 },
@@ -281,7 +295,7 @@ export class CrawlerEngine {
                 await this.registry.runPhase("finally", ctx);
 
                 if (!failedInStore) {
-                    this.persistProcessedUrl(runId, item.id, ctx, start);
+                    this.persistProcessedUrl(runId, item.id, ctx, allowedHosts);
                 }
             }
         };
@@ -337,7 +351,7 @@ export class CrawlerEngine {
         request: EnqueueRequest,
         runId: number,
         state: EngineState,
-        startUrl: string,
+        allowedHosts: ReadonlySet<string>,
     ): EnqueueResult {
         if (this.stopRequested) {
             return {
@@ -366,7 +380,7 @@ export class CrawlerEngine {
             };
         }
 
-        if (this.opts.sameOriginOnly && !isSameOrigin(normalizedUrl, startUrl)) {
+        if (!isAllowedHost(normalizedUrl, allowedHosts)) {
             return {
                 accepted: false,
                 normalizedUrl,
@@ -421,7 +435,7 @@ export class CrawlerEngine {
         runId: number,
         urlId: number,
         ctx: ResourceContext,
-        startUrl: string,
+        allowedHosts: ReadonlySet<string>,
     ): void {
         const discoveredLinks = (ctx.report.links ?? [])
             .map((link) => {
@@ -434,7 +448,8 @@ export class CrawlerEngine {
                         tag: link.tag ?? link.type ?? null,
                         target: link.target ?? null,
                         nofollow: false,
-                        isInternal: isSameOrigin(normalizedToUrl, startUrl),
+                        isInternal: isAllowedHost(normalizedToUrl, allowedHosts),
+                        enqueueResult: link.enqueueResult,
                     };
                 } catch {
                     return null;
@@ -487,6 +502,20 @@ export class CrawlerEngine {
         }
 
         return { allowed: true };
+    }
+
+    private buildAllowedHosts(startUrl: string): ReadonlySet<string> {
+        const allowedHosts = new Set<string>([normalizeHost(startUrl)]);
+
+        for (const value of this.opts.allowedHosts ?? []) {
+            try {
+                allowedHosts.add(normalizeHost(value));
+            } catch {
+                continue;
+            }
+        }
+
+        return allowedHosts;
     }
 
     requestStop(): void {

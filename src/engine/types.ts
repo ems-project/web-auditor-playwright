@@ -31,6 +31,7 @@ export interface PersistedLinkInput {
     target?: string | null;
     nofollow?: boolean;
     isInternal: boolean;
+    enqueueResult?: string;
 }
 
 export interface PersistPageResultInput {
@@ -47,7 +48,7 @@ export type Mime = string;
 
 export type CrawlOptions = {
     startUrl: string;
-    sameOriginOnly: boolean;
+    allowedHosts?: string[];
     ignoreHttpsError: boolean;
     maxPages: number;
     maxDepth: number;
@@ -111,6 +112,7 @@ export type ResourceReportLink = {
     url: string;
     tag?: string | null;
     target?: string | null;
+    enqueueResult?: string;
 };
 
 export type ResourceReportA11yAxeNode = {

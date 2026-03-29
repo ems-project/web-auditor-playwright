@@ -63,10 +63,11 @@ export class TextExtractorPlugin extends BasePlugin implements IPlugin {
 
             const links = TextUtils.extractLinks(text, this.maxLinks, "extracted");
             for (const link of links) {
-                ctx.crawler.enqueueUrl({
+                const enqueueResult = ctx.crawler.enqueueUrl({
                     url: link.url,
                     source: this.name,
                 });
+                link.enqueueResult = enqueueResult.reason;
             }
 
             ctx.report.content = text;

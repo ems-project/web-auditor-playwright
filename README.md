@@ -30,6 +30,7 @@ Web Auditor is built around a flexible plugin system. Each plugin can:
 The tool can be configured using [environment variables](#environment-variables):
 
 - URL allowlists / blocklists (regex)
+- Additional allowed hosts via `ALLOWED_ORIGINS`
 - Plugin activation control
 - Output directory
 - Crawl limits
@@ -75,7 +76,6 @@ The tool can be configured using [environment variables](#environment-variables)
     - `@context": "https://schema.org"`
 - Detects duplicates
 - page with Inline code
-- Allow multiple origins
 
 ## Installing Playwright and launch an audit locally
 
@@ -161,7 +161,7 @@ npm start
 | `FINDING_CODES_BLOCKLIST`                   | empty                                                            | Comma-separated list of finding codes to exclude from the report; any matching findings will be ignored. E.g. `MAIL_OR_TEL_LINK,INVALID_MAILTO_HREF,INVALID_TEL_HREF`.                                                                                                                                               |
 | `RATE_LIMIT_MS`                             | `500`                                                            | Minimum delay (in milliseconds) between navigation requests. This helps avoid overloading the target server.                                                                                                                                                                                                         |
 | `NAV_TIMEOUT_MS`                            | `30000`                                                          | Maximum time (in milliseconds) allowed for page navigation before it is considered a failure.                                                                                                                                                                                                                        |
-| `SAME_ORIGIN_ONLY`                          | `true`                                                           | If enabled, the crawler only follows links that belong to the same origin as the `START_URL`.                                                                                                                                                                                                                        |
+| `ALLOWED_ORIGINS`                           | empty                                                            | Comma-separated list of additional allowed origins or hosts that the crawler may follow. The host of `START_URL` is always allowed automatically, and every value in `ALLOWED_ORIGINS` is normalized to a host before link filtering.                                                                                |
 | `URL_ALLOWLIST_REGEX`                       | empty                                                            | Comma-separated list of regular expressions. If defined, only URLs matching at least one pattern will be crawled.                                                                                                                                                                                                    |
 | `URL_BLOCKLIST_REGEX`                       | empty                                                            | Comma-separated list of regular expressions. URLs matching any pattern will be excluded from crawling. Applied after allowlist.                                                                                                                                                                                      |
 | `CHECK_EXTERNAL_LINKS`                      | `false`                                                          | If enabled, dead link detection will also test external links. Otherwise only internal links are checked.                                                                                                                                                                                                            |
