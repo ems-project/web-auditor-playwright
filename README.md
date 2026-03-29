@@ -66,7 +66,6 @@ The tool can be configured using [environment variables](#environment-variables)
     - Non optimized images
     - Lazy loading
 - Empty anchor links
-- Log link's tags and targets
 - Cookie plugin (lifetime)
 - Stats by locales
 - Tests runner's IPs like https://ipv4.icanhazip.com/ and https://ipv6.icanhazip.com/
