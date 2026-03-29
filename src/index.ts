@@ -120,6 +120,10 @@ async function main() {
     }
     const urlAllowlist = TextUtils.parseRegexList(process.env.URL_ALLOWLIST_REGEX);
     const urlBlocklist = TextUtils.parseRegexList(process.env.URL_BLOCKLIST_REGEX);
+    const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? "")
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean);
     const soft404Patterns = TextUtils.parseRegexList(process.env.SOFT_404_PATTERNS);
     const soft500Patterns = TextUtils.parseRegexList(process.env.SOFT_500_PATTERNS);
     const dumpDir = process.env.DUMP_DIR?.trim() || null;
@@ -295,7 +299,7 @@ async function main() {
     const engine = new CrawlerEngine(
         {
             startUrl: process.env.START_URL || "https://example.org",
-            sameOriginOnly: (process.env.SAME_ORIGIN_ONLY ?? "true") === "true",
+            allowedHosts: allowedOrigins,
             ignoreHttpsError: (process.env.IGNORE_HTTPS_ERRORS ?? "false") === "true",
             maxPages: Number(process.env.MAX_PAGES ?? 50),
             maxDepth: Number(process.env.MAX_DEPTH ?? 3),

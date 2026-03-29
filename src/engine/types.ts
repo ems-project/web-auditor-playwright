@@ -47,7 +47,7 @@ export type Mime = string;
 
 export type CrawlOptions = {
     startUrl: string;
-    sameOriginOnly: boolean;
+    allowedHosts?: string[];
     ignoreHttpsError: boolean;
     maxPages: number;
     maxDepth: number;
