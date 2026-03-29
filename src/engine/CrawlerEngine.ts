@@ -406,9 +406,4 @@ export class CrawlerEngine {
     public isStopRequested(): boolean {
         return this.stopRequested;
     }
-
-    public init(): void {
-        const store = new AuditStore(path.join(this.opts.reportDir, "audit.db"));
-        store.initSchema();
-    }
 }
