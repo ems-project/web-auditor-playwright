@@ -391,24 +391,6 @@ export class AuditStore {
         };
     }
 
-    public getFindingCounts(runId: number): Array<{
-        code: string;
-        severity: string;
-        count: number;
-    }> {
-        return this.db
-            .prepare(
-                `
-      SELECT code, severity, COUNT(*) as count
-      FROM findings
-      WHERE run_id = ?
-      GROUP BY code, severity
-      ORDER BY count DESC, code ASC
-    `,
-            )
-            .all(runId) as Array<{ code: string; severity: string; count: number }>;
-    }
-
     public getFindings(runId: number): Array<{
         plugin: string;
         type: string;
