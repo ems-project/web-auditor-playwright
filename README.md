@@ -15,6 +15,7 @@ Built on top of Playwright, it crawls websites and runs a series of customizable
 - Media analysis (images size, metadata, etc.)
 - Resource analysis (PDF, downloads, MIME types)
 - Structured JSON reports (one per URL)
+- Stop and resume audits
 
 ## Plugin System
 
@@ -75,6 +76,7 @@ The tool can be configured using [environment variables](#environment-variables)
     - `@context": "https://schema.org"`
 - Detects duplicates
 - page with Inline code
+- Allow multiple origins
 
 ## Installing Playwright and launch an audit locally
 
