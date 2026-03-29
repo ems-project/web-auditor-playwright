@@ -3,7 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "tsc -p tsconfig.json && cp -r src/resources dist/resources",
+        "build": "tsc -p tsconfig.json && rm -rf dist/resources && mkdir -p dist/resources && cp -R src/resources/. dist/resources/",
         "start": "node dist/index.js",
         "dev": "tsx src/index.ts",
         "lint": "eslint .",

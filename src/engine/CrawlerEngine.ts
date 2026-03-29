@@ -431,6 +431,8 @@ export class CrawlerEngine {
                         toUrl: link.url,
                         normalizedToUrl,
                         linkText: link.text ?? null,
+                        tag: link.tag ?? link.type ?? null,
+                        target: link.target ?? null,
                         nofollow: false,
                         isInternal: isSameOrigin(normalizedToUrl, startUrl),
                     };

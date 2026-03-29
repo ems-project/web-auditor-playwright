@@ -235,6 +235,8 @@ export class HtmlProcessorPlugin extends BasePlugin implements IPlugin {
 
                 links.push({
                     type: el.tagName.toLowerCase(),
+                    tag: el.tagName.toLowerCase(),
+                    target: el.getAttribute("target"),
                     url: absoluteUrl,
                     text: el.textContent?.trim() ?? null,
                 });

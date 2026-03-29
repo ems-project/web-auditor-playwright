@@ -23,6 +23,10 @@ type RunSnapshot = {
     errorCount: number;
 };
 
+type MigrationRow = {
+    version: number;
+};
+
 export class AuditStore {
     private db: Database.Database;
 
@@ -30,18 +34,28 @@ export class AuditStore {
         this.db = new Database(dbPath);
         this.db.pragma("journal_mode = WAL");
         this.db.pragma("synchronous = NORMAL");
+        this.db.pragma("foreign_keys = ON");
     }
 
     public initSchema(): void {
-        const __filename = fileURLToPath(import.meta.url);
-        const __dirname = path.dirname(__filename);
-        const schemaPath = path.resolve(__dirname, "../resources/db/schema.sql");
-        if (!fs.existsSync(schemaPath)) {
-            throw new Error(`Schema file not found at ${schemaPath}`);
-        }
-        const sql = fs.readFileSync(schemaPath, "utf-8");
+        this.ensureMigrationsTable();
 
-        this.db.exec(sql);
+        for (const migration of this.getPendingMigrations()) {
+            const sql = fs.readFileSync(migration.path, "utf-8");
+            const apply = this.db.transaction(() => {
+                this.db.exec(sql);
+                this.db
+                    .prepare(
+                        `
+      INSERT INTO schema_migrations (version, name, applied_at)
+      VALUES (?, ?, ?)
+    `,
+                    )
+                    .run(migration.version, migration.name, new Date().toISOString());
+            });
+
+            apply();
+        }
     }
 
     public createRun(input: { startUrl: string }): number {
@@ -228,8 +242,8 @@ export class AuditStore {
             const insertLink = this.db.prepare(`
         INSERT INTO links (
           run_id, from_url_id, to_url, normalized_to_url, link_text,
-          nofollow, is_internal, discovered_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          tag, target, nofollow, is_internal, discovered_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
             for (const link of input.discoveredLinks) {
@@ -239,6 +253,8 @@ export class AuditStore {
                     link.toUrl,
                     link.normalizedToUrl,
                     link.linkText ?? null,
+                    link.tag ?? null,
+                    link.target ?? null,
                     link.nofollow ? 1 : 0,
                     link.isInternal ? 1 : 0,
                     new Date().toISOString(),
@@ -375,24 +391,6 @@ export class AuditStore {
         };
     }
 
-    public getFindingCounts(runId: number): Array<{
-        code: string;
-        severity: string;
-        count: number;
-    }> {
-        return this.db
-            .prepare(
-                `
-      SELECT code, severity, COUNT(*) as count
-      FROM findings
-      WHERE run_id = ?
-      GROUP BY code, severity
-      ORDER BY count DESC, code ASC
-    `,
-            )
-            .all(runId) as Array<{ code: string; severity: string; count: number }>;
-    }
-
     public getFindings(runId: number): Array<{
         plugin: string;
         type: string;
@@ -463,5 +461,57 @@ export class AuditStore {
                     url: inventoryRow.url,
                 };
             });
+    }
+
+    private ensureMigrationsTable(): void {
+        this.db.exec(`
+      CREATE TABLE IF NOT EXISTS schema_migrations (
+          version INTEGER PRIMARY KEY,
+          name TEXT NOT NULL,
+          applied_at TEXT NOT NULL
+      )
+    `);
+    }
+
+    private getPendingMigrations(): Array<{ version: number; name: string; path: string }> {
+        const appliedVersions = new Set(
+            this.db
+                .prepare(
+                    `
+      SELECT version
+      FROM schema_migrations
+      ORDER BY version ASC
+    `,
+                )
+                .all()
+                .map((row) => (row as MigrationRow).version),
+        );
+
+        return this.getAvailableMigrations().filter(
+            (migration) => !appliedVersions.has(migration.version),
+        );
+    }
+
+    private getAvailableMigrations(): Array<{ version: number; name: string; path: string }> {
+        const migrationsDir = this.getMigrationsDirectory();
+        if (!fs.existsSync(migrationsDir)) {
+            throw new Error(`Migrations directory not found at ${migrationsDir}`);
+        }
+
+        return fs
+            .readdirSync(migrationsDir)
+            .filter((name) => /^\d+_.+\.sql$/.test(name))
+            .sort((left, right) => left.localeCompare(right))
+            .map((name) => ({
+                version: Number(name.split("_")[0]),
+                name,
+                path: path.join(migrationsDir, name),
+            }));
+    }
+
+    private getMigrationsDirectory(): string {
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        return path.resolve(__dirname, "../resources/db/migrations");
     }
 }
