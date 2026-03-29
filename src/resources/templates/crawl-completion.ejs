@@ -30,7 +30,6 @@ body {
 }
 a { color: inherit; }
 main {
-  max-width: 1320px;
   margin: 0 auto;
   padding: 32px 20px 56px;
 }
@@ -162,6 +161,39 @@ th { font-size: 0.82rem; color: var(--muted); text-transform: uppercase; letter-
 }
 .empty { color: var(--muted); font-style: italic; }
 .findings-count { margin-bottom: 12px; color: var(--muted); }
+.finding-row { cursor: pointer; }
+.finding-row:hover td, .finding-row.is-open td { background: rgba(13,107,95,0.06); }
+.finding-row:focus-visible { outline: 2px solid rgba(13,107,95,0.35); outline-offset: -2px; }
+.finding-detail-row { display: none; }
+.finding-detail-row.is-open { display: table-row; }
+.finding-detail-panel {
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.72);
+}
+.finding-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+.finding-detail-block {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+}
+.finding-detail-block h3 {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.finding-detail-block p, .finding-detail-block pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.finding-detail-block pre { font-family: "IBM Plex Mono", "SFMono-Regular", monospace; font-size: 0.85rem; }
 @media (max-width: 960px) {
   .layout {
     grid-template-columns: 1fr;
@@ -263,7 +295,7 @@ th { font-size: 0.82rem; color: var(--muted); text-transform: uppercase; letter-
                 </thead>
                 <tbody>
                   <% for (const finding of detail.findings) { %>
-                    <tr>
+                    <tr class="finding-row" data-finding-row tabindex="0" aria-expanded="false">
                       <td>
                         <span class="badge <%= finding.type === 'error' ? 'error' : finding.type === 'warning' ? 'warning' : '' %>">
                           <%= finding.type %>
@@ -272,6 +304,42 @@ th { font-size: 0.82rem; color: var(--muted); text-transform: uppercase; letter-
                       <td><%= finding.code %></td>
                       <td><%= finding.url ?? '' %></td>
                       <td><%= finding.message %></td>
+                    </tr>
+                    <tr class="finding-detail-row" data-finding-detail-row>
+                      <td colspan="4">
+                        <div class="finding-detail-panel">
+                          <div class="finding-detail-grid">
+                            <div class="finding-detail-block">
+                              <h3>Plugin</h3>
+                              <p><%= detail.label %></p>
+                            </div>
+                            <div class="finding-detail-block">
+                              <h3>Severity</h3>
+                              <p><%= finding.type %></p>
+                            </div>
+                            <div class="finding-detail-block">
+                              <h3>Category</h3>
+                              <p><%= finding.category || '' %></p>
+                            </div>
+                            <div class="finding-detail-block">
+                              <h3>Code</h3>
+                              <p><%= finding.code %></p>
+                            </div>
+                            <div class="finding-detail-block">
+                              <h3>URL</h3>
+                              <p><%= finding.url ?? '' %></p>
+                            </div>
+                            <div class="finding-detail-block">
+                              <h3>Message</h3>
+                              <p><%= finding.message %></p>
+                            </div>
+                            <div class="finding-detail-block">
+                              <h3>Data</h3>
+                              <pre><%= JSON.stringify(finding.data ?? null, null, 2) %></pre>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
                     </tr>
                   <% } %>
                 </tbody>
@@ -301,6 +369,27 @@ function activate(hash) {
 
 window.addEventListener('hashchange', () => activate(window.location.hash));
 activate(window.location.hash);
+
+for (const row of Array.from(document.querySelectorAll('[data-finding-row]'))) {
+  const detailRow = row.nextElementSibling;
+  if (!detailRow || !detailRow.hasAttribute('data-finding-detail-row')) {
+    continue;
+  }
+
+  const toggle = function () {
+    const isOpen = detailRow.classList.toggle('is-open');
+    row.classList.toggle('is-open', isOpen);
+    row.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  };
+
+  row.addEventListener('click', toggle);
+  row.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      toggle();
+    }
+  });
+}
 </script>
 </body>
 </html>
