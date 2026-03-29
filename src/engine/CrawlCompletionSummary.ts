@@ -66,6 +66,57 @@ export function buildCrawlCompletionSummary(
 
     const auditPlugins: CompletionPluginSummary[] = [];
     const pluginDetails: CompletionPluginDetail[] = [];
+    const engineReport = reportByPlugin.get("engine");
+
+    if (engineReport) {
+        const engineSummary: CompletionPluginSummary = {
+            plugin: "engine",
+            label: engineReport.label,
+            treatedUrls: input.state.seen.size,
+            infos: input.state.infoCount,
+            warnings: input.state.warningCount,
+            errors: input.state.errorCount,
+        };
+        const findings = [...(issuesByPlugin.get("engine") ?? [])].sort(compareFindings);
+
+        auditPlugins.push(engineSummary);
+        pluginDetails.push({
+            plugin: engineSummary.plugin,
+            label: engineSummary.label,
+            sections: [
+                {
+                    title: "Summary",
+                    items: [
+                        {
+                            key: "treatedUrls",
+                            label: "Audited resources",
+                            value: engineSummary.treatedUrls,
+                        },
+                        {
+                            key: "infos",
+                            label: "Infos",
+                            value: engineSummary.infos,
+                        },
+                        {
+                            key: "warnings",
+                            label: "Warnings",
+                            value: engineSummary.warnings,
+                        },
+                        {
+                            key: "errors",
+                            label: "Errors",
+                            value: engineSummary.errors,
+                        },
+                    ],
+                },
+                {
+                    title: engineReport.label,
+                    items: engineReport.items,
+                },
+            ],
+            findings,
+        });
+    }
 
     for (const plugin of input.registry.list()) {
         if (!(plugin.includeInSummary?.() ?? false)) {
