@@ -1,7 +1,7 @@
 import { BasePlugin } from "../engine/BasePlugin.js";
 import { IPlugin, PluginPhase, ResourceContext, ResourceReportLink } from "../engine/types.js";
 
-import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { getDocument, VerbosityLevel } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { ErrorUtils } from "../utils/ErrorUtils.js";
 import { TextUtils } from "../utils/TextUtils.js";
 import { PDFDocumentProxy } from "pdfjs-dist/types/src/display/api.js";
@@ -67,7 +67,7 @@ export class PdfExtractorPlugin extends BasePlugin implements IPlugin {
         let loadingTask: ReturnType<typeof getDocument> | undefined;
 
         try {
-            loadingTask = getDocument(savedPath);
+            loadingTask = getDocument({ url: savedPath, verbosity: VerbosityLevel.ERRORS });
             const pdf = await loadingTask.promise;
 
             try {

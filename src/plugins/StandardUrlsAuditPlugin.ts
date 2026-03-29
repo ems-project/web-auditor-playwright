@@ -112,7 +112,7 @@ export class StandardUrlsAuditPlugin extends BasePlugin implements IPlugin {
         if (!spec) {
             return;
         }
-        if (ctx.status !== undefined ? ctx.status < 400 : true) {
+        if (ctx.status !== undefined ? ctx.status < 300 : true) {
             this.register(ctx);
             return;
         }

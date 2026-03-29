@@ -71,11 +71,10 @@ The tool can be configured using [environment variables](#environment-variables)
 - Tests runner's IPs like https://ipv4.icanhazip.com/ and https://ipv6.icanhazip.com/
 - hreflang
 - Analyse text's complexity (something like [Scolarius](https://www.scolarius.com/))
-- JSON-LD structure (`@context": "https://schema.org"`)
+- JSON-LD structure
+    - `@context": "https://schema.org"`
 - Detects duplicates
-- Detects page with Inline code
-- Generate Information Architecture schema
-- Test external links in a 2nd phase
+- page with Inline code
 
 ## Installing Playwright and launch an audit locally
 

@@ -110,12 +110,13 @@ export class DownloaderPlugin extends BasePlugin implements IPlugin {
         const parsed = new URL(finalTargetUrl);
 
         ctx.status = ctx.report.status_code = ctx.status ?? 200;
+        ctx.mime = detection.mime ?? undefined;
+        ctx.report.mimetype = detection.mime;
         ctx.report.url = sourceUrl;
         ctx.report.redirected = ctx.url !== finalTargetUrl;
         ctx.report.host = parsed.host;
         ctx.report.base_url = parsed.pathname;
         ctx.report.timestamp = new Date().toISOString();
-        ctx.report.mimetype = detection.mime;
         ctx.report.size = stat.size;
         ctx.report.is_web = false;
         ctx.report.meta_title = null;

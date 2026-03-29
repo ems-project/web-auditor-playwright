@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import type { PDFDocumentProxy, TextItem } from "pdfjs-dist/types/src/display/api.js";
-import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { getDocument, VerbosityLevel } from "pdfjs-dist/legacy/build/pdf.mjs";
 
 import { BasePlugin } from "../engine/BasePlugin.js";
 import { IPlugin, PluginPhase, ResourceContext } from "../engine/types.js";
@@ -39,7 +39,7 @@ export class PdfAccessibilityPlugin extends BasePlugin implements IPlugin {
             return;
         }
 
-        const loadingTask = getDocument(savedPath);
+        const loadingTask = getDocument({ url: savedPath, verbosity: VerbosityLevel.ERRORS });
 
         try {
             const pdf = await loadingTask.promise;

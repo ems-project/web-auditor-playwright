@@ -12,7 +12,10 @@ import { A11yAxePlugin } from "./plugins/A11yAxePlugin.js";
 import { StatsCollectorPlugin } from "./plugins/StatsCollectorPlugin.js";
 import { ConsoleStatusPlugin } from "./plugins/ConsoleStatusPlugin.js";
 import { SaveReportAsJsonPlugin } from "./plugins/SaveReportAsJsonPlugin.js";
+import { SiteDumpPlugin } from "./plugins/SiteDumpPlugin.js";
 import { HtmlProcessorPlugin } from "./plugins/HtmlProcessorPlugin.js";
+import { SeoUrlRulesPlugin } from "./plugins/SeoUrlRulesPlugin.js";
+import { SoftHttpErrorPlugin } from "./plugins/SoftHttpErrorPlugin.js";
 import { DownloaderPlugin } from "./plugins/DownloaderPlugin.js";
 import { CleanDownloadedPlugin } from "./plugins/CleanDownloadedPlugin.js";
 import { TextExtractorPlugin } from "./plugins/TextExtractorPlugin.js";
@@ -31,11 +34,87 @@ import { TextUtils } from "./utils/TextUtils.js";
 import { XlsxExporter } from "./reporting/XlsxExporter.js";
 import { Report } from "./engine/types.js";
 
+function buildSitemapXml(urls: string[]): string {
+    const lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        ...urls.map((url) => `  <url><loc>${escapeXml(url)}</loc></url>`),
+        "</urlset>",
+    ];
+
+    return `${lines.join("\n")}\n`;
+}
+
+function collectValidSitemapUrls(
+    inventory: Array<{ url: string; status?: number; mime?: string }>,
+): string[] {
+    const uniqueUrls = new Set<string>();
+
+    for (const entry of inventory) {
+        if (typeof entry.status !== "number" || entry.status >= 400) {
+            continue;
+        }
+        if (!isSitemapEligibleMime(entry.mime)) {
+            continue;
+        }
+
+        try {
+            const parsed = new URL(entry.url);
+            if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+                continue;
+            }
+            uniqueUrls.add(parsed.href);
+        } catch {
+            continue;
+        }
+    }
+
+    return [...uniqueUrls].sort((a, b) => a.localeCompare(b));
+}
+
+function isSitemapEligibleMime(mime: string | undefined): boolean {
+    if (!mime) {
+        return false;
+    }
+
+    if (mime.includes("text/html")) {
+        return true;
+    }
+
+    return [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-powerpoint",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "application/rtf",
+        "text/rtf",
+        "application/vnd.oasis.opendocument.text",
+        "application/vnd.oasis.opendocument.spreadsheet",
+        "application/vnd.oasis.opendocument.presentation",
+        "text/csv",
+    ].includes(mime);
+}
+
+function escapeXml(value: string): string {
+    return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+}
+
 async function main() {
     const reportOutputDir = process.env.REPORT_OUTPUT_DIR ?? "./reports";
     const websiteId = process.env.WEBSITE_ID ?? "my_website";
     const urlAllowlist = TextUtils.parseRegexList(process.env.URL_ALLOWLIST_REGEX);
     const urlBlocklist = TextUtils.parseRegexList(process.env.URL_BLOCKLIST_REGEX);
+    const soft404Patterns = TextUtils.parseRegexList(process.env.SOFT_404_PATTERNS);
+    const soft500Patterns = TextUtils.parseRegexList(process.env.SOFT_500_PATTERNS);
+    const dumpDir = process.env.DUMP_DIR?.trim() || null;
     const findingCodesBlocklist = (process.env.FINDING_CODES_BLOCKLIST ?? "")
         .split(",")
         .map((tag) => tag.trim())
@@ -91,6 +170,17 @@ async function main() {
             }),
         )
         .register(new HtmlProcessorPlugin())
+        .register(
+            new SeoUrlRulesPlugin({
+                maxUrlLength: Number(process.env.MAX_URL_LENGTH ?? 120),
+            }),
+        )
+        .register(
+            new SoftHttpErrorPlugin({
+                soft404Patterns: soft404Patterns.length > 0 ? soft404Patterns : undefined,
+                soft500Patterns: soft500Patterns.length > 0 ? soft500Patterns : undefined,
+            }),
+        )
         .register(
             new A11yAxePlugin({
                 relevantTags: (process.env.A11Y_AXE_RELEVANT_TAGS ?? "EN-301-549,best-practice")
@@ -177,6 +267,9 @@ async function main() {
         .register(new StandardUrlsAuditPlugin())
         .register(new CleanDownloadedPlugin());
 
+    if (dumpDir) {
+        registry.register(new SiteDumpPlugin({ outputDir: dumpDir }));
+    }
     if (process.env.DOWNLOAD_ENABLE_TEXTRACT_FALLBACK ?? "true") {
         registry.register(
             new TextractExtractorPlugin({
@@ -293,6 +386,13 @@ async function main() {
         console.log(jsonReport);
     }
     await fs.writeFile(path.join(reportOutputDir, `${websiteId}.json`), jsonReport, "utf-8");
+
+    const sitemapUrls = collectValidSitemapUrls(state.inventory);
+    await fs.writeFile(
+        path.join(reportOutputDir, `${websiteId}.xml`),
+        buildSitemapXml(sitemapUrls),
+        "utf-8",
+    );
 
     const xlsxExporter = new XlsxExporter({
         outputPath: path.join(reportOutputDir, `${websiteId}.xlsx`),

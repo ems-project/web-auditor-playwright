@@ -34,21 +34,32 @@ export class HtmlProcessorPlugin extends BasePlugin implements IPlugin {
         const titleAnalyzer = new TitleAnalyzer();
         const titleAnalysis = titleAnalyzer.analyze(extracted.title);
 
-        const mailOrTelLinkCount = extracted.links.filter(
+        const mailOrTelLinks = extracted.links.filter(
             (l) => l.url.startsWith("mailto:") || l.url.startsWith("tel:"),
-        ).length;
-        if (mailOrTelLinkCount > 0) {
+        );
+        if (mailOrTelLinks.length > 0) {
             this.registerInfo(
                 ctx,
                 "links",
                 "MAIL_OR_TEL_LINK",
-                `Contains ${mailOrTelLinkCount} mailto or tel link(s).`,
+                `Contains ${mailOrTelLinks.length} mailto or tel link(s).`,
                 {
-                    links: extracted.links.filter(
-                        (l) => l.url.startsWith("mailto:") || l.url.startsWith("tel:"),
-                    ),
+                    links: mailOrTelLinks,
                 },
             );
+        }
+
+        for (const link of mailOrTelLinks) {
+            const invalidHref = this.validateSpecialHref(link.url);
+            if (!invalidHref) {
+                continue;
+            }
+
+            this.registerWarning(ctx, "links", invalidHref.code, invalidHref.message, {
+                type: link.type,
+                text: link.text,
+                href: link.url,
+            });
         }
 
         for (const issue of titleAnalysis.issues) {
@@ -87,6 +98,71 @@ export class HtmlProcessorPlugin extends BasePlugin implements IPlugin {
             });
         }
         this.register(ctx);
+    }
+
+    private validateSpecialHref(href: string): { code: FindingCode; message: string } | null {
+        if (href.startsWith("mailto:")) {
+            return this.isValidMailtoHref(href)
+                ? null
+                : {
+                      code: "INVALID_MAILTO_HREF",
+                      message: `Invalid mailto href format: ${href}`,
+                  };
+        }
+
+        if (href.startsWith("tel:")) {
+            return this.validateTelHref(href);
+        }
+
+        return null;
+    }
+
+    private isValidMailtoHref(href: string): boolean {
+        const match = /^mailto:([^?]*)(?:\?.*)?$/i.exec(href);
+        if (!match) {
+            return false;
+        }
+
+        try {
+            const recipients = decodeURIComponent(match[1])
+                .split(",")
+                .map((value) => value.trim())
+                .filter(Boolean);
+
+            if (recipients.length === 0) {
+                return false;
+            }
+
+            return recipients.every((recipient) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient));
+        } catch {
+            return false;
+        }
+    }
+
+    private validateTelHref(href: string): { code: FindingCode; message: string } | null {
+        const match = /^tel:(.*)$/i.exec(href);
+        if (!match || match[1].length === 0) {
+            return {
+                code: "INVALID_TEL_HREF",
+                message: `Invalid tel href format: ${href}`,
+            };
+        }
+
+        if (!match[1].startsWith("+")) {
+            return {
+                code: "INVALID_TEL_HREF",
+                message: `Invalid tel href format: ${href}. Telephone links must start with "+".`,
+            };
+        }
+
+        if (!/^\+\d+$/.test(match[1])) {
+            return {
+                code: "INVALID_TEL_HREF",
+                message: `Invalid tel href format: ${href}. Telephone links must contain only digits after "+".`,
+            };
+        }
+
+        return null;
     }
 
     private async extractFromDom(ctx: ResourceContext) {
