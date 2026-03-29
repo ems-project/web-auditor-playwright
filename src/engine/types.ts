@@ -31,6 +31,7 @@ export interface PersistedLinkInput {
     target?: string | null;
     nofollow?: boolean;
     isInternal: boolean;
+    enqueueResult?: string;
 }
 
 export interface PersistPageResultInput {
@@ -111,6 +112,7 @@ export type ResourceReportLink = {
     url: string;
     tag?: string | null;
     target?: string | null;
+    enqueueResult?: string;
 };
 
 export type ResourceReportA11yAxeNode = {

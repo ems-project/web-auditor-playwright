@@ -449,6 +449,7 @@ export class CrawlerEngine {
                         target: link.target ?? null,
                         nofollow: false,
                         isInternal: isAllowedHost(normalizedToUrl, allowedHosts),
+                        enqueueResult: link.enqueueResult,
                     };
                 } catch {
                     return null;
