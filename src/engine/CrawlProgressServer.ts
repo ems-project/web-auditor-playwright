@@ -1,6 +1,8 @@
 import http from "node:http";
 
 import { AuditStore } from "./AuditStore.js";
+import type { CrawlCompletionSummary } from "./CrawlCompletionSummary.js";
+import { renderCrawlCompletionPage } from "./CrawlCompletionPage.js";
 import { renderCrawlProgressPage } from "./CrawlProgressPage.js";
 
 type CrawlProgressServerOptions = {
@@ -15,6 +17,7 @@ export class CrawlProgressServer {
     private readonly store: AuditStore;
     private server?: http.Server;
     private readonly sockets = new Set<import("node:net").Socket>();
+    private completionSummary?: CrawlCompletionSummary;
 
     constructor(private readonly options: CrawlProgressServerOptions) {
         this.host = options.host ?? "127.0.0.1";
@@ -35,6 +38,12 @@ export class CrawlProgressServer {
                 const snapshot = this.store.getLiveSnapshot(this.options.getRunId?.());
                 res.writeHead(200, { "content-type": "application/json; charset=utf-8" });
                 res.end(JSON.stringify(snapshot));
+                return;
+            }
+
+            if (requestUrl.pathname === "/api/completion") {
+                res.writeHead(200, { "content-type": "application/json; charset=utf-8" });
+                res.end(JSON.stringify(this.completionSummary ?? null));
                 return;
             }
 
@@ -84,11 +93,19 @@ export class CrawlProgressServer {
         this.server = undefined;
     }
 
+    setCompletionSummary(summary: CrawlCompletionSummary): void {
+        this.completionSummary = summary;
+    }
+
     getUrl(): string {
         return `http://${this.host}:${this.options.port}`;
     }
 
     private renderHtml(): string {
+        if (this.completionSummary) {
+            return renderCrawlCompletionPage(this.completionSummary);
+        }
+
         return renderCrawlProgressPage({
             title: "Web Auditor Crawl Monitor",
             statusApiPath: "/api/status",

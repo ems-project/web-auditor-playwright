@@ -386,6 +386,7 @@ export interface IPlugin {
     phases: PluginPhase[];
     run(phase: PluginPhase, ctx: ResourceContext): Promise<void>;
     includeInSummary?(): boolean;
+    isAuditPlugin?(): boolean;
     getSummary?(): PluginSummary | null;
     hydrateFromState?(engineState: EngineState): void;
     getReport?(engineState: EngineState): Report;

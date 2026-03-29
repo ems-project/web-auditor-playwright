@@ -33,6 +33,7 @@ import { IpSupportPlugin } from "./plugins/IpSupportPlugin.js";
 import { TextUtils } from "./utils/TextUtils.js";
 import { XlsxExporter } from "./reporting/XlsxExporter.js";
 import { Report } from "./engine/types.js";
+import { buildCrawlCompletionSummary } from "./engine/CrawlCompletionSummary.js";
 import { AuditStore } from "./engine/AuditStore.js";
 import { CrawlProgressServer } from "./engine/CrawlProgressServer.js";
 import fsp from "node:fs/promises";
@@ -68,7 +69,6 @@ function collectValidSitemapUrls(
             }
             uniqueUrls.add(parsed.href);
         } catch {
-            continue;
         }
     }
 
@@ -108,6 +108,19 @@ function escapeXml(value: string): string {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&apos;");
+}
+
+async function waitForTerminationSignal(): Promise<void> {
+    await new Promise<void>((resolve) => {
+        const onSignal = (): void => {
+            process.off("SIGINT", onSignal);
+            process.off("SIGTERM", onSignal);
+            resolve();
+        };
+
+        process.on("SIGINT", onSignal);
+        process.on("SIGTERM", onSignal);
+    });
 }
 
 async function main() {
@@ -348,7 +361,6 @@ async function main() {
         state = await engine.run();
     } finally {
         stopController.stop();
-        await progressServer?.stop();
     }
     const endedAt = new Date();
     const durationMs = endedAt.getTime() - state.startedAt.getTime();
@@ -358,6 +370,7 @@ async function main() {
         .getFindings(runId)
         .filter((finding) => !findingCodesBlocklist.includes(finding.code));
     const inventory = auditStore.getInventory(runId);
+    const run = auditStore.getRun(runId);
 
     const pluginSummaries = registry.getSummaries(state);
     const engineReport = {
@@ -449,6 +462,60 @@ async function main() {
     await xlsxExporter.export(globalReport);
 
     const hasErrors = pluginSummaries.reduce((sum, p) => sum + p.errors, 0) > 0;
+
+    if (progressServer) {
+        progressServer.setCompletionSummary(
+            buildCrawlCompletionSummary({
+                registry,
+                state,
+                status: run?.status ?? "finished",
+                title: "Audit Summary",
+                subtitle: `${state.origin} | started ${state.startedAt.toISOString()} | ended ${endedAt.toISOString()}`,
+                overviewCards: [
+                    {
+                        key: "runId",
+                        label: "Run ID",
+                        value: runId,
+                    },
+                    {
+                        key: "duration",
+                        label: "Duration",
+                        value: TimeUtils.formatHuman(durationMs),
+                    },
+                    {
+                        key: "urlsSeen",
+                        label: "URLs Seen",
+                        value: state.seen.size,
+                    },
+                    {
+                        key: "findings",
+                        label: "Findings",
+                        value: issues.length,
+                    },
+                    {
+                        key: "warnings",
+                        label: "Warnings",
+                        value: pluginSummaries.reduce((sum, plugin) => sum + plugin.warnings, 0),
+                    },
+                    {
+                        key: "errors",
+                        label: "Errors",
+                        value: pluginSummaries.reduce((sum, plugin) => sum + plugin.errors, 0),
+                    },
+                ],
+                runDetails: engineReport.items,
+                reports,
+                issues,
+            }),
+        );
+        console.log("Audit summary available at " + progressServer.getUrl());
+        console.log("Press Ctrl+C to stop the HTTP server.");
+        process.exitCode = hasErrors ? 2 : 0;
+        await waitForTerminationSignal();
+        await progressServer.stop();
+        return;
+    }
+
     process.exit(hasErrors ? 2 : 0);
 }
 
