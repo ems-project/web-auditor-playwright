@@ -4,6 +4,9 @@ import { AuditStore } from "./AuditStore.js";
 import type { CrawlCompletionSummary } from "./CrawlCompletionSummary.js";
 import { renderCrawlCompletionPage } from "./CrawlCompletionPage.js";
 import { renderCrawlProgressPage } from "./CrawlProgressPage.js";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 type CrawlProgressServerOptions = {
     auditDbPath: string;
@@ -50,6 +53,20 @@ export class CrawlProgressServer {
             if (requestUrl.pathname === "/" || requestUrl.pathname === "/index.html") {
                 res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
                 res.end(this.renderHtml());
+                return;
+            }
+
+            if (requestUrl.pathname === "/favicon.ico") {
+                const __filename = fileURLToPath(import.meta.url);
+                const __dirname = path.dirname(__filename);
+                const filePath = path.join(__dirname, "../resources/assets/logo.png");
+                const fileBuffer = readFileSync(filePath);
+                res.writeHead(200, {
+                    "Content-Type": "image/png",
+                    "Cache-Control": "public, max-age=86400",
+                });
+                res.end(fileBuffer);
+
                 return;
             }
 

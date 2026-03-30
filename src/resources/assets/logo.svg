@@ -1,0 +1,50 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Web Auditor logo</title>
+  <desc id="desc">A modern open-source logo combining a globe, audit checkmarks, and a Playwright-inspired triangular play symbol.</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="160" y1="128" x2="864" y2="896" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="272" y1="272" x2="752" y2="752" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22C55E"/>
+      <stop offset="0.5" stop-color="#14B8A6"/>
+      <stop offset="1" stop-color="#38BDF8"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="256" y1="256" x2="768" y2="768" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38BDF8"/>
+      <stop offset="1" stop-color="#22C55E"/>
+    </linearGradient>
+    <filter id="shadow" x="120" y="120" width="784" height="784" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-opacity="0.24"/>
+    </filter>
+  </defs>
+
+  <rect x="96" y="96" width="832" height="832" rx="192" fill="url(#bg)"/>
+
+  <g filter="url(#shadow)">
+    <circle cx="470" cy="460" r="238" stroke="url(#ring)" stroke-width="34"/>
+    <circle cx="470" cy="460" r="176" stroke="#E2E8F0" stroke-opacity="0.16" stroke-width="10" stroke-dasharray="14 18"/>
+
+    <path d="M470 239C396.7 239 333.3 282.7 301.4 345.5H638.6C606.7 282.7 543.3 239 470 239Z" fill="#E2E8F0" fill-opacity="0.08"/>
+    <path d="M470 681C543.3 681 606.7 637.3 638.6 574.5H301.4C333.3 637.3 396.7 681 470 681Z" fill="#E2E8F0" fill-opacity="0.08"/>
+    <path d="M294 460H646" stroke="#E2E8F0" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round"/>
+    <path d="M470 222V698" stroke="#E2E8F0" stroke-opacity="0.16" stroke-width="10" stroke-linecap="round"/>
+    <path d="M359 256C392 308 410 380 410 460C410 540 392 612 359 664" stroke="#E2E8F0" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round"/>
+    <path d="M581 256C548 308 530 380 530 460C530 540 548 612 581 664" stroke="#E2E8F0" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round"/>
+
+    <rect x="362" y="338" width="216" height="244" rx="28" fill="#F8FAFC"/>
+    <rect x="392" y="378" width="102" height="14" rx="7" fill="#CBD5E1"/>
+    <rect x="392" y="430" width="132" height="14" rx="7" fill="#CBD5E1"/>
+    <rect x="392" y="482" width="116" height="14" rx="7" fill="#CBD5E1"/>
+
+    <path d="M536 388L555 406L589 366" stroke="url(#accent)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M536 440L555 458L589 418" stroke="url(#accent)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M536 492L555 510L589 470" stroke="url(#accent)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <path d="M614 603L735 724" stroke="#94A3B8" stroke-width="34" stroke-linecap="round"/>
+    <circle cx="744" cy="733" r="62" fill="url(#accent)"/>
+    <path d="M725 698L783 733L725 768V698Z" fill="#062B22" fill-opacity="0.9"/>
+  </g>
+</svg>
