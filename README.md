@@ -51,13 +51,9 @@ The tool can be configured using [environment variables](#environment-variables)
 ## Roadmap
 
 - Enhanced reporting (aggregated dashboards)
-- CI/CD integration
 - Scheduling and automation
-- Web server to follow the audit and its report
 - Lighthouse plugin every x pages
-- Generate a HTML report with
-    - Reports summary
-    - European compatible accessibility report in french, dutch, german and english
+- European compatible accessibility report in french, dutch, german and english
 - Validate sitemap resources
 - Validate robots.txt
     - Ensure that the robots.txt has a rule to throttle the robots
@@ -72,10 +68,10 @@ The tool can be configured using [environment variables](#environment-variables)
 - Tests runner's IPs like https://ipv4.icanhazip.com/ and https://ipv6.icanhazip.com/
 - hreflang
 - Analyse text's complexity (something like [Scolarius](https://www.scolarius.com/))
-- JSON-LD structure
-    - `@context": "https://schema.org"`
+- JSON-LD structure (`@context": "https://schema.org"`)
 - Detects duplicates
 - page with Inline code
+- Information Architecture plugin
 
 ## Installing Playwright and launch an audit locally
 
