@@ -151,7 +151,7 @@ jobs:
             ${{ fromJson(needs.prepare.outputs.push) && format('*.output=type=image,name={0},push-by-digest=true,name-canonical=true,push=true', env.DOCKER_IMAGE_NAME) || '' }}
         env:
           GIT_HASH: ${{ github.sha }}
-          VERSION: ${{ (github.ref_type == 'tag' && github.ref_name) || needs.prepare.outputs.ref || '7.x-snapshot' }}
+          VERSION: ${{ (github.ref_type == 'tag' && github.ref_name) || needs.prepare.outputs.ref || '1.x-snapshot' }}
           DOCKER_IMAGE_TAG: ${{ (github.ref_type == 'tag' && github.ref_name) || needs.prepare.outputs.ref || 'snapshot' }}
 
       - # Workaround for https://github.com/actions/runner/pull/2477#issuecomment-1501003600
