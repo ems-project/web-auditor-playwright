@@ -160,7 +160,7 @@ jobs:
         run: |
           mkdir -p /tmp/metadata
 
-          digest=$(jq -r '."containerimage.digest"' <<< "${METADATA}")
+          digest=$(jq -r '."default"."containerimage.digest"' <<< "${METADATA}")
           touch "/tmp/metadata/${digest#sha256:}"
 
         env:
