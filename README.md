@@ -46,7 +46,8 @@ The tool can be configured using [environment variables](#environment-variables)
 
 - TypeScript / Node.js
 - Playwright
-- Optional integrations: axe-core, pa11y, trextract
+- sqlite3
+- Optional integrations: axe-core, pa11y, trextract, franc, exceljs, mammoth, pdfjs
 
 ## Roadmap
 
