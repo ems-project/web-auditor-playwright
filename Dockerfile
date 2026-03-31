@@ -40,7 +40,7 @@ ENV REPORT_OUTPUT_DIR="/opt/reports" \
     MAX_PAGES="50" \
     MAX_DEPTH="3" \
     CONCURRENCY="3" \
-    SAME_ORIGIN_ONLY="true" \
+    WEB_UI_HOST="0.0.0.0" \
     CHECK_EXTERNAL_LINKS="false" \
     NAV_TIMEOUT_MS="30000"
 
