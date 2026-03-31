@@ -141,7 +141,7 @@ async function main() {
     const soft500Patterns = TextUtils.parseRegexList(process.env.SOFT_500_PATTERNS);
     const dumpDir = process.env.DUMP_DIR?.trim() || null;
     const webUiEnabled = (process.env.WEB_UI_ENABLED ?? "true") === "true";
-    const webUiPortValue = process.env.WEB_UI_PORT ?? "3000";
+    const webUiPortValue = process.env.WEB_UI_PORT ?? "3030";
     const webUiPort = Number(webUiPortValue);
     if (!Number.isInteger(webUiPort) || webUiPort < 0 || webUiPort > 65535) {
         throw new Error("Invalid WEB_UI_PORT: " + webUiPortValue);
