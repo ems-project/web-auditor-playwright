@@ -59,7 +59,7 @@ export class CrawlProgressServer {
             if (requestUrl.pathname === "/favicon.ico") {
                 const __filename = fileURLToPath(import.meta.url);
                 const __dirname = path.dirname(__filename);
-                const filePath = path.join(__dirname, "../resources/assets/logo.png");
+                const filePath = path.join(__dirname, "../resources/assets/icon.png");
                 const fileBuffer = readFileSync(filePath);
                 res.writeHead(200, {
                     "Content-Type": "image/png",
