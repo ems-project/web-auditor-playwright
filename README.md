@@ -199,6 +199,7 @@ npm start
 | `IMAGE_LAZY_LOADING_ABOVE_FOLD_BUFFER_PX`   | `200`                                                            | Additional pixel buffer below the initial viewport before the `image-audit` plugin warns that an image should use `loading="lazy"`.                                                                                                                                                                                  |
 | `IMAGE_MIN_LAZY_LOADING_WIDTH_PX`           | `80`                                                             | Minimum rendered image width before the `image-audit` plugin evaluates whether lazy loading is expected.                                                                                                                                                                                                             |
 | `IMAGE_MIN_LAZY_LOADING_HEIGHT_PX`          | `80`                                                             | Minimum rendered image height before the `image-audit` plugin evaluates whether lazy loading is expected.                                                                                                                                                                                                            |
+| `IMAGE_METADATA_MAX_FILE_SIZE_BYTES`        | `20971520`                                                       | Maximum file size in bytes that `image-metadata` will parse before emitting `IMAGE_METADATA_SKIPPED_TOO_LARGE`.                                                                                                                                                                                                      |
 | `TLS_CERT_AUDIT_ONLY_START_URL`             | `true`                                                           | If set to true, audits the TLS certificate only for the start URL.                                                                                                                                                                                                                                                   |
 | `TLS_CERT_WARN_IF_EXPIRES_IN_DAYS`          | `30`                                                             | Warns when the TLS certificate expires in N days or less.                                                                                                                                                                                                                                                            |
 | `TLS_CERT_TIMEOUT_MS`                       | `10000`                                                          | Maximum time in milliseconds allowed for the TLS certificate inspection.                                                                                                                                                                                                                                             |
@@ -434,6 +435,32 @@ JPEG, PNG, GIF, BMP, and TIFF assets are often heavier than equivalent modern en
 
 Typical fix:
 Prefer AVIF or WebP when compatible with your delivery stack, or serve responsive image sources through `<picture>` and `source[type]`.
+
+### Image Metadata
+
+The `image-metadata` plugin extracts technical metadata from downloaded image files and can emit the following findings:
+
+#### `IMAGE_METADATA_SKIPPED_TOO_LARGE`
+
+Image metadata extraction was skipped because the downloaded file is larger than `IMAGE_METADATA_MAX_FILE_SIZE_BYTES`.
+
+Why it matters:
+Very large binaries are expensive to read and parse during a crawl, especially when the goal is metadata inspection rather than full media processing.
+
+Typical fix:
+Raise `IMAGE_METADATA_MAX_FILE_SIZE_BYTES` if large source files are expected, or keep the threshold low to preserve crawl throughput.
+
+#### `IMAGE_METADATA_EXTRACTION_FAILED`
+
+The file looked like a supported image, but metadata extraction failed.
+
+Why it matters:
+This usually means the file is corrupted, mislabeled, truncated, or uses a structure the parser does not recognize.
+
+Typical fix:
+Validate the downloaded asset, verify the MIME type and file integrity, or extend the parser if the format is intentionally supported in your workflow.
+
+The plugin writes extracted metadata into `report.metas` using keys such as `image_mime`, `image_format`, `image_width`, `image_height`, `image_bit_depth`, `image_color_type`, `image_progressive`, `image_animated`, and `image_exif_orientation` when available.
 
 ### Hreflang
 
