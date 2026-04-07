@@ -83,3 +83,33 @@ test("findMissingCrossLinks returns alternates without reciprocal links", () => 
     assert.equal(missing[0]?.sourceUrl, "https://example.com/fr");
     assert.equal(missing[0]?.targetUrl, "https://example.com/en");
 });
+
+test("findDuplicates detects repeated hreflang entries", () => {
+    const plugin = new HreflangPlugin();
+
+    const duplicates = callPrivateMethod<
+        [Array<{ hreflang: string; normalized: string; url: string }>],
+        Array<Record<string, unknown>>
+    >(plugin, "findDuplicates", [
+        { hreflang: "fr-be", normalized: "fr-be", url: "https://example.com/fr" },
+        { hreflang: "fr-be", normalized: "fr-be", url: "https://example.com/fr" },
+        { hreflang: "en-us", normalized: "en-us", url: "https://example.com/en" },
+    ]);
+
+    assert.equal(duplicates.length, 1);
+    assert.equal(duplicates[0]?.hreflang, "fr-be");
+});
+
+test("matchesLocale tolerates x-default", () => {
+    const plugin = new HreflangPlugin();
+
+    assert.equal(
+        callPrivateMethod<[string, string | null], boolean>(
+            plugin,
+            "matchesLocale",
+            "x-default",
+            "fr",
+        ),
+        true,
+    );
+});

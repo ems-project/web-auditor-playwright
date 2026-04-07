@@ -3,6 +3,8 @@ import type { FindingData, IPlugin, PluginPhase, ResourceContext } from "../engi
 
 type HreflangPluginOptions = {
     requireOnHtmlPages?: boolean;
+    requireXDefault?: boolean;
+    requireSelfReference?: boolean;
 };
 
 type HreflangAlternate = {
@@ -27,10 +29,14 @@ export class HreflangPlugin extends BasePlugin implements IPlugin {
     phases: PluginPhase[] = ["beforeFinally", "finally"];
 
     private readonly requireOnHtmlPages: boolean;
+    private readonly requireXDefault: boolean;
+    private readonly requireSelfReference: boolean;
 
     constructor(options: HreflangPluginOptions = {}) {
         super();
         this.requireOnHtmlPages = options.requireOnHtmlPages ?? true;
+        this.requireXDefault = options.requireXDefault ?? true;
+        this.requireSelfReference = options.requireSelfReference ?? true;
     }
 
     applies(ctx: ResourceContext): boolean {
@@ -71,9 +77,33 @@ export class HreflangPlugin extends BasePlugin implements IPlugin {
                 );
             }
 
-            const selfAlternate = alternates.find((alternate) =>
+            const duplicates = this.findDuplicates(alternates);
+            for (const duplicate of duplicates) {
+                this.registerWarning(
+                    ctx,
+                    "seo",
+                    "HREFLANG_DUPLICATE",
+                    `Duplicate hreflang entry detected for ${duplicate.hreflang}.`,
+                    duplicate,
+                );
+            }
+
+            const selfAlternates = alternates.filter((alternate) =>
                 this.sameUrl(alternate.url, currentUrl),
             );
+            if (this.requireSelfReference && selfAlternates.length === 0) {
+                this.registerWarning(
+                    ctx,
+                    "seo",
+                    "HREFLANG_SELF_REFERENCE_MISSING",
+                    "No self-referencing hreflang link found for this page.",
+                    {
+                        pageUrl: currentUrl,
+                    },
+                );
+            }
+
+            const selfAlternate = selfAlternates[0];
             if (selfAlternate && !this.matchesLocale(selfAlternate.hreflang, ctx.report.locale)) {
                 this.registerWarning(
                     ctx,
@@ -83,6 +113,21 @@ export class HreflangPlugin extends BasePlugin implements IPlugin {
                     {
                         hreflang: selfAlternate.hreflang,
                         pageLocale: ctx.report.locale ?? null,
+                        pageUrl: currentUrl,
+                    },
+                );
+            }
+
+            if (
+                this.requireXDefault &&
+                !alternates.some((alternate) => alternate.normalized === "x-default")
+            ) {
+                this.registerWarning(
+                    ctx,
+                    "seo",
+                    "HREFLANG_X_DEFAULT_MISSING",
+                    "No x-default hreflang entry found on this page.",
+                    {
                         pageUrl: currentUrl,
                     },
                 );
@@ -196,6 +241,27 @@ export class HreflangPlugin extends BasePlugin implements IPlugin {
         }
 
         return missing;
+    }
+
+    private findDuplicates(alternates: HreflangAlternate[]): FindingData[] {
+        const seen = new Map<string, string>();
+        const duplicates: FindingData[] = [];
+
+        for (const alternate of alternates) {
+            const key = `${alternate.normalized}|${alternate.url}`;
+            const existing = seen.get(key);
+            if (existing) {
+                duplicates.push({
+                    hreflang: alternate.hreflang,
+                    targetUrl: alternate.url,
+                });
+                continue;
+            }
+
+            seen.set(key, alternate.url);
+        }
+
+        return duplicates;
     }
 
     private getState(ctx: ResourceContext): HreflangState {

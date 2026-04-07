@@ -67,7 +67,6 @@ The tool can be configured using [environment variables](#environment-variables)
 - Cookie plugin (lifetime)
 - Stats by locales
 - Tests runner's IPs like https://ipv4.icanhazip.com/ and https://ipv6.icanhazip.com/
-- hreflang
 - Analyse text's complexity (something like [Scolarius](https://www.scolarius.com/))
 - JSON-LD structure (`@context": "https://schema.org"`)
 - Detects duplicates
@@ -402,6 +401,80 @@ You can find detailed explanations, examples, and remediation guidance for each 
 | performance-metrics | SLOW_PAGE_LOAD            | Slow load time      | Integrator | Optimize performance   |
 | performance-metrics | SLOW_DOM_CONTENT_LOADED   | Slow DOM ready      | Integrator | Optimize scripts       |
 | performance-metrics | PERFORMANCE_MEASURED      | Performance metrics | Integrator | Analyze                |
+
+### Hreflang
+
+The `hreflang` plugin audits alternate language declarations on HTML pages and can emit the following warnings:
+
+### `HREFLANG_MISSING`
+
+No `link[rel="alternate"][hreflang]` tags were found on the page.
+
+Why it matters:
+This usually means localized variants are not declared for search engines, which can reduce the quality of international targeting.
+
+Typical fix:
+Add `hreflang` alternate links in the page head for each language or regional variant you publish.
+
+### `HREFLANG_INVALID_CODE`
+
+A `hreflang` value uses an invalid format such as `fr_BE` instead of `fr-BE`.
+
+Why it matters:
+Search engines expect language and regional subtags to use hyphen-separated values. Invalid codes may be ignored.
+
+Typical fix:
+Use values such as `fr`, `fr-BE`, `nl-NL`, or `x-default`. Avoid underscores.
+
+### `HREFLANG_LANGUAGE_MISMATCH`
+
+The self-referencing `hreflang` value does not match the page language detected or declared by the auditor.
+
+Why it matters:
+If a page identifies itself as one language while its own `hreflang` points to another, search engines receive conflicting signals.
+
+Typical fix:
+Ensure the page language, the `lang` attribute, the textual content, and the self-referencing `hreflang` all describe the same language.
+
+### `HREFLANG_SELF_REFERENCE_MISSING`
+
+The page does not include a self-referencing `hreflang` entry pointing to its own canonical URL.
+
+Why it matters:
+Without a self-reference, the alternate set is incomplete and search engines may interpret the cluster less reliably.
+
+Typical fix:
+Add a `hreflang` alternate entry for the current page URL using the correct language or language-region code.
+
+### `HREFLANG_X_DEFAULT_MISSING`
+
+No `x-default` entry is present in the `hreflang` set.
+
+Why it matters:
+`x-default` helps define the fallback page for users whose language or region does not match the declared alternates.
+
+Typical fix:
+Add one `x-default` alternate pointing to the default or language selector version of the page.
+
+### `HREFLANG_DUPLICATE`
+
+The page declares the same `hreflang` and target URL combination more than once.
+
+Why it matters:
+Duplicate alternate declarations add noise and make the implementation harder to trust and maintain.
+
+Typical fix:
+Keep only one unique alternate declaration per `hreflang` and target URL pair.
+
+### `HREFLANG_CROSS_LINK_MISSING`
+
+A page links to an alternate language page, but the target page does not link back to the source page in its own `hreflang` set.
+
+Why it matters:
+`hreflang` relationships are expected to be reciprocal. Missing return links weaken the consistency of the alternate cluster.
+
+Typical fix:
+Ensure every alternate page declares the full cluster, including a return link to each related page.
 
 ## Contributing
 
