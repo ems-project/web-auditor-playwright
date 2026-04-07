@@ -91,7 +91,9 @@ export class TextractExtractorPlugin extends BasePlugin implements IPlugin {
 
             const text = TextUtils.normalizeText(rawText, this.maxExtractedChars);
 
-            if (!text) {
+            if (!text && mime?.startsWith("image/")) {
+                return;
+            } else if (!text) {
                 this.registerInfo(
                     ctx,
                     "content",
