@@ -567,6 +567,6 @@ export class ImageMetadataPlugin extends BasePlugin implements IPlugin {
     }
 
     isAuditPlugin(): boolean {
-        return false;
+        return true;
     }
 }
