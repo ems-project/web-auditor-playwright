@@ -14,6 +14,7 @@ import { ConsoleStatusPlugin } from "./plugins/ConsoleStatusPlugin.js";
 import { SaveReportAsJsonPlugin } from "./plugins/SaveReportAsJsonPlugin.js";
 import { SiteDumpPlugin } from "./plugins/SiteDumpPlugin.js";
 import { HtmlProcessorPlugin } from "./plugins/HtmlProcessorPlugin.js";
+import { CssAuditPlugin } from "./plugins/CssAuditPlugin.js";
 import { SeoUrlRulesPlugin } from "./plugins/SeoUrlRulesPlugin.js";
 import { SoftHttpErrorPlugin } from "./plugins/SoftHttpErrorPlugin.js";
 import { DownloaderPlugin } from "./plugins/DownloaderPlugin.js";
@@ -202,6 +203,12 @@ async function main() {
             }),
         )
         .register(new HtmlProcessorPlugin())
+        .register(
+            new CssAuditPlugin({
+                maxInlineStyleAttributes: Number(process.env.CSS_MAX_INLINE_STYLE_ATTRIBUTES ?? 25),
+                maxStyleTags: Number(process.env.CSS_MAX_STYLE_TAGS ?? 5),
+            }),
+        )
         .register(
             new SeoUrlRulesPlugin({
                 maxUrlLength: Number(process.env.MAX_URL_LENGTH ?? 120),
