@@ -15,6 +15,7 @@ import { SaveReportAsJsonPlugin } from "./plugins/SaveReportAsJsonPlugin.js";
 import { SiteDumpPlugin } from "./plugins/SiteDumpPlugin.js";
 import { HtmlProcessorPlugin } from "./plugins/HtmlProcessorPlugin.js";
 import { CssAuditPlugin } from "./plugins/CssAuditPlugin.js";
+import { ImagePlugin } from "./plugins/ImagePlugin.js";
 import { SeoUrlRulesPlugin } from "./plugins/SeoUrlRulesPlugin.js";
 import { SoftHttpErrorPlugin } from "./plugins/SoftHttpErrorPlugin.js";
 import { DownloaderPlugin } from "./plugins/DownloaderPlugin.js";
@@ -208,6 +209,15 @@ async function main() {
             new CssAuditPlugin({
                 maxInlineStyleAttributes: Number(process.env.CSS_MAX_INLINE_STYLE_ATTRIBUTES ?? 0),
                 maxStyleTags: Number(process.env.CSS_MAX_STYLE_TAGS ?? 0),
+            }),
+        )
+        .register(
+            new ImagePlugin({
+                lazyLoadingAboveFoldBufferPx: Number(
+                    process.env.IMAGE_LAZY_LOADING_ABOVE_FOLD_BUFFER_PX ?? 200,
+                ),
+                minLazyLoadingWidthPx: Number(process.env.IMAGE_MIN_LAZY_LOADING_WIDTH_PX ?? 80),
+                minLazyLoadingHeightPx: Number(process.env.IMAGE_MIN_LAZY_LOADING_HEIGHT_PX ?? 80),
             }),
         )
         .register(
