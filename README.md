@@ -459,7 +459,17 @@ This usually means the file is corrupted, mislabeled, truncated, or uses a struc
 Typical fix:
 Validate the downloaded asset, verify the MIME type and file integrity, or extend the parser if the format is intentionally supported in your workflow.
 
-The plugin writes extracted metadata into `report.metas` using keys such as `image_mime`, `image_format`, `image_width`, `image_height`, `image_bit_depth`, `image_color_type`, `image_progressive`, `image_animated`, and `image_exif_orientation` when available.
+#### `IMAGE_COPYRIGHT_MISSING`
+
+The image metadata does not contain copyright information.
+
+Why it matters:
+Missing copyright metadata weakens ownership traceability and can make downstream reuse, legal review, or DAM workflows harder to enforce.
+
+Typical fix:
+Write copyright information into the source asset metadata before publication, or explicitly exempt assets that are not expected to carry rights metadata.
+
+The plugin writes extracted metadata into `report.metas` using keys such as `image_mime`, `image_format`, `image_width`, `image_height`, `image_bit_depth`, `image_color_type`, `image_progressive`, `image_animated`, `image_exif_orientation`, and `image_copyright` when available.
 
 ### Hreflang
 

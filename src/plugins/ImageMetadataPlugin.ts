@@ -17,6 +17,7 @@ type ImageMetadata = {
     progressive?: boolean;
     animated?: boolean;
     exifOrientation?: number;
+    copyright?: string;
 };
 
 export class ImageMetadataPlugin extends BasePlugin implements IPlugin {
@@ -61,6 +62,20 @@ export class ImageMetadataPlugin extends BasePlugin implements IPlugin {
             ctx.report.metas = this.mergeMetas(ctx.report.metas ?? [], metadata, mime);
             ctx.report.message = `Image metadata extracted from ${mime}.`;
             ctx.report.title ??= ctx.downloaded?.suggestedFilename ?? null;
+
+            if (!metadata.copyright?.trim()) {
+                this.registerWarning(
+                    ctx,
+                    "compliance",
+                    "IMAGE_METADATA_COPYRIGHT_MISSING",
+                    "Image metadata does not contain copyright information.",
+                    {
+                        mime,
+                        format: metadata.format,
+                    },
+                );
+            }
+
             this.register(ctx);
         } catch (error) {
             this.registerWarning(
@@ -113,6 +128,9 @@ export class ImageMetadataPlugin extends BasePlugin implements IPlugin {
                 value: `${metadata.exifOrientation}`,
             });
         }
+        if (metadata.copyright?.trim()) {
+            incoming.push({ key: "image_copyright", value: metadata.copyright.trim() });
+        }
 
         const map = new Map(existing.map((item) => [item.key, item]));
         for (const item of incoming) {
@@ -146,13 +164,48 @@ export class ImageMetadataPlugin extends BasePlugin implements IPlugin {
             throw new Error("Invalid PNG file signature");
         }
 
-        const colorType = buffer.readUInt8(25);
+        let offset = 8;
+        let width: number | undefined;
+        let height: number | undefined;
+        let bitDepth: number | undefined;
+        let colorType: string | undefined;
+        let copyright: string | undefined;
+
+        while (offset + 8 <= buffer.length) {
+            const chunkLength = buffer.readUInt32BE(offset);
+            const chunkType = buffer.subarray(offset + 4, offset + 8).toString("ascii");
+            const chunkDataStart = offset + 8;
+            const chunkDataEnd = chunkDataStart + chunkLength;
+            if (chunkDataEnd + 4 > buffer.length) {
+                throw new Error("Invalid PNG chunk length");
+            }
+
+            const chunk = buffer.subarray(chunkDataStart, chunkDataEnd);
+            if (chunkType === "IHDR") {
+                width = chunk.readUInt32BE(0);
+                height = chunk.readUInt32BE(4);
+                bitDepth = chunk.readUInt8(8);
+                colorType = this.describePngColorType(chunk.readUInt8(9));
+            } else if (chunkType === "tEXt" || chunkType === "iTXt") {
+                const parsed = this.parsePngTextChunk(chunkType, chunk);
+                if (parsed && this.isCopyrightKeyword(parsed.keyword) && parsed.value.trim()) {
+                    copyright = parsed.value.trim();
+                }
+            }
+
+            offset = chunkDataEnd + 4;
+            if (chunkType === "IEND") {
+                break;
+            }
+        }
+
         return {
             format: "png",
-            width: buffer.readUInt32BE(16),
-            height: buffer.readUInt32BE(20),
-            bitDepth: buffer.readUInt8(24),
-            colorType: this.describePngColorType(colorType),
+            width,
+            height,
+            bitDepth,
+            colorType,
+            copyright,
         };
     }
 
@@ -194,6 +247,7 @@ export class ImageMetadataPlugin extends BasePlugin implements IPlugin {
 
         let offset = 2;
         let orientation: number | undefined;
+        let copyright: string | undefined;
 
         while (offset + 3 < buffer.length) {
             if (buffer[offset] !== 0xff) {
@@ -221,10 +275,9 @@ export class ImageMetadataPlugin extends BasePlugin implements IPlugin {
             const segment = buffer.subarray(segmentStart, segmentEnd);
 
             if (marker === 0xe1) {
-                const parsedOrientation = this.parseExifOrientation(segment);
-                if (typeof parsedOrientation === "number") {
-                    orientation = parsedOrientation;
-                }
+                const exif = this.parseExifMetadata(segment);
+                orientation ??= exif.orientation;
+                copyright ??= exif.copyright;
             }
 
             if (this.isJpegStartOfFrame(marker)) {
@@ -235,6 +288,7 @@ export class ImageMetadataPlugin extends BasePlugin implements IPlugin {
                     bitDepth: buffer.readUInt8(segmentStart),
                     progressive: marker === 0xc2,
                     exifOrientation: orientation,
+                    copyright,
                 };
             }
 
@@ -317,11 +371,57 @@ export class ImageMetadataPlugin extends BasePlugin implements IPlugin {
         const viewBoxMatch = svgTag.match(
             /viewBox\s*=\s*["'][^"']*?(-?\d*\.?\d+)\s+(-?\d*\.?\d+)\s+(-?\d*\.?\d+)\s+(-?\d*\.?\d+)["']/i,
         );
+        const copyright = this.extractSvgCopyright(text);
 
         return {
             format: "svg",
             width: width ?? (viewBoxMatch ? Number(viewBoxMatch[3]) : undefined),
             height: height ?? (viewBoxMatch ? Number(viewBoxMatch[4]) : undefined),
+            copyright,
+        };
+    }
+
+    private parsePngTextChunk(
+        chunkType: string,
+        chunk: Buffer,
+    ): { keyword: string; value: string } | null {
+        if (chunkType === "tEXt") {
+            const separator = chunk.indexOf(0);
+            if (separator <= 0) {
+                return null;
+            }
+
+            return {
+                keyword: chunk.subarray(0, separator).toString("latin1"),
+                value: chunk.subarray(separator + 1).toString("latin1"),
+            };
+        }
+
+        const firstSeparator = chunk.indexOf(0);
+        if (firstSeparator <= 0 || firstSeparator + 5 > chunk.length) {
+            return null;
+        }
+
+        const keyword = chunk.subarray(0, firstSeparator).toString("utf8");
+        const compressionFlag = chunk[firstSeparator + 1];
+        const languageStart = firstSeparator + 3;
+        const languageEnd = chunk.indexOf(0, languageStart);
+        if (languageEnd === -1) {
+            return null;
+        }
+
+        const translatedEnd = chunk.indexOf(0, languageEnd + 1);
+        if (translatedEnd === -1) {
+            return null;
+        }
+
+        if (compressionFlag !== 0) {
+            return null;
+        }
+
+        return {
+            keyword,
+            value: chunk.subarray(translatedEnd + 1).toString("utf8"),
         };
     }
 
@@ -336,19 +436,42 @@ export class ImageMetadataPlugin extends BasePlugin implements IPlugin {
         return Number.isFinite(numeric) ? numeric : undefined;
     }
 
-    private parseExifOrientation(segment: Buffer): number | undefined {
+    private extractSvgCopyright(text: string): string | undefined {
+        const patterns = [
+            /<dc:rights[^>]*>[\s\S]*?<rdf:li[^>]*>([\s\S]*?)<\/rdf:li>[\s\S]*?<\/dc:rights>/i,
+            /<cc:license[^>]*>([\s\S]*?)<\/cc:license>/i,
+            /<metadata[^>]*>[\s\S]*?copyright([\s\S]*?)<\/metadata>/i,
+        ];
+
+        for (const pattern of patterns) {
+            const value = pattern
+                .exec(text)?.[1]
+                ?.replace(/<[^>]+>/g, " ")
+                .trim();
+            if (value) {
+                return value;
+            }
+        }
+
+        return undefined;
+    }
+
+    private parseExifMetadata(segment: Buffer): {
+        orientation?: number;
+        copyright?: string;
+    } {
         if (segment.length < 14 || segment.subarray(0, 6).toString("ascii") !== "Exif\0\0") {
-            return undefined;
+            return {};
         }
 
         const tiff = segment.subarray(6);
         if (tiff.length < 8) {
-            return undefined;
+            return {};
         }
 
         const byteOrder = tiff.subarray(0, 2).toString("ascii");
         if (byteOrder !== "II" && byteOrder !== "MM") {
-            return undefined;
+            return {};
         }
 
         const littleEndian = byteOrder === "II";
@@ -358,15 +481,18 @@ export class ImageMetadataPlugin extends BasePlugin implements IPlugin {
             littleEndian ? tiff.readUInt32LE(offset) : tiff.readUInt32BE(offset);
 
         if (readUInt16(2) !== 0x2a) {
-            return undefined;
+            return {};
         }
 
         const ifdOffset = readUInt32(4);
         if (ifdOffset + 2 > tiff.length) {
-            return undefined;
+            return {};
         }
 
         const entryCount = readUInt16(ifdOffset);
+        let orientation: number | undefined;
+        let copyright: string | undefined;
+
         for (let index = 0; index < entryCount; index += 1) {
             const entryOffset = ifdOffset + 2 + index * 12;
             if (entryOffset + 12 > tiff.length) {
@@ -374,28 +500,53 @@ export class ImageMetadataPlugin extends BasePlugin implements IPlugin {
             }
 
             const tag = readUInt16(entryOffset);
-            if (tag !== 0x0112) {
-                continue;
-            }
-
             const type = readUInt16(entryOffset + 2);
             const count = readUInt32(entryOffset + 4);
-            if (type !== 3 || count < 1) {
-                return undefined;
+
+            if (tag === 0x0112 && type === 3 && count >= 1) {
+                orientation = littleEndian
+                    ? tiff.readUInt16LE(entryOffset + 8)
+                    : tiff.readUInt16BE(entryOffset + 8);
             }
 
-            return littleEndian
-                ? tiff.readUInt16LE(entryOffset + 8)
-                : tiff.readUInt16BE(entryOffset + 8);
+            if (tag === 0x8298 && type === 2 && count > 0) {
+                copyright = this.readExifAsciiValue(tiff, entryOffset + 8, count, littleEndian);
+            }
         }
 
-        return undefined;
+        return { orientation, copyright: copyright?.trim() || undefined };
+    }
+
+    private readExifAsciiValue(
+        tiff: Buffer,
+        valueOffset: number,
+        count: number,
+        littleEndian: boolean,
+    ): string | undefined {
+        const dataOffset =
+            count <= 4
+                ? valueOffset
+                : littleEndian
+                  ? tiff.readUInt32LE(valueOffset)
+                  : tiff.readUInt32BE(valueOffset);
+
+        const endOffset = dataOffset + count;
+        if (dataOffset < 0 || endOffset > tiff.length) {
+            return undefined;
+        }
+
+        return tiff.subarray(dataOffset, endOffset).toString("latin1").replace(/\0+$/, "");
     }
 
     private isJpegStartOfFrame(marker: number): boolean {
         return [
             0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf,
         ].includes(marker);
+    }
+
+    private isCopyrightKeyword(keyword: string): boolean {
+        const normalized = keyword.trim().toLowerCase();
+        return normalized === "copyright" || normalized === "rights";
     }
 
     private describePngColorType(value: number): string {
