@@ -14,6 +14,7 @@ import { ConsoleStatusPlugin } from "./plugins/ConsoleStatusPlugin.js";
 import { SaveReportAsJsonPlugin } from "./plugins/SaveReportAsJsonPlugin.js";
 import { SiteDumpPlugin } from "./plugins/SiteDumpPlugin.js";
 import { HtmlProcessorPlugin } from "./plugins/HtmlProcessorPlugin.js";
+import { CssAuditPlugin } from "./plugins/CssAuditPlugin.js";
 import { SeoUrlRulesPlugin } from "./plugins/SeoUrlRulesPlugin.js";
 import { SoftHttpErrorPlugin } from "./plugins/SoftHttpErrorPlugin.js";
 import { DownloaderPlugin } from "./plugins/DownloaderPlugin.js";
@@ -24,6 +25,7 @@ import { DocxExtractorPlugin } from "./plugins/DocxExtractorPlugin.js";
 import { TextractExtractorPlugin } from "./plugins/TextractExtractorPlugin.js";
 import { SecurityHeadersPlugin } from "./plugins/SecurityHeadersPlugin.js";
 import { LanguageDetectionPlugin } from "./plugins/LanguageDetectionPlugin.js";
+import { HreflangPlugin } from "./plugins/HreflangPlugin.js";
 import { StandardUrlsAuditPlugin } from "./plugins/StandardUrlsAuditPlugin.js";
 import { ConsolePlugin } from "./plugins/ConsolePlugin.js";
 import { PdfAccessibilityPlugin } from "./plugins/PdfAccessibilityPlugin.js";
@@ -203,6 +205,12 @@ async function main() {
         )
         .register(new HtmlProcessorPlugin())
         .register(
+            new CssAuditPlugin({
+                maxInlineStyleAttributes: Number(process.env.CSS_MAX_INLINE_STYLE_ATTRIBUTES ?? 0),
+                maxStyleTags: Number(process.env.CSS_MAX_STYLE_TAGS ?? 0),
+            }),
+        )
+        .register(
             new SeoUrlRulesPlugin({
                 maxUrlLength: Number(process.env.MAX_URL_LENGTH ?? 120),
             }),
@@ -296,6 +304,7 @@ async function main() {
                 overwriteExistingLocale: process.env.LANGUAGE_DETECTION_OVERWRITE === "true",
             }),
         )
+        .register(new HreflangPlugin())
         .register(new StandardUrlsAuditPlugin())
         .register(new CleanDownloadedPlugin());
 
