@@ -35,6 +35,7 @@ import { PerformanceMetricsPlugin } from "./plugins/PerformanceMetricsPlugin.js"
 import { TlsCertificatePlugin } from "./plugins/TlsCertificatePlugin.js";
 import { IpSupportPlugin } from "./plugins/IpSupportPlugin.js";
 import { TextUtils } from "./utils/TextUtils.js";
+import { fetchPublicIpAddresses } from "./utils/PublicIpResolver.js";
 import { XlsxExporter } from "./reporting/XlsxExporter.js";
 import { Report } from "./engine/types.js";
 import { buildCrawlCompletionSummary } from "./engine/CrawlCompletionSummary.js";
@@ -391,6 +392,12 @@ async function main() {
     }
     const endedAt = new Date();
     const durationMs = endedAt.getTime() - state.startedAt.getTime();
+    const publicIpAddresses = await fetchPublicIpAddresses({
+        ipv4Url: process.env.CLIENT_PUBLIC_IPV4_URL ?? "https://ipv4.icanhazip.com/",
+        ipv6Url: process.env.CLIENT_PUBLIC_IPV6_URL ?? "https://ipv6.icanhazip.com/",
+        timeoutMs: Number(process.env.CLIENT_PUBLIC_IP_TIMEOUT_MS ?? 5000),
+    });
+
     const auditStore = new AuditStore(path.join(reportOutputDir, websiteId, "audit.db"));
     const runId = Number(state.any["runId"]);
     const issues = auditStore
@@ -438,6 +445,16 @@ async function main() {
                 key: "stopRequested",
                 label: "Stop Requested",
                 value: state.stopRequested,
+            },
+            {
+                key: "clientPublicIpv4",
+                label: "Client Public IPv4",
+                value: publicIpAddresses.ipv4 ?? "unavailable",
+            },
+            {
+                key: "clientPublicIpv6",
+                label: "Client Public IPv6",
+                value: publicIpAddresses.ipv6 ?? "unavailable",
             },
         ],
     };
