@@ -25,6 +25,7 @@ import { DocxExtractorPlugin } from "./plugins/DocxExtractorPlugin.js";
 import { TextractExtractorPlugin } from "./plugins/TextractExtractorPlugin.js";
 import { SecurityHeadersPlugin } from "./plugins/SecurityHeadersPlugin.js";
 import { LanguageDetectionPlugin } from "./plugins/LanguageDetectionPlugin.js";
+import { HreflangPlugin } from "./plugins/HreflangPlugin.js";
 import { StandardUrlsAuditPlugin } from "./plugins/StandardUrlsAuditPlugin.js";
 import { ConsolePlugin } from "./plugins/ConsolePlugin.js";
 import { PdfAccessibilityPlugin } from "./plugins/PdfAccessibilityPlugin.js";
@@ -303,6 +304,7 @@ async function main() {
                 overwriteExistingLocale: process.env.LANGUAGE_DETECTION_OVERWRITE === "true",
             }),
         )
+        .register(new HreflangPlugin())
         .register(new StandardUrlsAuditPlugin())
         .register(new CleanDownloadedPlugin());
 
