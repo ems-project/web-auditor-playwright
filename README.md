@@ -51,7 +51,6 @@ The tool can be configured using [environment variables](#environment-variables)
 
 ## Roadmap
 
-- Enhanced reporting (aggregated dashboards)
 - Scheduling and automation
 - Lighthouse plugin every x pages
 - European compatible accessibility report in french, dutch, german and english
@@ -60,9 +59,6 @@ The tool can be configured using [environment variables](#environment-variables)
     - Ensure that the robots.txt has a rule to throttle the robots
     - Ensure that all page's CSS are not blocked by robots.txt's rules
 - Images metadata plugin
-- Images integration in HTML pages plugin
-    - Non optimized images
-    - Lazy loading
 - Empty anchor links
 - Cookie plugin (lifetime)
 - Stats by locales
