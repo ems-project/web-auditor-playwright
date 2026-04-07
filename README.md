@@ -196,6 +196,9 @@ npm start
 | `PERF_SLOW_DOMCONTENTLOADED_THRESHOLD_MS`   | `1500`                                                           | DOMContentLoaded threshold in milliseconds above which the page is reported as slow.                                                                                                                                                                                                                                 |
 | `CSS_MAX_INLINE_STYLE_ATTRIBUTES`           | `0`                                                              | Warns when a page contains more inline `style` attributes than this threshold.                                                                                                                                                                                                                                       |
 | `CSS_MAX_STYLE_TAGS`                        | `0`                                                              | Warns when a page contains more `<style>` tags than this threshold.                                                                                                                                                                                                                                                  |
+| `IMAGE_LAZY_LOADING_ABOVE_FOLD_BUFFER_PX`   | `200`                                                            | Additional pixel buffer below the initial viewport before the `image-audit` plugin warns that an image should use `loading="lazy"`.                                                                                                                                                                                  |
+| `IMAGE_MIN_LAZY_LOADING_WIDTH_PX`           | `80`                                                             | Minimum rendered image width before the `image-audit` plugin evaluates whether lazy loading is expected.                                                                                                                                                                                                             |
+| `IMAGE_MIN_LAZY_LOADING_HEIGHT_PX`          | `80`                                                             | Minimum rendered image height before the `image-audit` plugin evaluates whether lazy loading is expected.                                                                                                                                                                                                            |
 | `TLS_CERT_AUDIT_ONLY_START_URL`             | `true`                                                           | If set to true, audits the TLS certificate only for the start URL.                                                                                                                                                                                                                                                   |
 | `TLS_CERT_WARN_IF_EXPIRES_IN_DAYS`          | `30`                                                             | Warns when the TLS certificate expires in N days or less.                                                                                                                                                                                                                                                            |
 | `TLS_CERT_TIMEOUT_MS`                       | `10000`                                                          | Maximum time in milliseconds allowed for the TLS certificate inspection.                                                                                                                                                                                                                                             |
@@ -397,6 +400,40 @@ You can find detailed explanations, examples, and remediation guidance for each 
 | performance-metrics | SLOW_PAGE_LOAD            | Slow load time      | Integrator | Optimize performance   |
 | performance-metrics | SLOW_DOM_CONTENT_LOADED   | Slow DOM ready      | Integrator | Optimize scripts       |
 | performance-metrics | PERFORMANCE_MEASURED      | Performance metrics | Integrator | Analyze                |
+
+### Image Audit
+
+The `image-audit` plugin inspects HTML `<img>` usage and emits the following performance-oriented findings:
+
+#### `IMAGE_MISSING_LAZY_LOADING`
+
+A below-the-fold image does not use `loading="lazy"`.
+
+Why it matters:
+Images that are initially outside the viewport may still be fetched eagerly, which increases network contention and slows down meaningful rendering.
+
+Typical fix:
+Add `loading="lazy"` to non-critical images rendered below the fold, or adjust the image plugin thresholds if the page has a justified eager-loading strategy.
+
+#### `IMAGE_MISSING_DIMENSIONS`
+
+An image is rendered without explicit `width` and/or `height` attributes.
+
+Why it matters:
+Missing intrinsic dimensions can contribute to layout shifts during page load, especially when image assets load after text and surrounding components.
+
+Typical fix:
+Set explicit `width` and `height` attributes matching the image ratio, or render the image through a component that reserves the correct layout space.
+
+#### `IMAGE_NON_OPTIMIZED_FORMAT`
+
+An image uses a legacy raster format without an obvious modern alternative such as AVIF or WebP.
+
+Why it matters:
+JPEG, PNG, GIF, BMP, and TIFF assets are often heavier than equivalent modern encodings, especially when no responsive `<picture>` source is provided.
+
+Typical fix:
+Prefer AVIF or WebP when compatible with your delivery stack, or serve responsive image sources through `<picture>` and `source[type]`.
 
 ### Hreflang
 
