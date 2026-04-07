@@ -205,8 +205,8 @@ async function main() {
         .register(new HtmlProcessorPlugin())
         .register(
             new CssAuditPlugin({
-                maxInlineStyleAttributes: Number(process.env.CSS_MAX_INLINE_STYLE_ATTRIBUTES ?? 25),
-                maxStyleTags: Number(process.env.CSS_MAX_STYLE_TAGS ?? 5),
+                maxInlineStyleAttributes: Number(process.env.CSS_MAX_INLINE_STYLE_ATTRIBUTES ?? 0),
+                maxStyleTags: Number(process.env.CSS_MAX_STYLE_TAGS ?? 0),
             }),
         )
         .register(
