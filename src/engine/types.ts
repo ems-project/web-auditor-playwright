@@ -188,6 +188,7 @@ export type FindingCode =
     | "URL_TOO_LONG"
     | "URL_SPECIAL_CHARACTERS"
     | "URL_SPACE"
+    // HREFLANG
     | "HREFLANG_MISSING"
     | "HREFLANG_INVALID_CODE"
     | "HREFLANG_LANGUAGE_MISMATCH"
