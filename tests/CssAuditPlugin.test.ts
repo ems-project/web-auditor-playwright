@@ -119,3 +119,30 @@ test("buildInlineCssIssues stays silent when counts are within thresholds", () =
 
     assert.deepEqual(issues, []);
 });
+
+test("buildSmoothScrollIssues warns when smooth scrolling rules are detected", () => {
+    const plugin = createPlugin();
+
+    const issues = callPrivateMethod<
+        [
+            {
+                smoothScrollRuleCount: number;
+                inlineStyleAttributeCount: number;
+                styleTagCount: number;
+                stylesheets: StylesheetRef[];
+            },
+        ],
+        CssIssue[]
+    >(plugin, "buildSmoothScrollIssues", {
+        smoothScrollRuleCount: 1,
+        inlineStyleAttributeCount: 0,
+        styleTagCount: 0,
+        stylesheets: [],
+    });
+
+    assert.deepEqual(
+        issues.map((issue) => issue.code),
+        ["CSS_SMOOTH_SCROLL_VALIDATION_RISK"],
+    );
+    assert.equal(issues[0].message, "Smooth scrolling may interfere with form validation UX.");
+});

@@ -36,6 +36,7 @@ type CssDomMetrics = {
     stylesheets: StylesheetRef[];
     inlineStyleAttributeCount: number;
     styleTagCount: number;
+    smoothScrollRuleCount: number;
 };
 
 type CssIssue = {
@@ -90,6 +91,7 @@ export class CssAuditPlugin extends BasePlugin implements IPlugin {
             const issues = [
                 ...this.buildStylesheetNetworkIssues(metrics.stylesheets, pageState),
                 ...this.buildInlineCssIssues(metrics),
+                ...this.buildSmoothScrollIssues(metrics),
             ];
 
             for (const issue of issues) {
@@ -137,10 +139,46 @@ export class CssAuditPlugin extends BasePlugin implements IPlugin {
                 };
             });
 
+            const hasInlineSmoothScroll = Array.from(
+                document.querySelectorAll<HTMLElement>("[style]"),
+            ).some((element) => element.style.scrollBehavior === "smooth");
+
+            const countSmoothScrollRules = (rules: CSSRuleList | undefined): number => {
+                if (!rules) {
+                    return 0;
+                }
+
+                let total = 0;
+                for (const rule of Array.from(rules)) {
+                    if (rule instanceof CSSStyleRule && rule.style.scrollBehavior === "smooth") {
+                        total += 1;
+                        continue;
+                    }
+
+                    const nestedRules = (rule as CSSRule & { cssRules?: CSSRuleList }).cssRules;
+                    if (nestedRules) {
+                        total += countSmoothScrollRules(nestedRules);
+                    }
+                }
+
+                return total;
+            };
+
+            let stylesheetSmoothScrollRules = 0;
+            for (const stylesheet of Array.from(document.styleSheets)) {
+                try {
+                    stylesheetSmoothScrollRules += countSmoothScrollRules(stylesheet.cssRules);
+                } catch {
+                    // Cross-origin stylesheets may not expose cssRules.
+                }
+            }
+
             return {
                 stylesheets,
                 inlineStyleAttributeCount: document.querySelectorAll("[style]").length,
                 styleTagCount: document.querySelectorAll("style").length,
+                smoothScrollRuleCount:
+                    stylesheetSmoothScrollRules + (hasInlineSmoothScroll ? 1 : 0),
             };
         });
     }
@@ -234,6 +272,24 @@ export class CssAuditPlugin extends BasePlugin implements IPlugin {
         }
 
         return issues;
+    }
+
+    private buildSmoothScrollIssues(metrics: CssDomMetrics): CssIssue[] {
+        if (metrics.smoothScrollRuleCount === 0) {
+            return [];
+        }
+
+        return [
+            {
+                severity: "warning",
+                category: "html",
+                code: "CSS_SMOOTH_SCROLL_VALIDATION_RISK",
+                message: "Smooth scrolling may interfere with form validation UX.",
+                data: {
+                    count: metrics.smoothScrollRuleCount,
+                },
+            },
+        ];
     }
 
     private getPageState(page: Page): PageCssState {
