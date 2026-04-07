@@ -58,7 +58,6 @@ The tool can be configured using [environment variables](#environment-variables)
 - Validate robots.txt
     - Ensure that the robots.txt has a rule to throttle the robots
     - Ensure that all page's CSS are not blocked by robots.txt's rules
-- Images metadata plugin
 - Empty anchor links
 - Cookie plugin (lifetime)
 - Stats by locales
