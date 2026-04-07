@@ -406,7 +406,7 @@ You can find detailed explanations, examples, and remediation guidance for each 
 
 The `hreflang` plugin audits alternate language declarations on HTML pages and can emit the following warnings:
 
-### `HREFLANG_MISSING`
+#### `HREFLANG_MISSING`
 
 No `link[rel="alternate"][hreflang]` tags were found on the page.
 
@@ -416,7 +416,7 @@ This usually means localized variants are not declared for search engines, which
 Typical fix:
 Add `hreflang` alternate links in the page head for each language or regional variant you publish.
 
-### `HREFLANG_INVALID_CODE`
+#### `HREFLANG_INVALID_CODE`
 
 A `hreflang` value uses an invalid format such as `fr_BE` instead of `fr-BE`.
 
@@ -426,7 +426,7 @@ Search engines expect language and regional subtags to use hyphen-separated valu
 Typical fix:
 Use values such as `fr`, `fr-BE`, `nl-NL`, or `x-default`. Avoid underscores.
 
-### `HREFLANG_LANGUAGE_MISMATCH`
+#### `HREFLANG_LANGUAGE_MISMATCH`
 
 The self-referencing `hreflang` value does not match the page language detected or declared by the auditor.
 
@@ -436,7 +436,7 @@ If a page identifies itself as one language while its own `hreflang` points to a
 Typical fix:
 Ensure the page language, the `lang` attribute, the textual content, and the self-referencing `hreflang` all describe the same language.
 
-### `HREFLANG_SELF_REFERENCE_MISSING`
+#### `HREFLANG_SELF_REFERENCE_MISSING`
 
 The page does not include a self-referencing `hreflang` entry pointing to its own canonical URL.
 
@@ -446,7 +446,7 @@ Without a self-reference, the alternate set is incomplete and search engines may
 Typical fix:
 Add a `hreflang` alternate entry for the current page URL using the correct language or language-region code.
 
-### `HREFLANG_X_DEFAULT_MISSING`
+#### `HREFLANG_X_DEFAULT_MISSING`
 
 No `x-default` entry is present in the `hreflang` set.
 
@@ -456,7 +456,7 @@ Why it matters:
 Typical fix:
 Add one `x-default` alternate pointing to the default or language selector version of the page.
 
-### `HREFLANG_DUPLICATE`
+#### `HREFLANG_DUPLICATE`
 
 The page declares the same `hreflang` and target URL combination more than once.
 
@@ -466,7 +466,7 @@ Duplicate alternate declarations add noise and make the implementation harder to
 Typical fix:
 Keep only one unique alternate declaration per `hreflang` and target URL pair.
 
-### `HREFLANG_CROSS_LINK_MISSING`
+#### `HREFLANG_CROSS_LINK_MISSING`
 
 A page links to an alternate language page, but the target page does not link back to the source page in its own `hreflang` set.
 
@@ -475,6 +475,70 @@ Why it matters:
 
 Typical fix:
 Ensure every alternate page declares the full cluster, including a return link to each related page.
+
+### CSS Audit Warnings
+
+The `css-audit` plugin can emit the following warnings and errors:
+
+#### `STYLESHEET_MISSING_HREF`
+
+A stylesheet link was detected without an `href` attribute.
+
+Why it matters:
+The browser cannot load the stylesheet resource if the target URL is missing.
+
+Typical fix:
+Add a valid `href` to the `link rel="stylesheet"` tag or remove the broken tag.
+
+#### `STYLESHEET_HTTP_ERROR`
+
+A stylesheet request completed with an HTTP error status such as `404` or `500`.
+
+Why it matters:
+The page may render without the expected CSS, which can break layout, readability, or interaction behavior.
+
+Typical fix:
+Restore the missing stylesheet, fix the URL, or correct the server-side error on the CSS asset.
+
+#### `STYLESHEET_REQUEST_FAILED`
+
+A stylesheet request failed before a valid HTTP response was received.
+
+Why it matters:
+This often indicates a network error, blocked request, invalid URL, or browser-level loading failure.
+
+Typical fix:
+Check the stylesheet URL, browser console/network logs, CSP rules, and any request blocking or redirect issues.
+
+#### `INLINE_STYLE_ATTRIBUTES_EXCESSIVE`
+
+The page contains more inline `style` attributes than allowed by `CSS_MAX_INLINE_STYLE_ATTRIBUTES`.
+
+Why it matters:
+Excessive inline styling usually makes front-end code harder to maintain and reduces style reuse and consistency.
+
+Typical fix:
+Move repeated inline styles into shared CSS classes or external stylesheets, or adjust the threshold if the page has a justified exception.
+
+#### `STYLE_TAGS_EXCESSIVE`
+
+The page contains more `<style>` tags than allowed by `CSS_MAX_STYLE_TAGS`.
+
+Why it matters:
+A high number of style blocks often signals fragmented CSS generation, duplicated styles, or weak asset consolidation.
+
+Typical fix:
+Merge redundant style blocks, move page-level CSS into bundled stylesheets, or raise the threshold only when the platform legitimately injects scoped styles.
+
+#### `CSS_SMOOTH_SCROLL_VALIDATION_RISK`
+
+The page contains a `scroll-behavior: smooth` rule.
+
+Why it matters:
+Smooth scrolling may interfere with form validation UX, especially when scripts scroll users to invalid fields or error summaries.
+
+Typical fix:
+Remove or scope `scroll-behavior: smooth` where form validation flows rely on immediate focus and positioning, or explicitly disable smooth scrolling in those contexts.
 
 ## Contributing
 
