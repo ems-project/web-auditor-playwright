@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
     buildSimplifiedAuditViewModel,
+    parseSimplifiedAuditLocales,
     renderSimplifiedAuditPage,
 } from "../src/engine/SimplifiedAuditPage.js";
 
@@ -82,4 +83,10 @@ test("buildSimplifiedAuditViewModel scopes the summary to accessibility issues o
     assert.equal(model.groupedFindingCount, 1);
     assert.equal(model.statusLabel, "Partially compliant");
     assert.equal(model.findings[0]?.code, "color-contrast");
+});
+
+test("parseSimplifiedAuditLocales filters invalid locales and falls back to defaults", () => {
+    assert.deepEqual(parseSimplifiedAuditLocales("de,fr,xx,de"), ["de", "fr"]);
+    assert.deepEqual(parseSimplifiedAuditLocales("xx,yy"), ["fr", "nl", "de", "en"]);
+    assert.deepEqual(parseSimplifiedAuditLocales(undefined), ["fr", "nl", "de", "en"]);
 });

@@ -1,0 +1,87 @@
+{
+    "htmlLang": "de",
+    "pageTitle": "Vereinfachter Auditbericht",
+    "lead": "Kompakte Fassung für die Veröffentlichung im CMS auf Basis von EN 301 549-orientierten Barrierefreiheitsbefunden aus Web Auditor.",
+    "copyButton": "HTML-Inhalt kopieren",
+    "copySuccess": "Der HTML-Inhalt wurde in die Zwischenablage kopiert.",
+    "copyError": "Das Kopieren ist fehlgeschlagen. Bitte die Browserberechtigungen prüfen.",
+    "generatedNotice": "Diese Seite wird automatisch erzeugt und muss vor der Veröffentlichung geprüft werden.",
+    "sectionWhy": "1. Warum erhalten Sie diesen Bericht?",
+    "whyParagraphs": [
+        "Diese Seite bietet eine vereinfachte Zusammenfassung der Barrierefreiheitsbefunde, die während des Audits der Website festgestellt wurden.",
+        "Die Inhalte beziehen sich auf die europäische Norm EN 301 549 und sollen die Aktualisierung einer öffentlichen Auditseite erleichtern."
+    ],
+    "sectionHow": "2. Wie ist dieser Bericht zu lesen und zu verstehen?",
+    "howParagraphs": [
+        "Der unten angezeigte Status ist ein indikatives Ergebnis auf Basis der von Web Auditor erzeugten Barrierefreiheitsbefunde.",
+        "Die Tabellen gruppieren die technischen Befunde nach Regel und zeigen die Anzahl betroffener Seiten sowie eine Beispiel-URL."
+    ],
+    "howBullets": [
+        "Dieser vereinfachte Bericht konzentriert sich ausschließlich auf Barrierefreiheitsbefunde und blendet SEO-, Sicherheits- und Performancebefunde aus.",
+        "Die technischen Meldungen im Anhang werden unverändert aus der Audit-Engine übernommen.",
+        "Vor einer offiziellen Veröffentlichung ist weiterhin eine menschliche Prüfung erforderlich."
+    ],
+    "sectionResults": "3. Ergebnisse der vereinfachten Prüfung",
+    "generalInfo": "Allgemeine Informationen",
+    "siteName": "Name der Website",
+    "siteUrl": "URL der Website",
+    "auditDate": "Prüfdatum",
+    "auditStartedAt": "Beginn des Audits",
+    "auditEndedAt": "Ende des Audits",
+    "auditType": "Audittyp",
+    "auditTypeValue": "Vereinfachte automatisierte Prüfung",
+    "standard": "Norm",
+    "standardValue": "EN 301 549",
+    "auditTool": "Auditwerkzeug",
+    "auditToolValue": "Web Auditor",
+    "pagesChecked": "Geprüfte Seiten",
+    "provisionalStatus": "Indikativer Status",
+    "complianceStatusLabel": "Konformitätsstatus",
+    "summaryTitle": "Überblick",
+    "summaryLead": "Die folgende Zusammenfassung basiert ausschließlich auf den während des Audits erkannten Barrierefreiheitsbefunden.",
+    "summaryCards": {
+        "findings": "Befunde",
+        "ruleGroups": "Regelgruppen",
+        "affectedPages": "Betroffene Seiten",
+        "plugins": "Auditquellen"
+    },
+    "status": {
+        "compliant": "Konform",
+        "partiallyCompliant": "Teilweise konform",
+        "nonCompliant": "Nicht konform"
+    },
+    "statusDescriptions": {
+        "compliant": "In den für diese Zusammenfassung berücksichtigten Prüfungen wurden keine Barrierefreiheitsbefunde festgestellt.",
+        "partiallyCompliant": "Es wurden Warnungen zur Barrierefreiheit festgestellt. Für eine endgültige Bewertung ist weiterhin eine menschliche Prüfung erforderlich.",
+        "nonCompliant": "Mindestens ein Barrierefreiheitsbefund mit dem Schweregrad error wurde in den berücksichtigten Prüfungen festgestellt."
+    },
+    "pluginBreakdownTitle": "Verteilung nach Auditquelle",
+    "findingsTitle": "Gruppierte technische Befunde",
+    "noFindings": "Für diese Zusammenfassung wurden keine Barrierefreiheitsbefunde festgestellt.",
+    "findingsLead": "Die Befunde sind nach technischem Code gruppiert, um die Erstellung einer redaktionellen Zusammenfassung zu erleichtern.",
+    "auditDetailsIntro": "Die folgenden Tabellen gruppieren die Barrierefreiheitsbefunde nach Auditquelle. Redaktioneller Aufbau und Layout orientieren sich an der Smals-Referenzseite, jedoch mit EN 301 549-Ausrichtung.",
+    "sourceHeading": "Auditquelle",
+    "sourceLead": "Gruppierte Befunde für diese Quelle.",
+    "columns": {
+        "severity": "Schweregrad",
+        "plugin": "Quelle",
+        "code": "Code",
+        "message": "Technische Meldung",
+        "pages": "Seiten",
+        "example": "Beispiel-URL",
+        "description": "Beschreibung",
+        "references": "Ref(s)"
+    },
+    "severity": {
+        "error": "Fehler",
+        "warning": "Warnung",
+        "info": "Info"
+    },
+    "appendixTitle": "Technischer Anhang",
+    "appendixParagraph": "Dieser Anhang enthält die Rohmeldungen der Audit-Engine, um die Erstellung redaktioneller Inhalte im CMS zu erleichtern.",
+    "rawMessagesNotice": "Die folgenden Meldungen werden unverändert dargestellt und können eine manuelle Umformulierung erfordern.",
+    "breakdownErrors": "Fehler",
+    "breakdownWarnings": "Warnungen",
+    "breakdownInfos": "Infos",
+    "occurrences": "Vorkommen"
+}

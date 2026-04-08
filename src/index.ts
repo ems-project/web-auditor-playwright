@@ -41,7 +41,10 @@ import { fetchPublicIpAddresses } from "./utils/PublicIpResolver.js";
 import { XlsxExporter } from "./reporting/XlsxExporter.js";
 import { Report } from "./engine/types.js";
 import { buildCrawlCompletionSummary } from "./engine/CrawlCompletionSummary.js";
-import { writeSimplifiedAuditPages } from "./engine/SimplifiedAuditPage.js";
+import {
+    parseSimplifiedAuditLocales,
+    writeSimplifiedAuditPages,
+} from "./engine/SimplifiedAuditPage.js";
 import { AuditStore } from "./engine/AuditStore.js";
 import { CrawlProgressServer } from "./engine/CrawlProgressServer.js";
 import fsp from "node:fs/promises";
@@ -159,6 +162,9 @@ async function main() {
         .split(",")
         .map((tag) => tag.trim())
         .filter(Boolean);
+    const simplifiedAuditLocales = parseSimplifiedAuditLocales(
+        process.env.SIMPLIFIED_AUDIT_LOCALES,
+    );
     const registry = new PluginRegistry({
         disabledPlugins: (process.env.DISABLED_PLUGINS ?? "")
             .split(",")
@@ -525,6 +531,7 @@ async function main() {
         issues,
         inventory,
         plugins: pluginSummaries,
+        locales: simplifiedAuditLocales,
     });
 
     const hasErrors = pluginSummaries.reduce((sum, p) => sum + p.errors, 0) > 0;

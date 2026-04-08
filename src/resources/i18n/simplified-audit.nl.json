@@ -1,0 +1,87 @@
+{
+    "htmlLang": "nl",
+    "pageTitle": "Vereenvoudigd auditrapport",
+    "lead": "Beknopte versie voor CMS-publicatie, gebaseerd op EN 301 549-gerichte toegankelijkheidsbevindingen uit Web Auditor.",
+    "copyButton": "HTML-inhoud kopiëren",
+    "copySuccess": "De HTML-inhoud werd naar het klembord gekopieerd.",
+    "copyError": "Kopiëren is mislukt. Controleer de browserrechten.",
+    "generatedNotice": "Deze pagina wordt automatisch gegenereerd en moet vóór publicatie worden nagelezen.",
+    "sectionWhy": "1. Waarom ontvangt u dit rapport?",
+    "whyParagraphs": [
+        "Deze pagina geeft een vereenvoudigde samenvatting van de toegankelijkheidsbevindingen die tijdens de audit van de site werden vastgesteld.",
+        "De inhoud verwijst naar de Europese norm EN 301 549 en is bedoeld om een publieke auditrapportpagina eenvoudiger bij te werken."
+    ],
+    "sectionHow": "2. Hoe leest en begrijpt u dit rapport?",
+    "howParagraphs": [
+        "De hieronder getoonde status is een indicatieve status die wordt berekend op basis van toegankelijkheidsbevindingen uit Web Auditor.",
+        "De tabellen groeperen de technische bevindingen per regel en tonen het aantal betrokken pagina’s en een voorbeeld-URL."
+    ],
+    "howBullets": [
+        "Dit vereenvoudigde rapport focust uitsluitend op toegankelijkheidsbevindingen en laat SEO-, veiligheids- en performantiebevindingen buiten beschouwing.",
+        "De technische boodschappen in de bijlage blijven ongewijzigd zoals ze door de auditmotor werden geproduceerd.",
+        "Een menselijke validatie blijft noodzakelijk vóór officiële publicatie."
+    ],
+    "sectionResults": "3. Resultaten van de vereenvoudigde controle",
+    "generalInfo": "Algemene informatie",
+    "siteName": "Naam van de site",
+    "siteUrl": "URL van de site",
+    "auditDate": "Controledatum",
+    "auditStartedAt": "Start van de audit",
+    "auditEndedAt": "Einde van de audit",
+    "auditType": "Type audit",
+    "auditTypeValue": "Vereenvoudigd geautomatiseerd",
+    "standard": "Norm",
+    "standardValue": "EN 301 549",
+    "auditTool": "Audittool",
+    "auditToolValue": "Web Auditor",
+    "pagesChecked": "Aantal gecontroleerde pagina’s",
+    "provisionalStatus": "Indicatieve status",
+    "complianceStatusLabel": "Conformiteitsstatus",
+    "summaryTitle": "Overzicht",
+    "summaryLead": "Het onderstaande overzicht is uitsluitend gebaseerd op toegankelijkheidsbevindingen uit de audit.",
+    "summaryCards": {
+        "findings": "Bevindingen",
+        "ruleGroups": "Regelgroepen",
+        "affectedPages": "Getroffen pagina’s",
+        "plugins": "Auditbronnen"
+    },
+    "status": {
+        "compliant": "Conform",
+        "partiallyCompliant": "Gedeeltelijk conform",
+        "nonCompliant": "Niet conform"
+    },
+    "statusDescriptions": {
+        "compliant": "Er werden geen toegankelijkheidsbevindingen gedetecteerd binnen de controles die in deze synthese zijn opgenomen.",
+        "partiallyCompliant": "Er werden toegankelijkheidswaarschuwingen gedetecteerd. Een menselijke beoordeling blijft nodig voor een definitieve conclusie.",
+        "nonCompliant": "Er werd minstens één toegankelijkheidsfout met ernstniveau error gedetecteerd binnen de opgenomen controles."
+    },
+    "pluginBreakdownTitle": "Verdeling per auditbron",
+    "findingsTitle": "Gegroepeerde technische bevindingen",
+    "noFindings": "Er werden geen toegankelijkheidsbevindingen opgenomen in deze synthese.",
+    "findingsLead": "De bevindingen zijn per technische code gegroepeerd om de publicatie van een redactionele samenvatting te vergemakkelijken.",
+    "auditDetailsIntro": "De onderstaande tabellen groeperen de toegankelijkheidsbevindingen per auditbron. De redactionele structuur en lay-out zijn afgestemd op de Smals referentiepagina, maar met EN 301 549-positionering.",
+    "sourceHeading": "Auditbron",
+    "sourceLead": "Gegroepeerde bevindingen voor deze bron.",
+    "columns": {
+        "severity": "Ernst",
+        "plugin": "Bron",
+        "code": "Code",
+        "message": "Technische boodschap",
+        "pages": "Pagina’s",
+        "example": "Voorbeeld-URL",
+        "description": "Beschrijving",
+        "references": "Ref(s)"
+    },
+    "severity": {
+        "error": "Fout",
+        "warning": "Waarschuwing",
+        "info": "Info"
+    },
+    "appendixTitle": "Technische bijlage",
+    "appendixParagraph": "Deze bijlage herneemt de ruwe boodschappen van de auditmotor om een meer redactionele CMS-tekst te helpen voorbereiden.",
+    "rawMessagesNotice": "De onderstaande boodschappen worden ongewijzigd weergegeven en kunnen manuele herformulering vereisen.",
+    "breakdownErrors": "Fouten",
+    "breakdownWarnings": "Waarschuwingen",
+    "breakdownInfos": "Info",
+    "occurrences": "Voorkomens"
+}

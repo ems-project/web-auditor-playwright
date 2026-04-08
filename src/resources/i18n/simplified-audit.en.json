@@ -1,0 +1,87 @@
+{
+    "htmlLang": "en",
+    "pageTitle": "Simplified Audit Report",
+    "lead": "Compact CMS-ready version based on EN 301 549-oriented accessibility findings produced by Web Auditor.",
+    "copyButton": "Copy HTML content",
+    "copySuccess": "The HTML content has been copied to the clipboard.",
+    "copyError": "Copy failed. Please check browser permissions.",
+    "generatedNotice": "This page is generated automatically and should be reviewed before publication.",
+    "sectionWhy": "1. Why are you receiving this report?",
+    "whyParagraphs": [
+        "This page provides a simplified summary of the accessibility findings identified during the audit of the website.",
+        "The content is framed against the EN 301 549 European standard and is intended to make it easier to update a public audit report page."
+    ],
+    "sectionHow": "2. How should this report be read and understood?",
+    "howParagraphs": [
+        "The status shown below is an indicative status calculated from the accessibility findings produced by Web Auditor.",
+        "The tables group technical findings by rule and show the number of impacted pages as well as one example URL."
+    ],
+    "howBullets": [
+        "This simplified report focuses only on accessibility findings and intentionally excludes SEO, security and performance findings.",
+        "The technical messages in the appendix are kept exactly as emitted by the audit engine.",
+        "Human validation is still required before any official publication."
+    ],
+    "sectionResults": "3. Simplified audit results",
+    "generalInfo": "General information",
+    "siteName": "Site name",
+    "siteUrl": "Site URL",
+    "auditDate": "Audit date",
+    "auditStartedAt": "Audit started",
+    "auditEndedAt": "Audit ended",
+    "auditType": "Audit type",
+    "auditTypeValue": "Simplified automated audit",
+    "standard": "Standard",
+    "standardValue": "EN 301 549",
+    "auditTool": "Audit tool",
+    "auditToolValue": "Web Auditor",
+    "pagesChecked": "Checked pages",
+    "provisionalStatus": "Indicative status",
+    "complianceStatusLabel": "Compliance status",
+    "summaryTitle": "Overview",
+    "summaryLead": "The summary below is based only on accessibility findings detected during the audit.",
+    "summaryCards": {
+        "findings": "Findings",
+        "ruleGroups": "Rule groups",
+        "affectedPages": "Impacted pages",
+        "plugins": "Audit sources"
+    },
+    "status": {
+        "compliant": "Compliant",
+        "partiallyCompliant": "Partially compliant",
+        "nonCompliant": "Non-compliant"
+    },
+    "statusDescriptions": {
+        "compliant": "No accessibility findings were detected by the checks included in this summary.",
+        "partiallyCompliant": "Accessibility warnings were detected. Human review is still required before drawing a final conclusion.",
+        "nonCompliant": "At least one accessibility finding with error severity was detected by the checks included in this summary."
+    },
+    "pluginBreakdownTitle": "Breakdown by audit source",
+    "findingsTitle": "Grouped technical findings",
+    "noFindings": "No accessibility findings were detected for this summary.",
+    "findingsLead": "Findings are grouped by technical code to make editorial publication easier.",
+    "auditDetailsIntro": "The tables below group accessibility findings by audit source. The editorial structure and layout are aligned with the Smals reference page while using EN 301 549 positioning.",
+    "sourceHeading": "Audit source",
+    "sourceLead": "Grouped findings for this source.",
+    "columns": {
+        "severity": "Severity",
+        "plugin": "Source",
+        "code": "Code",
+        "message": "Technical message",
+        "pages": "Pages",
+        "example": "Example URL",
+        "description": "Description",
+        "references": "Ref(s)"
+    },
+    "severity": {
+        "error": "Error",
+        "warning": "Warning",
+        "info": "Info"
+    },
+    "appendixTitle": "Technical appendix",
+    "appendixParagraph": "This appendix keeps the raw engine messages to help prepare more editorial wording in the CMS.",
+    "rawMessagesNotice": "The messages below are displayed verbatim and may require manual rewriting.",
+    "breakdownErrors": "Errors",
+    "breakdownWarnings": "Warnings",
+    "breakdownInfos": "Infos",
+    "occurrences": "Occurrences"
+}
