@@ -50,6 +50,7 @@ type BuildCompletionSummaryInput = {
     runDetails: ReportItem[];
     reports: Report[];
     issues: CompletionFinding[];
+    artifactItems?: ReportItem[];
 };
 
 export function buildCrawlCompletionSummary(
@@ -67,6 +68,10 @@ export function buildCrawlCompletionSummary(
     const auditPlugins: CompletionPluginSummary[] = [];
     const pluginDetails: CompletionPluginDetail[] = [];
     const engineReport = reportByPlugin.get("engine");
+    const runDetails =
+        input.artifactItems && input.artifactItems.length > 0
+            ? [...input.runDetails, ...input.artifactItems]
+            : input.runDetails;
 
     if (engineReport) {
         const engineSummary: CompletionPluginSummary = {
@@ -78,42 +83,50 @@ export function buildCrawlCompletionSummary(
             errors: input.state.errorCount,
         };
         const findings = [...(issuesByPlugin.get("engine") ?? [])].sort(compareFindings);
+        const sections: CompletionPluginDetail["sections"] = [
+            {
+                title: "Summary",
+                items: [
+                    {
+                        key: "treatedUrls",
+                        label: "Audited resources",
+                        value: engineSummary.treatedUrls,
+                    },
+                    {
+                        key: "infos",
+                        label: "Infos",
+                        value: engineSummary.infos,
+                    },
+                    {
+                        key: "warnings",
+                        label: "Warnings",
+                        value: engineSummary.warnings,
+                    },
+                    {
+                        key: "errors",
+                        label: "Errors",
+                        value: engineSummary.errors,
+                    },
+                ],
+            },
+            {
+                title: engineReport.label,
+                items: engineReport.items,
+            },
+        ];
+
+        if (input.artifactItems && input.artifactItems.length > 0) {
+            sections.push({
+                title: "Artifacts",
+                items: input.artifactItems,
+            });
+        }
 
         auditPlugins.push(engineSummary);
         pluginDetails.push({
             plugin: engineSummary.plugin,
             label: engineSummary.label,
-            sections: [
-                {
-                    title: "Summary",
-                    items: [
-                        {
-                            key: "treatedUrls",
-                            label: "Audited resources",
-                            value: engineSummary.treatedUrls,
-                        },
-                        {
-                            key: "infos",
-                            label: "Infos",
-                            value: engineSummary.infos,
-                        },
-                        {
-                            key: "warnings",
-                            label: "Warnings",
-                            value: engineSummary.warnings,
-                        },
-                        {
-                            key: "errors",
-                            label: "Errors",
-                            value: engineSummary.errors,
-                        },
-                    ],
-                },
-                {
-                    title: engineReport.label,
-                    items: engineReport.items,
-                },
-            ],
+            sections,
             findings,
         });
     }
@@ -192,7 +205,7 @@ export function buildCrawlCompletionSummary(
         title: input.title,
         subtitle: input.subtitle,
         overviewCards: input.overviewCards,
-        runDetails: input.runDetails,
+        runDetails,
         auditPlugins,
         pluginDetails,
     };

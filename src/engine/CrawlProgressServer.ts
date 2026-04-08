@@ -1,18 +1,20 @@
 import http from "node:http";
+import { readFileSync } from "node:fs";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { AuditStore } from "./AuditStore.js";
 import type { CrawlCompletionSummary } from "./CrawlCompletionSummary.js";
 import { renderCrawlCompletionPage } from "./CrawlCompletionPage.js";
 import { renderCrawlProgressPage } from "./CrawlProgressPage.js";
-import { readFileSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 type CrawlProgressServerOptions = {
     auditDbPath: string;
     port: number;
     getRunId?: () => number | undefined;
     host?: string;
+    staticRootDir?: string;
 };
 
 export class CrawlProgressServer {
@@ -21,11 +23,13 @@ export class CrawlProgressServer {
     private server?: http.Server;
     private readonly sockets = new Set<import("node:net").Socket>();
     private completionSummary?: CrawlCompletionSummary;
+    private readonly staticRootDir: string | null;
 
     constructor(private readonly options: CrawlProgressServerOptions) {
         this.host = options.host ?? "127.0.0.1";
         this.store = new AuditStore(options.auditDbPath);
         this.store.initSchema();
+        this.staticRootDir = options.staticRootDir ?? null;
     }
 
     async start(): Promise<void> {
@@ -53,6 +57,11 @@ export class CrawlProgressServer {
             if (requestUrl.pathname === "/" || requestUrl.pathname === "/index.html") {
                 res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
                 res.end(this.renderHtml());
+                return;
+            }
+
+            if (requestUrl.pathname.startsWith("/artifacts/")) {
+                void this.serveArtifact(requestUrl.pathname, res);
                 return;
             }
 
@@ -129,4 +138,51 @@ export class CrawlProgressServer {
             refreshIntervalMs: 2000,
         });
     }
+
+    private async serveArtifact(pathname: string, res: http.ServerResponse): Promise<void> {
+        if (!this.staticRootDir) {
+            res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+            res.end("Not found");
+            return;
+        }
+
+        const relativePath = pathname.replace(/^\/artifacts\//, "");
+        const resolvedPath = path.resolve(this.staticRootDir, relativePath);
+        const rootPath = path.resolve(this.staticRootDir);
+
+        if (!resolvedPath.startsWith(rootPath + path.sep) && resolvedPath !== rootPath) {
+            res.writeHead(403, { "content-type": "text/plain; charset=utf-8" });
+            res.end("Forbidden");
+            return;
+        }
+
+        try {
+            const fileBuffer = await fs.readFile(resolvedPath);
+            res.writeHead(200, {
+                "content-type": contentTypeForArtifact(resolvedPath),
+                "cache-control": "no-store",
+            });
+            res.end(fileBuffer);
+        } catch {
+            res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+            res.end("Not found");
+        }
+    }
+}
+
+function contentTypeForArtifact(filePath: string): string {
+    const lower = filePath.toLowerCase();
+    if (lower.endsWith(".json")) {
+        return "application/json; charset=utf-8";
+    }
+    if (lower.endsWith(".xlsx")) {
+        return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    }
+    if (lower.endsWith(".xml")) {
+        return "application/xml; charset=utf-8";
+    }
+    if (lower.endsWith(".html")) {
+        return "text/html; charset=utf-8";
+    }
+    return "application/octet-stream";
 }

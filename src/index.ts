@@ -388,6 +388,7 @@ async function main() {
                   port: webUiPort,
                   host: webUiHost,
                   getRunId: () => engine.getCurrentRunId(),
+                  staticRootDir: path.join(reportOutputDir, websiteId),
               })
             : null;
 
@@ -534,6 +535,32 @@ async function main() {
         locales: simplifiedAuditLocales,
     });
 
+    const artifactItems = [
+        {
+            key: "reportJson",
+            label: "report.json",
+            value: { href: "/artifacts/report.json", label: "Open report.json" },
+        },
+        {
+            key: "reportXlsx",
+            label: "report.xlsx",
+            value: { href: "/artifacts/report.xlsx", label: "Open report.xlsx" },
+        },
+        {
+            key: "sitemapXml",
+            label: "sitemap.xml",
+            value: { href: "/artifacts/sitemap.xml", label: "Open sitemap.xml" },
+        },
+        {
+            key: "simplifiedAuditPages",
+            label: "Simplified audit pages",
+            value: simplifiedAuditLocales.map((locale) => ({
+                href: `/artifacts/simplified-audit.${locale}.html`,
+                label: `Open simplified-audit.${locale}.html`,
+            })),
+        },
+    ];
+
     const hasErrors = pluginSummaries.reduce((sum, p) => sum + p.errors, 0) > 0;
 
     if (progressServer) {
@@ -579,6 +606,7 @@ async function main() {
                 runDetails: engineReport.items,
                 reports,
                 issues,
+                artifactItems,
             }),
         );
         console.log("Audit summary available at " + progressServer.getUrl());
