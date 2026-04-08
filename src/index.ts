@@ -41,6 +41,7 @@ import { fetchPublicIpAddresses } from "./utils/PublicIpResolver.js";
 import { XlsxExporter } from "./reporting/XlsxExporter.js";
 import { Report } from "./engine/types.js";
 import { buildCrawlCompletionSummary } from "./engine/CrawlCompletionSummary.js";
+import { writeSimplifiedAuditPages } from "./engine/SimplifiedAuditPage.js";
 import { AuditStore } from "./engine/AuditStore.js";
 import { CrawlProgressServer } from "./engine/CrawlProgressServer.js";
 import fsp from "node:fs/promises";
@@ -515,6 +516,16 @@ async function main() {
         outputPath: path.join(reportOutputDir, websiteId, "report.xlsx"),
     });
     await xlsxExporter.export(globalReport);
+
+    await writeSimplifiedAuditPages({
+        outputDir: path.join(reportOutputDir, websiteId),
+        origin: state.origin,
+        startedAt: state.startedAt,
+        endedAt,
+        issues,
+        inventory,
+        plugins: pluginSummaries,
+    });
 
     const hasErrors = pluginSummaries.reduce((sum, p) => sum + p.errors, 0) > 0;
 
