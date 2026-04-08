@@ -7,7 +7,7 @@ import {
     renderSimplifiedAuditPage,
 } from "../src/engine/SimplifiedAuditPage.js";
 
-test("renderSimplifiedAuditPage renders exhaustive EN 301 549 criteria with help_url references", () => {
+test("renderSimplifiedAuditPage renders BOSA-style EN 301 549 sections with help_url references", () => {
     const model = buildSimplifiedAuditViewModel({
         locale: "fr",
         origin: "https://example.com",
@@ -46,8 +46,10 @@ test("renderSimplifiedAuditPage renders exhaustive EN 301 549 criteria with help
         html,
         /cdn\.jsdelivr\.net\/npm\/bootstrap@5\.3\.3\/dist\/css\/bootstrap\.min\.css/,
     );
-    assert.match(html, /Critère EN 301 549/);
-    assert.match(html, /9\.1\.1\.1/);
+    assert.match(html, /1\. Perceptible/);
+    assert.match(html, /1\.1 Alternatives textuelles/);
+    assert.match(html, /1\.1\.1/);
+    assert.match(html, /Contenu non textuel/);
     assert.match(html, /Non-conformité détectée/);
     assert.match(
         html,
@@ -56,7 +58,7 @@ test("renderSimplifiedAuditPage renders exhaustive EN 301 549 criteria with help
     assert.match(html, /ClipboardItem/);
 });
 
-test("buildSimplifiedAuditViewModel lists exhaustive Axe criteria and marks criteria without findings as passing", () => {
+test("buildSimplifiedAuditViewModel groups criteria by principle and guideline and keeps passing criteria", () => {
     const model = buildSimplifiedAuditViewModel({
         locale: "en",
         origin: "https://example.com",
@@ -99,11 +101,18 @@ test("buildSimplifiedAuditViewModel lists exhaustive Axe criteria and marks crit
     assert.equal(model.findingCount, 1);
     assert.equal(model.groupedFindingCount, 1);
     assert.equal(model.statusLabel, "Partially compliant");
-    assert.equal(model.findings[0]?.code, "color-contrast");
-    assert.ok(model.axeCriteria.length > 10);
+    assert.ok(model.axePrinciples.length >= 4);
 
-    const failingCriterion = model.axeCriteria.find(
-        (criterion) => criterion.criterion === "9.1.4.3",
+    const perceptible = model.axePrinciples.find((principle) => principle.code === "1");
+    assert.ok(perceptible);
+    assert.equal(perceptible?.title, "Perceivable");
+
+    const distinguishable = perceptible?.guidelines.find((guideline) => guideline.code === "1.4");
+    assert.ok(distinguishable);
+    assert.equal(distinguishable?.title, "Distinguishable");
+
+    const failingCriterion = distinguishable?.criteria.find(
+        (criterion) => criterion.criterion === "1.4.3",
     );
     assert.ok(failingCriterion);
     assert.equal(failingCriterion?.status, "warning");
@@ -112,7 +121,9 @@ test("buildSimplifiedAuditViewModel lists exhaustive Axe criteria and marks crit
         "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
     );
 
-    const passingCriterion = model.axeCriteria.find((criterion) => criterion.status === "pass");
+    const passingCriterion = perceptible?.guidelines
+        .flatMap((guideline) => guideline.criteria)
+        .find((criterion) => criterion.status === "pass");
     assert.ok(passingCriterion);
     assert.equal(passingCriterion?.statusLabel, "No issue detected");
 });

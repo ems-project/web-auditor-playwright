@@ -69,44 +69,48 @@ type TranslationBundle = {
         warning: string;
         info: string;
     };
-    pluginBreakdownTitle: string;
     findingsTitle: string;
     noFindings: string;
     findingsLead: string;
     criteriaTitle: string;
     criteriaLead: string;
     detectedFindingsLabel: string;
-    auditDetailsIntro: string;
-    sourceHeading: string;
-    sourceLead: string;
     columns: {
-        severity: string;
-        plugin: string;
-        code: string;
-        message: string;
         pages: string;
-        example: string;
         description: string;
         references: string;
         criterion: string;
         status: string;
         checks: string;
     };
-    severity: {
-        error: string;
-        warning: string;
-        info: string;
-    };
     appendixTitle: string;
     appendixParagraph: string;
     rawMessagesNotice: string;
-    breakdownErrors: string;
-    breakdownWarnings: string;
-    breakdownInfos: string;
     occurrences: string;
+    structure: {
+        principles: Record<string, { title: string; description: string }>;
+        guidelines: Record<string, { title: string; description: string }>;
+        criteria: Record<string, { title: string }>;
+    };
 };
 
 type CriterionStatus = "pass" | "error" | "warning" | "info";
+
+type CriterionRow = {
+    criterion: string;
+    criterionTitle: string;
+    status: CriterionStatus;
+    statusLabel: string;
+    statusBadgeClass: string;
+    pages: number;
+    occurrences: number;
+    checks: string[];
+    findingMessages: string[];
+    references: Array<{
+        label: string;
+        url: string;
+    }>;
+};
 
 type SimplifiedAuditViewModel = {
     locale: SimplifiedAuditLocale;
@@ -125,52 +129,15 @@ type SimplifiedAuditViewModel = {
     findingCount: number;
     groupedFindingCount: number;
     affectedPageCount: number;
-    pluginCount: number;
-    pluginBreakdown: Array<{
-        name: string;
-        errors: number;
-        warnings: number;
-        infos: number;
-        total: number;
-    }>;
-    findings: Array<{
-        severity: "error" | "warning" | "info";
-        severityLabel: string;
-        plugin: string;
-        pluginLabel: string;
+    axePrinciples: Array<{
         code: string;
-        message: string;
-        pages: number;
-        exampleUrl: string | null;
-        occurrences: number;
-    }>;
-    findingsByPlugin: Array<{
-        plugin: string;
-        pluginLabel: string;
-        findings: Array<{
-            severity: "error" | "warning" | "info";
-            severityLabel: string;
-            plugin: string;
-            pluginLabel: string;
+        title: string;
+        description: string;
+        guidelines: Array<{
             code: string;
-            message: string;
-            pages: number;
-            exampleUrl: string | null;
-            occurrences: number;
-        }>;
-    }>;
-    axeCriteria: Array<{
-        criterion: string;
-        status: CriterionStatus;
-        statusLabel: string;
-        statusBadgeClass: string;
-        pages: number;
-        occurrences: number;
-        checks: string[];
-        findingMessages: string[];
-        references: Array<{
-            label: string;
-            url: string;
+            title: string;
+            description: string;
+            criteria: CriterionRow[];
         }>;
     }>;
 };
@@ -189,7 +156,6 @@ type BuildSimplifiedAuditPagesInput = {
 type AxeIssueData = {
     help_url?: string;
     description?: string;
-    help?: string;
     id?: string;
     en301549_criteria?: string[];
 };
@@ -247,8 +213,7 @@ export function buildSimplifiedAuditViewModel(
 ): SimplifiedAuditViewModel {
     const t = translations[input.locale];
     const filteredIssues = input.issues.filter(isAccessibilityIssue);
-    const groupedFindings = groupIssues(filteredIssues, t);
-    const pluginBreakdown = buildPluginBreakdown(filteredIssues);
+    const criterionRows = buildCriterionRows(filteredIssues, t);
     const pagesChecked = countCheckedPages(input.inventory, input.origin);
     const affectedPageCount = new Set(filteredIssues.map((issue) => issue.url).filter(Boolean))
         .size;
@@ -284,13 +249,9 @@ export function buildSimplifiedAuditViewModel(
                   : "text-bg-danger",
         pagesChecked,
         findingCount: filteredIssues.length,
-        groupedFindingCount: groupedFindings.length,
+        groupedFindingCount: criterionRows.filter((row) => row.status !== "pass").length,
         affectedPageCount,
-        pluginCount: pluginBreakdown.length,
-        pluginBreakdown,
-        findings: groupedFindings,
-        findingsByPlugin: groupFindingsByPlugin(groupedFindings),
-        axeCriteria: buildAxeCriteriaRows(filteredIssues, t),
+        axePrinciples: groupCriterionRowsByStructure(criterionRows, t),
     };
 }
 
@@ -310,7 +271,8 @@ function buildAuditedAxeCriteria(): Array<{ criterion: string; rules: AxeRuleEnt
 
         const criteria = tags
             .map((tag) => /^EN-(\d+(?:\.\d+)+)$/.exec(tag)?.[1] ?? null)
-            .filter((criterion): criterion is string => criterion !== null);
+            .filter((criterion): criterion is string => criterion !== null)
+            .map(stripEnPrefix);
         if (criteria.length === 0) {
             continue;
         }
@@ -337,13 +299,10 @@ function buildAuditedAxeCriteria(): Array<{ criterion: string; rules: AxeRuleEnt
                 left.ruleId.localeCompare(right.ruleId),
             ),
         }))
-        .sort((left, right) => compareCriteria(left.criterion, right.criterion));
+        .sort((left, right) => compareCodes(left.criterion, right.criterion));
 }
 
-function buildAxeCriteriaRows(
-    issues: IssueEntry[],
-    t: TranslationBundle,
-): SimplifiedAuditViewModel["axeCriteria"] {
+function buildCriterionRows(issues: IssueEntry[], t: TranslationBundle): CriterionRow[] {
     const buckets = new Map<
         string,
         {
@@ -361,7 +320,7 @@ function buildAxeCriteriaRows(
         }
 
         const data = extractAxeIssueData(issue);
-        const criteria = data?.en301549_criteria?.filter(Boolean) ?? [];
+        const criteria = data?.en301549_criteria?.map(stripEnPrefix).filter(Boolean) ?? [];
         if (criteria.length === 0) {
             continue;
         }
@@ -386,8 +345,10 @@ function buildAxeCriteriaRows(
                 bucket.messages.add(data.description);
             }
             if (data?.help_url) {
-                const label = data.id ? data.id : issue.code;
-                bucket.references.set(data.help_url, { label, url: data.help_url });
+                bucket.references.set(data.help_url, {
+                    label: data.id ? data.id : issue.code,
+                    url: data.help_url,
+                });
             }
             buckets.set(criterion, bucket);
         }
@@ -407,6 +368,7 @@ function buildAxeCriteriaRows(
 
         return {
             criterion,
+            criterionTitle: t.structure.criteria[criterion]?.title ?? criterion,
             status,
             statusLabel: t.criterionStatus[status],
             statusBadgeClass: criterionStatusBadgeClass(status),
@@ -421,12 +383,80 @@ function buildAxeCriteriaRows(
     });
 }
 
+function groupCriterionRowsByStructure(
+    rows: CriterionRow[],
+    t: TranslationBundle,
+): SimplifiedAuditViewModel["axePrinciples"] {
+    const principles = new Map<
+        string,
+        {
+            code: string;
+            title: string;
+            description: string;
+            guidelines: Map<
+                string,
+                {
+                    code: string;
+                    title: string;
+                    description: string;
+                    criteria: CriterionRow[];
+                }
+            >;
+        }
+    >();
+
+    for (const row of rows) {
+        const parts = row.criterion.split(".");
+        const principleCode = parts[0] ?? row.criterion;
+        const guidelineCode = parts.length >= 2 ? `${parts[0]}.${parts[1]}` : row.criterion;
+
+        const principleEntry = principles.get(principleCode) ?? {
+            code: principleCode,
+            title: t.structure.principles[principleCode]?.title ?? principleCode,
+            description: t.structure.principles[principleCode]?.description ?? "",
+            guidelines: new Map(),
+        };
+        const guidelineEntry = principleEntry.guidelines.get(guidelineCode) ?? {
+            code: guidelineCode,
+            title: t.structure.guidelines[guidelineCode]?.title ?? guidelineCode,
+            description: t.structure.guidelines[guidelineCode]?.description ?? "",
+            criteria: [],
+        };
+
+        guidelineEntry.criteria.push(row);
+        principleEntry.guidelines.set(guidelineCode, guidelineEntry);
+        principles.set(principleCode, principleEntry);
+    }
+
+    return [...principles.values()]
+        .sort((left, right) => compareCodes(left.code, right.code))
+        .map((principle) => ({
+            code: principle.code,
+            title: principle.title,
+            description: principle.description,
+            guidelines: [...principle.guidelines.values()]
+                .sort((left, right) => compareCodes(left.code, right.code))
+                .map((guideline) => ({
+                    code: guideline.code,
+                    title: guideline.title,
+                    description: guideline.description,
+                    criteria: guideline.criteria.sort((left, right) =>
+                        compareCodes(left.criterion, right.criterion),
+                    ),
+                })),
+        }));
+}
+
 function extractAxeIssueData(issue: IssueEntry): AxeIssueData | null {
     if (!issue.data || typeof issue.data !== "object" || Array.isArray(issue.data)) {
         return null;
     }
 
     return issue.data as AxeIssueData;
+}
+
+function stripEnPrefix(value: string): string {
+    return value.startsWith("9.") ? value.slice(2) : value;
 }
 
 function criterionStatusBadgeClass(status: CriterionStatus): string {
@@ -442,7 +472,7 @@ function criterionStatusBadgeClass(status: CriterionStatus): string {
     return "text-bg-danger";
 }
 
-function compareCriteria(left: string, right: string): number {
+function compareCodes(left: string, right: string): number {
     const leftParts = left.split(".").map((part) => Number(part));
     const rightParts = right.split(".").map((part) => Number(part));
     const maxLength = Math.max(leftParts.length, rightParts.length);
@@ -509,146 +539,14 @@ function looksLikeAccessibilityRelevantResource(mime: string | undefined): boole
     return value.includes("text/html") || value.includes("application/pdf") || value === "";
 }
 
-function groupIssues(
-    issues: IssueEntry[],
-    t: TranslationBundle,
-): SimplifiedAuditViewModel["findings"] {
-    const map = new Map<
-        string,
-        SimplifiedAuditViewModel["findings"][number] & { urls: Set<string> }
-    >();
-
-    for (const issue of issues) {
-        const severity = normalizeSeverity(issue.type);
-        const key = `${issue.plugin}|${issue.code}|${severity}`;
-        const existing = map.get(key);
-        if (existing) {
-            existing.occurrences += 1;
-            if (issue.url) {
-                existing.urls.add(issue.url);
-                if (!existing.exampleUrl) {
-                    existing.exampleUrl = issue.url;
-                }
-            }
-            continue;
-        }
-
-        map.set(key, {
-            severity,
-            severityLabel: t.severity[severity],
-            plugin: issue.plugin,
-            pluginLabel: humanizePluginName(issue.plugin),
-            code: issue.code,
-            message: issue.message,
-            pages: issue.url ? 1 : 0,
-            exampleUrl: issue.url ?? null,
-            occurrences: 1,
-            urls: new Set(issue.url ? [issue.url] : []),
-        });
-    }
-
-    return [...map.values()]
-        .map((entry) => ({
-            severity: entry.severity,
-            severityLabel: entry.severityLabel,
-            plugin: entry.plugin,
-            pluginLabel: entry.pluginLabel,
-            code: entry.code,
-            message: entry.message,
-            pages: entry.urls.size,
-            exampleUrl: entry.exampleUrl,
-            occurrences: entry.occurrences,
-        }))
-        .sort((left, right) => {
-            const rank = { error: 0, warning: 1, info: 2 } as const;
-            const severityDelta = rank[left.severity] - rank[right.severity];
-            if (severityDelta !== 0) {
-                return severityDelta;
-            }
-            if (right.pages !== left.pages) {
-                return right.pages - left.pages;
-            }
-            if (right.occurrences !== left.occurrences) {
-                return right.occurrences - left.occurrences;
-            }
-            return `${left.plugin}|${left.code}`.localeCompare(`${right.plugin}|${right.code}`);
-        });
-}
-
-function groupFindingsByPlugin(
-    findings: SimplifiedAuditViewModel["findings"],
-): SimplifiedAuditViewModel["findingsByPlugin"] {
-    const map = new Map<string, SimplifiedAuditViewModel["findingsByPlugin"][number]>();
-
-    for (const finding of findings) {
-        const bucket = map.get(finding.plugin) ?? {
-            plugin: finding.plugin,
-            pluginLabel: finding.pluginLabel,
-            findings: [],
-        };
-        bucket.findings.push(finding);
-        map.set(finding.plugin, bucket);
-    }
-
-    return [...map.values()].sort((left, right) =>
-        left.pluginLabel.localeCompare(right.pluginLabel),
-    );
-}
-
-function buildPluginBreakdown(issues: IssueEntry[]): SimplifiedAuditViewModel["pluginBreakdown"] {
-    const map = new Map<string, SimplifiedAuditViewModel["pluginBreakdown"][number]>();
-
-    for (const issue of issues) {
-        const severity = normalizeSeverity(issue.type);
-        const existing = map.get(issue.plugin) ?? {
-            name: humanizePluginName(issue.plugin),
-            errors: 0,
-            warnings: 0,
-            infos: 0,
-            total: 0,
-        };
-        if (severity === "error") {
-            existing.errors += 1;
-        } else if (severity === "warning") {
-            existing.warnings += 1;
-        } else {
-            existing.infos += 1;
-        }
-        existing.total += 1;
-        map.set(issue.plugin, existing);
-    }
-
-    return [...map.values()].sort(
-        (left, right) => right.total - left.total || left.name.localeCompare(right.name),
-    );
-}
-
 function computeStatus(issues: IssueEntry[]): keyof TranslationBundle["status"] {
-    if (issues.some((issue) => normalizeSeverity(issue.type) === "error")) {
+    if (issues.some((issue) => normalizeCriterionStatus(issue.type) === "error")) {
         return "nonCompliant";
     }
     if (issues.length > 0) {
         return "partiallyCompliant";
     }
     return "compliant";
-}
-
-function normalizeSeverity(value: string): "error" | "warning" | "info" {
-    if (value === "error") {
-        return "error";
-    }
-    if (value === "warning") {
-        return "warning";
-    }
-    return "info";
-}
-
-function humanizePluginName(value: string): string {
-    return value
-        .split(/[-_]+/)
-        .filter(Boolean)
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(" ");
 }
 
 function formatDate(

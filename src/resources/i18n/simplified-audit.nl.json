@@ -95,5 +95,142 @@
         "error": "Niet-conformiteit gedetecteerd",
         "warning": "Waarschuwing gedetecteerd",
         "info": "Informatie gedetecteerd"
+    },
+    "structure": {
+        "principles": {
+            "1": {
+                "title": "Waarneembaar",
+                "description": "Informatie en componenten van de gebruikersinterface moeten aan gebruikers worden gepresenteerd op een manier die zij kunnen waarnemen."
+            },
+            "2": {
+                "title": "Bedienbaar",
+                "description": "Componenten van de gebruikersinterface en navigatie moeten bedienbaar zijn."
+            },
+            "3": {
+                "title": "Begrijpelijk",
+                "description": "Informatie en de bediening van de gebruikersinterface moeten begrijpelijk zijn."
+            },
+            "4": {
+                "title": "Robuust",
+                "description": "Content moet robuust genoeg zijn om betrouwbaar geïnterpreteerd te kunnen worden door uiteenlopende user agents, inclusief hulptechnologieën."
+            }
+        },
+        "guidelines": {
+            "1.1": {
+                "title": "Tekstalternatieven",
+                "description": "Bied tekstalternatieven voor niet-tekstuele content."
+            },
+            "1.2": {
+                "title": "Tijdsgebonden media",
+                "description": "Bied alternatieven voor tijdsgebonden media."
+            },
+            "1.3": {
+                "title": "Aanpasbaar",
+                "description": "Creëer content die op verschillende manieren kan worden gepresenteerd zonder informatie of structuur te verliezen."
+            },
+            "1.4": {
+                "title": "Onderscheidbaar",
+                "description": "Maak het eenvoudiger voor gebruikers om content te zien en te horen."
+            },
+            "2.1": {
+                "title": "Toetsenbordtoegankelijk",
+                "description": "Maak alle functionaliteit beschikbaar via een toetsenbord."
+            },
+            "2.2": {
+                "title": "Voldoende tijd",
+                "description": "Geef gebruikers voldoende tijd om content te lezen en te gebruiken."
+            },
+            "2.4": {
+                "title": "Navigeerbaar",
+                "description": "Bied hulpmiddelen om te navigeren, content te vinden en te bepalen waar men zich bevindt."
+            },
+            "2.5": {
+                "title": "Invoermodaliteiten",
+                "description": "Maak bediening makkelijker via andere invoermodaliteiten dan alleen het toetsenbord."
+            },
+            "3.1": {
+                "title": "Leesbaar",
+                "description": "Maak tekstinhoud leesbaar en begrijpelijk."
+            },
+            "3.3": {
+                "title": "Hulp bij invoer",
+                "description": "Help gebruikers om fouten te vermijden en te corrigeren."
+            },
+            "4.1": {
+                "title": "Compatibel",
+                "description": "Maximaliseer compatibiliteit met huidige en toekomstige user agents, inclusief hulptechnologieën."
+            }
+        },
+        "criteria": {
+            "1.1.1": {
+                "title": "Niet-tekstuele content"
+            },
+            "1.2.1": {
+                "title": "Alleen audio en alleen video (vooraf opgenomen)"
+            },
+            "1.2.2": {
+                "title": "Ondertitels (vooraf opgenomen)"
+            },
+            "1.3.1": {
+                "title": "Info en relaties"
+            },
+            "1.3.4": {
+                "title": "Oriëntatie"
+            },
+            "1.3.5": {
+                "title": "Doel van invoer identificeren"
+            },
+            "1.4.1": {
+                "title": "Gebruik van kleur"
+            },
+            "1.4.2": {
+                "title": "Audiobediening"
+            },
+            "1.4.3": {
+                "title": "Contrast (minimum)"
+            },
+            "1.4.4": {
+                "title": "Tekst schalen"
+            },
+            "1.4.12": {
+                "title": "Tekstafstand"
+            },
+            "2.1.1": {
+                "title": "Toetsenbord"
+            },
+            "2.1.3": {
+                "title": "Toetsenbord zonder uitzondering"
+            },
+            "2.2.1": {
+                "title": "Aanpasbare timing"
+            },
+            "2.2.2": {
+                "title": "Pauzeren, stoppen, verbergen"
+            },
+            "2.4.1": {
+                "title": "Blokken omzeilen"
+            },
+            "2.4.2": {
+                "title": "Paginatitel"
+            },
+            "2.4.4": {
+                "title": "Doel van de link in context"
+            },
+            "2.5.3": {
+                "title": "Label in naam"
+            },
+            "3.1.1": {
+                "title": "Taal van de pagina"
+            },
+            "3.1.2": {
+                "title": "Taal van onderdelen"
+            },
+            "3.3.2": {
+                "title": "Labels of instructies"
+            },
+            "4.1.2": {
+                "title": "Naam, rol, waarde"
+            }
+        }
     }
 }

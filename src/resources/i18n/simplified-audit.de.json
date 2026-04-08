@@ -95,5 +95,142 @@
         "error": "Nichtkonformität erkannt",
         "warning": "Warnung erkannt",
         "info": "Information erkannt"
+    },
+    "structure": {
+        "principles": {
+            "1": {
+                "title": "Wahrnehmbar",
+                "description": "Informationen und Komponenten der Benutzeroberfläche müssen den Nutzern so dargestellt werden, dass sie wahrgenommen werden können."
+            },
+            "2": {
+                "title": "Bedienbar",
+                "description": "Komponenten der Benutzeroberfläche und Navigation müssen bedienbar sein."
+            },
+            "3": {
+                "title": "Verständlich",
+                "description": "Informationen und die Bedienung der Benutzeroberfläche müssen verständlich sein."
+            },
+            "4": {
+                "title": "Robust",
+                "description": "Inhalte müssen robust genug sein, um von einer Vielzahl von Benutzeragenten einschließlich assistiver Technologien zuverlässig interpretiert zu werden."
+            }
+        },
+        "guidelines": {
+            "1.1": {
+                "title": "Textalternativen",
+                "description": "Stellen Sie Textalternativen für nicht-textuelle Inhalte bereit."
+            },
+            "1.2": {
+                "title": "Zeitbasierte Medien",
+                "description": "Stellen Sie Alternativen für zeitbasierte Medien bereit."
+            },
+            "1.3": {
+                "title": "Anpassbar",
+                "description": "Erstellen Sie Inhalte, die ohne Informations- oder Strukturverlust unterschiedlich präsentiert werden können."
+            },
+            "1.4": {
+                "title": "Unterscheidbar",
+                "description": "Erleichtern Sie es Nutzern, Inhalte zu sehen und zu hören."
+            },
+            "2.1": {
+                "title": "Per Tastatur zugänglich",
+                "description": "Machen Sie alle Funktionen über eine Tastatur verfügbar."
+            },
+            "2.2": {
+                "title": "Ausreichend Zeit",
+                "description": "Geben Sie Nutzern ausreichend Zeit, Inhalte zu lesen und zu verwenden."
+            },
+            "2.4": {
+                "title": "Navigierbar",
+                "description": "Stellen Sie Hilfen bereit, damit Nutzer navigieren, Inhalte finden und ihre Position bestimmen können."
+            },
+            "2.5": {
+                "title": "Eingabemodalitäten",
+                "description": "Erleichtern Sie die Bedienung über andere Eingabemodalitäten als die Tastatur."
+            },
+            "3.1": {
+                "title": "Lesbar",
+                "description": "Machen Sie Textinhalte lesbar und verständlich."
+            },
+            "3.3": {
+                "title": "Hilfen bei der Eingabe",
+                "description": "Helfen Sie Nutzern, Fehler zu vermeiden und zu korrigieren."
+            },
+            "4.1": {
+                "title": "Kompatibel",
+                "description": "Maximieren Sie die Kompatibilität mit aktuellen und zukünftigen Benutzeragenten einschließlich assistiver Technologien."
+            }
+        },
+        "criteria": {
+            "1.1.1": {
+                "title": "Nicht-textueller Inhalt"
+            },
+            "1.2.1": {
+                "title": "Nur-Audio und Nur-Video (aufgezeichnet)"
+            },
+            "1.2.2": {
+                "title": "Untertitel (aufgezeichnet)"
+            },
+            "1.3.1": {
+                "title": "Informationen und Beziehungen"
+            },
+            "1.3.4": {
+                "title": "Ausrichtung"
+            },
+            "1.3.5": {
+                "title": "Eingabezweck bestimmen"
+            },
+            "1.4.1": {
+                "title": "Verwendung von Farbe"
+            },
+            "1.4.2": {
+                "title": "Audiosteuerung"
+            },
+            "1.4.3": {
+                "title": "Kontrast (Minimum)"
+            },
+            "1.4.4": {
+                "title": "Text vergrößern"
+            },
+            "1.4.12": {
+                "title": "Textabstände"
+            },
+            "2.1.1": {
+                "title": "Tastatur"
+            },
+            "2.1.3": {
+                "title": "Tastatur ohne Ausnahme"
+            },
+            "2.2.1": {
+                "title": "Anpassbare Zeitbegrenzung"
+            },
+            "2.2.2": {
+                "title": "Pausieren, stoppen, ausblenden"
+            },
+            "2.4.1": {
+                "title": "Blöcke umgehen"
+            },
+            "2.4.2": {
+                "title": "Seite mit Titel"
+            },
+            "2.4.4": {
+                "title": "Zweck des Links im Kontext"
+            },
+            "2.5.3": {
+                "title": "Beschriftung im Namen"
+            },
+            "3.1.1": {
+                "title": "Sprache der Seite"
+            },
+            "3.1.2": {
+                "title": "Sprache von Teilen"
+            },
+            "3.3.2": {
+                "title": "Beschriftungen oder Anweisungen"
+            },
+            "4.1.2": {
+                "title": "Name, Rolle, Wert"
+            }
+        }
     }
 }
