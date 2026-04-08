@@ -136,7 +136,6 @@ test("detectResourceKind classifies css, js and image resources", () => {
     );
 });
 
-
 test("enqueueSitemaps queues absolute and relative sitemap URLs once", () => {
     const plugin = createPlugin();
     const queued: Array<{ url: string; source?: string }> = [];
