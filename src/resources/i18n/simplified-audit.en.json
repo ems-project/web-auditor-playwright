@@ -50,10 +50,7 @@
         "pages": "Pages",
         "example": "Example URL",
         "description": "Description",
-        "references": "Ref(s)",
-        "criterion": "EN301 549 criterion",
-        "status": "Result",
-        "checks": "Audited Axe rules"
+        "status": "Result"
     },
     "severity": {
         "error": "Error",

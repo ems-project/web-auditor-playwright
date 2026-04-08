@@ -50,10 +50,7 @@
         "pages": "Seiten",
         "example": "Beispiel-URL",
         "description": "Beschreibung",
-        "references": "Ref(s)",
-        "criterion": "EN-301-549-Kriterium",
-        "status": "Ergebnis",
-        "checks": "Geprüfte Axe-Regeln"
+        "status": "Ergebnis"
     },
     "severity": {
         "error": "Fehler",

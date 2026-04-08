@@ -137,49 +137,22 @@
                                                 <table class="table table-bordered align-middle">
                                                     <thead>
                                                         <tr>
-                                                            <th scope="col"><%= model.t.columns.criterion %></th>
-                                                            <th scope="col"><%= model.t.columns.status %></th>
                                                             <th scope="col" style="width: 42%"><%= model.t.columns.description %></th>
                                                             <th scope="col"><%= model.t.columns.pages %></th>
                                                             <th scope="col"><%= model.t.occurrences %></th>
-                                                            <th scope="col"><%= model.t.columns.references %></th>
+                                                            <th scope="col"><%= model.t.columns.status %></th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <% for (const criterion of guideline.criteria) { %>
                                                             <tr>
                                                                 <td>
-                                                                    <strong>9.<%= criterion.criterion %></strong><br>
+                                                                    <strong>9.<%= criterion.criterion %></strong>
                                                                     <span><%= criterion.criterionTitle %></span>
-                                                                </td>
-                                                                <td><span class="badge <%= criterion.statusBadgeClass %>"><%= criterion.statusLabel %></span></td>
-                                                                <td>
-                                                                    <div class="small text-secondary mb-2"><%= model.t.columns.checks %></div>
-                                                                    <ul class="criterion-list mb-0">
-                                                                        <% for (const check of criterion.checks) { %>
-                                                                            <li><%= check %></li>
-                                                                        <% } %>
-                                                                    </ul>
-                                                                    <% if (criterion.findingMessages.length > 0) { %>
-                                                                        <div class="small text-secondary mt-3 mb-2"><%= model.t.detectedFindingsLabel %></div>
-                                                                        <ul class="criterion-list mb-0">
-                                                                            <% for (const finding of criterion.findingMessages) { %>
-                                                                                <li><%= finding %></li>
-                                                                            <% } %>
-                                                                        </ul>
-                                                                    <% } %>
                                                                 </td>
                                                                 <td><%= criterion.pages %></td>
                                                                 <td><%= criterion.occurrences %></td>
-                                                                <td>
-                                                                    <% if (criterion.references.length > 0) { %>
-                                                                        <ul class="criterion-list mb-0">
-                                                                            <% for (const ref of criterion.references) { %>
-                                                                                <li><a href="<%= ref.url %>"><%= ref.label %></a></li>
-                                                                            <% } %>
-                                                                        </ul>
-                                                                    <% } %>
-                                                                </td>
+                                                                <td><span class="badge <%= criterion.statusBadgeClass %>"><%= criterion.statusLabel %></span></td>
                                                             </tr>
                                                         <% } %>
                                                     </tbody>

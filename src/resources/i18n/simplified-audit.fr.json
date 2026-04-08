@@ -50,10 +50,7 @@
         "pages": "Pages",
         "example": "Exemple d’URL",
         "description": "Description",
-        "references": "Ref(s)",
-        "criterion": "Critère EN301 549",
-        "status": "Résultat",
-        "checks": "Règles Axe auditées"
+        "status": "Résultat"
     },
     "severity": {
         "error": "Erreur",

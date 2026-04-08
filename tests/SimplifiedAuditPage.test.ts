@@ -51,10 +51,6 @@ test("renderSimplifiedAuditPage renders BOSA-style EN 301 549 sections with help
     assert.match(html, /9\.1\.1\.1/);
     assert.match(html, /Contenu non textuel/);
     assert.match(html, /Non-conformité détectée/);
-    assert.match(
-        html,
-        /https:\/\/dequeuniversity\.com\/rules\/axe\/4\.11\/image-alt\?application=axeAPI/,
-    );
     assert.match(html, /ClipboardItem/);
 });
 
@@ -116,10 +112,6 @@ test("buildSimplifiedAuditViewModel groups criteria by principle and guideline a
     );
     assert.ok(failingCriterion);
     assert.equal(failingCriterion?.status, "warning");
-    assert.equal(
-        failingCriterion?.references[0]?.url,
-        "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
-    );
 
     const passingCriterion = perceptible?.guidelines
         .flatMap((guideline) => guideline.criteria)

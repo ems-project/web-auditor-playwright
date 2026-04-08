@@ -50,10 +50,7 @@
         "pages": "Pagina’s",
         "example": "Voorbeeld-URL",
         "description": "Beschrijving",
-        "references": "Ref(s)",
-        "criterion": "EN301 549-criterium",
-        "status": "Resultaat",
-        "checks": "Geauditeerde Axe-regels"
+        "status": "Resultaat"
     },
     "severity": {
         "error": "Fout",

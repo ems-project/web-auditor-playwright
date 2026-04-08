@@ -69,10 +69,8 @@ type TranslationBundle = {
     columns: {
         pages: string;
         description: string;
-        references: string;
         criterion: string;
         status: string;
-        checks: string;
     };
     appendixTitle: string;
     appendixParagraph: string;
@@ -95,12 +93,6 @@ type CriterionRow = {
     statusBadgeClass: string;
     pages: number;
     occurrences: number;
-    checks: string[];
-    findingMessages: string[];
-    references: Array<{
-        label: string;
-        url: string;
-    }>;
 };
 
 type SimplifiedAuditViewModel = {
@@ -285,7 +277,6 @@ function buildCriterionRows(issues: IssueEntry[], t: TranslationBundle): Criteri
             urls: Set<string>;
             occurrences: number;
             messages: Set<string>;
-            references: Map<string, { label: string; url: string }>;
         }
     >();
 
@@ -307,7 +298,6 @@ function buildCriterionRows(issues: IssueEntry[], t: TranslationBundle): Criteri
                 urls: new Set<string>(),
                 occurrences: 0,
                 messages: new Set<string>(),
-                references: new Map<string, { label: string; url: string }>(),
             };
 
             bucket.status = higherCriterionStatus(bucket.status, severity);
@@ -319,27 +309,13 @@ function buildCriterionRows(issues: IssueEntry[], t: TranslationBundle): Criteri
             if (data?.description) {
                 bucket.messages.add(data.description);
             }
-            if (data?.help_url) {
-                bucket.references.set(data.help_url, {
-                    label: data.id ? data.id : issue.code,
-                    url: data.help_url,
-                });
-            }
             buckets.set(criterion, bucket);
         }
     }
 
-    return auditedAxeCriteria.map(({ criterion, rules }) => {
+    return auditedAxeCriteria.map(({ criterion }) => {
         const bucket = buckets.get(criterion);
         const status: CriterionStatus = bucket?.status ?? "pass";
-        const references =
-            bucket && bucket.references.size > 0
-                ? [...bucket.references.values()].sort((left, right) =>
-                      left.label.localeCompare(right.label),
-                  )
-                : rules
-                      .filter((rule) => rule.helpUrl)
-                      .map((rule) => ({ label: rule.ruleId, url: rule.helpUrl! }));
 
         return {
             criterion,
@@ -349,11 +325,6 @@ function buildCriterionRows(issues: IssueEntry[], t: TranslationBundle): Criteri
             statusBadgeClass: criterionStatusBadgeClass(status),
             pages: bucket?.urls.size ?? 0,
             occurrences: bucket?.occurrences ?? 0,
-            checks: rules.map((rule) => `${rule.ruleId}: ${rule.help}`),
-            findingMessages: bucket
-                ? [...bucket.messages].sort((left, right) => left.localeCompare(right))
-                : [],
-            references,
         };
     });
 }
