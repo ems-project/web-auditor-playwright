@@ -225,6 +225,12 @@ export type FindingCode =
     | "ROBOTS_TXT_BLOCKS_CSS"
     | "ROBOTS_TXT_BLOCKS_JS"
     | "ROBOTS_TXT_BLOCKS_IMAGE"
+    // Sitemap
+    | "SITEMAP_INVALID_XML"
+    | "SITEMAP_INVALID_ROOT"
+    | "SITEMAP_INVALID_URL"
+    | "SITEMAP_DUPLICATE_URL"
+    | "SITEMAP_PAGE_MISSING_FROM_SITEMAP"
     | "SOFT_404_DETECTED"
     | "SOFT_500_DETECTED"
     // Content extraction

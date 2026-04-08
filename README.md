@@ -292,6 +292,16 @@ Examples:
 | robots-txt | ROBOTS_TXT_BLOCKS_JS           | Blocks used JavaScript        | Frontend, SEO   | Allow required JS     |
 | robots-txt | ROBOTS_TXT_BLOCKS_IMAGE        | Blocks used image resource    | Frontend, SEO   | Allow required images |
 
+### Sitemap
+
+| Plugin  | Code                              | Description                      | Profiles        | Recommended Actions            |
+| ------- | --------------------------------- | -------------------------------- | --------------- | ------------------------------ |
+| sitemap | SITEMAP_INVALID_XML               | Invalid sitemap XML              | Integrator      | Fix sitemap serialization      |
+| sitemap | SITEMAP_INVALID_ROOT              | Invalid sitemap root element     | Integrator, SEO | Use `urlset` or `sitemapindex` |
+| sitemap | SITEMAP_INVALID_URL               | Invalid sitemap `loc`            | Integrator, SEO | Fix invalid or missing URLs    |
+| sitemap | SITEMAP_DUPLICATE_URL             | Duplicate sitemap URL            | SEO             | Remove duplicates              |
+| sitemap | SITEMAP_PAGE_MISSING_FROM_SITEMAP | Crawled page absent from sitemap | SEO, Integrator | Add page to sitemap            |
+
 ### HTML Accessibility
 
 Lowercase finding codes (e.g. `area-alt` or `scrollable-region-focusable`) correspond to accessibility rules detected by the a11y-axe plugin.
