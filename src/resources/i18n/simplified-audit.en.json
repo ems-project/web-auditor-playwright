@@ -6,22 +6,7 @@
     "copySuccess": "The HTML content has been copied to the clipboard.",
     "copyError": "Copy failed. Please check browser permissions.",
     "generatedNotice": "This page is generated automatically and should be reviewed before publication.",
-    "sectionWhy": "1. Why are you receiving this report?",
-    "whyParagraphs": [
-        "This page provides a simplified summary of the accessibility findings identified during the audit of the website.",
-        "The content is framed against the EN 301 549 European standard and is intended to make it easier to update a public audit report page."
-    ],
-    "sectionHow": "2. How should this report be read and understood?",
-    "howParagraphs": [
-        "The status shown below is an indicative status calculated from the accessibility findings produced by Web Auditor.",
-        "The tables group technical findings by rule and show the number of impacted pages as well as one example URL."
-    ],
-    "howBullets": [
-        "This simplified report focuses only on accessibility findings and intentionally excludes SEO, security and performance findings.",
-        "The technical messages in the appendix are kept exactly as emitted by the audit engine.",
-        "Human validation is still required before any official publication."
-    ],
-    "sectionResults": "3. Simplified audit results",
+    "sectionResults": "Simplified audit results",
     "generalInfo": "General information",
     "siteUrl": "Site URL",
     "auditDate": "Audit date",

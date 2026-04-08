@@ -6,22 +6,7 @@
     "copySuccess": "De HTML-inhoud werd naar het klembord gekopieerd.",
     "copyError": "Kopiëren is mislukt. Controleer de browserrechten.",
     "generatedNotice": "Deze pagina wordt automatisch gegenereerd en moet vóór publicatie worden nagelezen.",
-    "sectionWhy": "1. Waarom ontvangt u dit rapport?",
-    "whyParagraphs": [
-        "Deze pagina geeft een vereenvoudigde samenvatting van de toegankelijkheidsbevindingen die tijdens de audit van de site werden vastgesteld.",
-        "De inhoud verwijst naar de Europese norm EN 301 549 en is bedoeld om een publieke auditrapportpagina eenvoudiger bij te werken."
-    ],
-    "sectionHow": "2. Hoe leest en begrijpt u dit rapport?",
-    "howParagraphs": [
-        "De hieronder getoonde status is een indicatieve status die wordt berekend op basis van toegankelijkheidsbevindingen uit Web Auditor.",
-        "De tabellen groeperen de technische bevindingen per regel en tonen het aantal betrokken pagina’s en een voorbeeld-URL."
-    ],
-    "howBullets": [
-        "Dit vereenvoudigde rapport focust uitsluitend op toegankelijkheidsbevindingen en laat SEO-, veiligheids- en performantiebevindingen buiten beschouwing.",
-        "De technische boodschappen in de bijlage blijven ongewijzigd zoals ze door de auditmotor werden geproduceerd.",
-        "Een menselijke validatie blijft noodzakelijk vóór officiële publicatie."
-    ],
-    "sectionResults": "3. Resultaten van de vereenvoudigde controle",
+    "sectionResults": "Resultaten van de vereenvoudigde controle",
     "generalInfo": "Algemene informatie",
     "siteUrl": "URL van de site",
     "auditDate": "Controledatum",

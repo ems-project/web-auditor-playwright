@@ -6,22 +6,7 @@
     "copySuccess": "Der HTML-Inhalt wurde in die Zwischenablage kopiert.",
     "copyError": "Das Kopieren ist fehlgeschlagen. Bitte die Browserberechtigungen prüfen.",
     "generatedNotice": "Diese Seite wird automatisch erzeugt und muss vor der Veröffentlichung geprüft werden.",
-    "sectionWhy": "1. Warum erhalten Sie diesen Bericht?",
-    "whyParagraphs": [
-        "Diese Seite bietet eine vereinfachte Zusammenfassung der Barrierefreiheitsbefunde, die während des Audits der Website festgestellt wurden.",
-        "Die Inhalte beziehen sich auf die europäische Norm EN 301 549 und sollen die Aktualisierung einer öffentlichen Auditseite erleichtern."
-    ],
-    "sectionHow": "2. Wie ist dieser Bericht zu lesen und zu verstehen?",
-    "howParagraphs": [
-        "Der unten angezeigte Status ist ein indikatives Ergebnis auf Basis der von Web Auditor erzeugten Barrierefreiheitsbefunde.",
-        "Die Tabellen gruppieren die technischen Befunde nach Regel und zeigen die Anzahl betroffener Seiten sowie eine Beispiel-URL."
-    ],
-    "howBullets": [
-        "Dieser vereinfachte Bericht konzentriert sich ausschließlich auf Barrierefreiheitsbefunde und blendet SEO-, Sicherheits- und Performancebefunde aus.",
-        "Die technischen Meldungen im Anhang werden unverändert aus der Audit-Engine übernommen.",
-        "Vor einer offiziellen Veröffentlichung ist weiterhin eine menschliche Prüfung erforderlich."
-    ],
-    "sectionResults": "3. Ergebnisse der vereinfachten Prüfung",
+    "sectionResults": "Ergebnisse der vereinfachten Prüfung",
     "generalInfo": "Allgemeine Informationen",
     "siteUrl": "URL der Website",
     "auditDate": "Prüfdatum",

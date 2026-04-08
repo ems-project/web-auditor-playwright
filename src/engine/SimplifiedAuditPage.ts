@@ -24,11 +24,6 @@ type TranslationBundle = {
     copySuccess: string;
     copyError: string;
     generatedNotice: string;
-    sectionWhy: string;
-    whyParagraphs: string[];
-    sectionHow: string;
-    howParagraphs: string[];
-    howBullets: string[];
     sectionResults: string;
     generalInfo: string;
     siteName: string;

@@ -118,25 +118,6 @@
                             </dl>
                         </section>
 
-                        <section class="section-block">
-                            <h2><%= model.t.sectionWhy %></h2>
-                            <% for (const paragraph of model.t.whyParagraphs) { %>
-                                <p><%= paragraph %></p>
-                            <% } %>
-                        </section>
-
-                        <section class="section-block">
-                            <h2><%= model.t.sectionHow %></h2>
-                            <% for (const paragraph of model.t.howParagraphs) { %>
-                                <p><%= paragraph %></p>
-                            <% } %>
-                            <ul>
-                                <% for (const bullet of model.t.howBullets) { %>
-                                    <li><%= bullet %></li>
-                                <% } %>
-                            </ul>
-                        </section>
-
                         <section id="audit" class="section-block">
                             <h2><%= model.t.sectionResults %></h2>
                             <p><%= model.t.criteriaLead %></p>

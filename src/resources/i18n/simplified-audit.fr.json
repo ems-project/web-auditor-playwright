@@ -6,22 +6,7 @@
     "copySuccess": "Le contenu HTML a été copié dans le presse-papier.",
     "copyError": "La copie a échoué. Vérifiez les permissions du navigateur.",
     "generatedNotice": "Cette page est générée automatiquement et doit être relue avant publication.",
-    "sectionWhy": "1. Pourquoi recevez-vous ce rapport ?",
-    "whyParagraphs": [
-        "Cette page présente une synthèse simplifiée des constats accessibilité relevés pendant l’audit du site.",
-        "Le contenu est formulé en référence à la norme européenne EN 301 549 et vise à faciliter la mise à jour d’une page publique de rapport d’audit."
-    ],
-    "sectionHow": "2. Comment lire et comprendre ce rapport ?",
-    "howParagraphs": [
-        "Le statut affiché ci-dessous est un statut indicatif calculé à partir des constats accessibilité générés par Web Auditor.",
-        "Les tableaux regroupent les non-conformités par règle technique et indiquent le nombre de pages touchées ainsi qu’un exemple d’URL."
-    ],
-    "howBullets": [
-        "Le rapport simplifié se concentre sur les constats accessibilité et exclut volontairement les constats SEO, sécurité ou performance.",
-        "Les messages techniques repris dans l’annexe sont conservés tels qu’émis par le moteur d’audit.",
-        "Une validation humaine reste nécessaire avant publication officielle."
-    ],
-    "sectionResults": "3. Résultats du contrôle simplifié",
+    "sectionResults": "Résultats du contrôle simplifié",
     "generalInfo": "Informations générales",
     "siteUrl": "URL du site",
     "auditDate": "Date du contrôle",
