@@ -1,0 +1,210 @@
+{
+    "htmlLang": "de",
+    "pageTitle": "Vereinfachter Auditbericht",
+    "lead": "Kompakte Fassung für die Veröffentlichung im CMS auf Basis von EN301 549-orientierten Barrierefreiheitsbefunden aus Web Auditor.",
+    "copyButton": "HTML-Inhalt kopieren",
+    "copySuccess": "Der HTML-Inhalt wurde in die Zwischenablage kopiert.",
+    "copyError": "Das Kopieren ist fehlgeschlagen. Bitte die Browserberechtigungen prüfen.",
+    "generatedNotice": "Diese Seite wird automatisch erzeugt und muss vor der Veröffentlichung geprüft werden.",
+    "sectionResults": "Ergebnisse der vereinfachten Prüfung",
+    "generalInfo": "Allgemeine Informationen",
+    "siteUrl": "URL der Website",
+    "auditDate": "Prüfdatum",
+    "auditType": "Audittyp",
+    "auditTypeValue": "Vereinfachte automatisierte Prüfung",
+    "standard": "Norm",
+    "standardValue": "EN301 549",
+    "pagesChecked": "Geprüfte Seiten",
+    "provisionalStatus": "Indikativer Status",
+    "complianceStatusLabel": "Konformitätsstatus",
+    "summaryTitle": "Überblick",
+    "summaryLead": "Die folgende Zusammenfassung basiert ausschließlich auf den während des Audits erkannten Barrierefreiheitsbefunden.",
+    "summaryCards": {
+        "findings": "Befunde",
+        "ruleGroups": "Regelgruppen",
+        "affectedPages": "Betroffene Seiten",
+        "plugins": "Auditquellen"
+    },
+    "status": {
+        "compliant": "Konform",
+        "partiallyCompliant": "Teilweise konform",
+        "nonCompliant": "Nicht konform"
+    },
+    "statusDescriptions": {
+        "compliant": "In den für diese Zusammenfassung berücksichtigten Prüfungen wurden keine Barrierefreiheitsbefunde festgestellt.",
+        "partiallyCompliant": "Es wurden Warnungen zur Barrierefreiheit festgestellt. Für eine endgültige Bewertung ist weiterhin eine menschliche Prüfung erforderlich.",
+        "nonCompliant": "Mindestens ein Barrierefreiheitsbefund mit dem Schweregrad error wurde in den berücksichtigten Prüfungen festgestellt."
+    },
+    "pluginBreakdownTitle": "Verteilung nach Auditquelle",
+    "findingsTitle": "Gruppierte technische Befunde",
+    "noFindings": "Für diese Zusammenfassung wurden keine Barrierefreiheitsbefunde festgestellt.",
+    "findingsLead": "Die Befunde sind nach technischem Code gruppiert, um die Erstellung einer redaktionellen Zusammenfassung zu erleichtern.",
+    "auditDetailsIntro": "Die folgenden Tabellen gruppieren die Barrierefreiheitsbefunde nach Auditquelle. Redaktioneller Aufbau und Layout orientieren sich an der Smals-Referenzseite, jedoch mit EN301 549-Ausrichtung.",
+    "sourceHeading": "Auditquelle",
+    "sourceLead": "Gruppierte Befunde für diese Quelle.",
+    "columns": {
+        "severity": "Schweregrad",
+        "plugin": "Quelle",
+        "code": "Code",
+        "message": "Technische Meldung",
+        "pages": "Seiten",
+        "example": "Beispiel-URL",
+        "description": "Beschreibung",
+        "status": "Ergebnis"
+    },
+    "severity": {
+        "error": "Fehler",
+        "warning": "Warnung",
+        "info": "Info"
+    },
+    "breakdownErrors": "Fehler",
+    "breakdownWarnings": "Warnungen",
+    "breakdownInfos": "Infos",
+    "occurrences": "Vorkommen",
+    "criteriaTitle": "Von Axe automatisch geprüfte EN-301-549-Kriterien",
+    "criteriaLead": "Die folgende Tabelle listet vollständig alle EN-301-549-Kriterien auf, die von Axe Core abgedeckt werden. Jede Zeile zeigt, ob während des Audits eine Nichtkonformität erkannt wurde, und enthält Referenzlinks zur Axe-Dokumentation.",
+    "detectedFindingsLabel": "Erkannte Befunde",
+    "criterionStatus": {
+        "pass": "Kein Problem erkannt",
+        "error": "Nichtkonformität erkannt",
+        "warning": "Warnung erkannt",
+        "info": "Information erkannt"
+    },
+    "structure": {
+        "principles": {
+            "1": {
+                "title": "Wahrnehmbar",
+                "description": "Informationen und Komponenten der Benutzeroberfläche müssen den Nutzern so dargestellt werden, dass sie wahrgenommen werden können."
+            },
+            "2": {
+                "title": "Bedienbar",
+                "description": "Komponenten der Benutzeroberfläche und Navigation müssen bedienbar sein."
+            },
+            "3": {
+                "title": "Verständlich",
+                "description": "Informationen und die Bedienung der Benutzeroberfläche müssen verständlich sein."
+            },
+            "4": {
+                "title": "Robust",
+                "description": "Inhalte müssen robust genug sein, um von einer Vielzahl von Benutzeragenten einschließlich assistiver Technologien zuverlässig interpretiert zu werden."
+            }
+        },
+        "guidelines": {
+            "1.1": {
+                "title": "Textalternativen",
+                "description": "Stellen Sie Textalternativen für nicht-textuelle Inhalte bereit."
+            },
+            "1.2": {
+                "title": "Zeitbasierte Medien",
+                "description": "Stellen Sie Alternativen für zeitbasierte Medien bereit."
+            },
+            "1.3": {
+                "title": "Anpassbar",
+                "description": "Erstellen Sie Inhalte, die ohne Informations- oder Strukturverlust unterschiedlich präsentiert werden können."
+            },
+            "1.4": {
+                "title": "Unterscheidbar",
+                "description": "Erleichtern Sie es Nutzern, Inhalte zu sehen und zu hören."
+            },
+            "2.1": {
+                "title": "Per Tastatur zugänglich",
+                "description": "Machen Sie alle Funktionen über eine Tastatur verfügbar."
+            },
+            "2.2": {
+                "title": "Ausreichend Zeit",
+                "description": "Geben Sie Nutzern ausreichend Zeit, Inhalte zu lesen und zu verwenden."
+            },
+            "2.4": {
+                "title": "Navigierbar",
+                "description": "Stellen Sie Hilfen bereit, damit Nutzer navigieren, Inhalte finden und ihre Position bestimmen können."
+            },
+            "2.5": {
+                "title": "Eingabemodalitäten",
+                "description": "Erleichtern Sie die Bedienung über andere Eingabemodalitäten als die Tastatur."
+            },
+            "3.1": {
+                "title": "Lesbar",
+                "description": "Machen Sie Textinhalte lesbar und verständlich."
+            },
+            "3.3": {
+                "title": "Hilfen bei der Eingabe",
+                "description": "Helfen Sie Nutzern, Fehler zu vermeiden und zu korrigieren."
+            },
+            "4.1": {
+                "title": "Kompatibel",
+                "description": "Maximieren Sie die Kompatibilität mit aktuellen und zukünftigen Benutzeragenten einschließlich assistiver Technologien."
+            }
+        },
+        "criteria": {
+            "1.1.1": {
+                "title": "Nicht-textueller Inhalt"
+            },
+            "1.2.1": {
+                "title": "Nur-Audio und Nur-Video (aufgezeichnet)"
+            },
+            "1.2.2": {
+                "title": "Untertitel (aufgezeichnet)"
+            },
+            "1.3.1": {
+                "title": "Informationen und Beziehungen"
+            },
+            "1.3.4": {
+                "title": "Ausrichtung"
+            },
+            "1.3.5": {
+                "title": "Eingabezweck bestimmen"
+            },
+            "1.4.1": {
+                "title": "Verwendung von Farbe"
+            },
+            "1.4.2": {
+                "title": "Audiosteuerung"
+            },
+            "1.4.3": {
+                "title": "Kontrast (Minimum)"
+            },
+            "1.4.4": {
+                "title": "Text vergrößern"
+            },
+            "1.4.12": {
+                "title": "Textabstände"
+            },
+            "2.1.1": {
+                "title": "Tastatur"
+            },
+            "2.1.3": {
+                "title": "Tastatur ohne Ausnahme"
+            },
+            "2.2.1": {
+                "title": "Anpassbare Zeitbegrenzung"
+            },
+            "2.2.2": {
+                "title": "Pausieren, stoppen, ausblenden"
+            },
+            "2.4.1": {
+                "title": "Blöcke umgehen"
+            },
+            "2.4.2": {
+                "title": "Seite mit Titel"
+            },
+            "2.4.4": {
+                "title": "Zweck des Links im Kontext"
+            },
+            "2.5.3": {
+                "title": "Beschriftung im Namen"
+            },
+            "3.1.1": {
+                "title": "Sprache der Seite"
+            },
+            "3.1.2": {
+                "title": "Sprache von Teilen"
+            },
+            "3.3.2": {
+                "title": "Beschriftungen oder Anweisungen"
+            },
+            "4.1.2": {
+                "title": "Name, Rolle, Wert"
+            }
+        }
+    }
+}

@@ -1,0 +1,210 @@
+{
+    "htmlLang": "fr",
+    "pageTitle": "Rapport d’audit simplifié",
+    "lead": "Version synthétique orientée publication CMS, basée sur les constats accessibilité alignés EN301 549 produits par Web Auditor.",
+    "copyButton": "Copier le contenu HTML",
+    "copySuccess": "Le contenu HTML a été copié dans le presse-papier.",
+    "copyError": "La copie a échoué. Vérifiez les permissions du navigateur.",
+    "generatedNotice": "Cette page est générée automatiquement et doit être relue avant publication.",
+    "sectionResults": "Résultats du contrôle simplifié",
+    "generalInfo": "Informations générales",
+    "siteUrl": "URL du site",
+    "auditDate": "Date du contrôle",
+    "auditType": "Type d’audit",
+    "auditTypeValue": "Simplifié automatisé",
+    "standard": "Référentiel",
+    "standardValue": "EN301 549",
+    "pagesChecked": "Nombre de pages vérifiées",
+    "provisionalStatus": "Statut indicatif",
+    "complianceStatusLabel": "Statut de conformité",
+    "summaryTitle": "Vue d’ensemble",
+    "summaryLead": "Le résumé ci-dessous se base uniquement sur les constats accessibilité détectés pendant l’audit.",
+    "summaryCards": {
+        "findings": "Constats",
+        "ruleGroups": "Groupes de règles",
+        "affectedPages": "Pages touchées",
+        "plugins": "Sources d’audit"
+    },
+    "status": {
+        "compliant": "Conforme",
+        "partiallyCompliant": "Partiellement conforme",
+        "nonCompliant": "Non conforme"
+    },
+    "statusDescriptions": {
+        "compliant": "Aucun constat accessibilité n’a été relevé par les contrôles pris en compte dans cette synthèse.",
+        "partiallyCompliant": "Des avertissements accessibilité ont été détectés. Une revue humaine est nécessaire pour statuer définitivement.",
+        "nonCompliant": "Au moins une non-conformité accessibilité de sévérité erreur a été détectée dans les contrôles pris en compte."
+    },
+    "pluginBreakdownTitle": "Répartition par source d’audit",
+    "findingsTitle": "Constats techniques regroupés",
+    "noFindings": "Aucun constat accessibilité n’a été relevé pour cette synthèse.",
+    "findingsLead": "Les constats sont regroupés par code technique afin de faciliter la publication d’un résumé éditorial.",
+    "auditDetailsIntro": "Le tableau ci-dessous reprend les constats d’accessibilité regroupés par source d’audit. La logique éditoriale et la mise en page s’inspirent du rapport d’audit Smals, avec un positionnement EN301 549.",
+    "sourceHeading": "Source d’audit",
+    "sourceLead": "Constats regroupés pour cette source.",
+    "columns": {
+        "severity": "Sévérité",
+        "plugin": "Source",
+        "code": "Code",
+        "message": "Message technique",
+        "pages": "Pages",
+        "example": "Exemple d’URL",
+        "description": "Description",
+        "status": "Résultat"
+    },
+    "severity": {
+        "error": "Erreur",
+        "warning": "Avertissement",
+        "info": "Info"
+    },
+    "breakdownErrors": "Erreurs",
+    "breakdownWarnings": "Avertissements",
+    "breakdownInfos": "Infos",
+    "occurrences": "Occurrences",
+    "criteriaTitle": "Critères EN301 549 contrôlés automatiquement par Axe",
+    "criteriaLead": "Le tableau ci-dessous liste exhaustivement les critères EN301 549 couverts par Axe Core. Chaque ligne indique si une non-conformité a été détectée pendant l’audit et reprend des liens de référence vers la documentation Axe.",
+    "detectedFindingsLabel": "Constats détectés",
+    "criterionStatus": {
+        "pass": "Aucun problème détecté",
+        "error": "Non-conformité détectée",
+        "warning": "Avertissement détecté",
+        "info": "Information détectée"
+    },
+    "structure": {
+        "principles": {
+            "1": {
+                "title": "Perceptible",
+                "description": "Les informations et les composants de l’interface utilisateur doivent être présentés de manière à pouvoir être perçus."
+            },
+            "2": {
+                "title": "Utilisable",
+                "description": "Les composants de l’interface utilisateur et les éléments de navigation doivent être utilisables."
+            },
+            "3": {
+                "title": "Compréhensible",
+                "description": "Les informations et l’utilisation de l’interface utilisateur doivent être compréhensibles."
+            },
+            "4": {
+                "title": "Robuste",
+                "description": "Le contenu doit être suffisamment robuste pour pouvoir être interprété de manière fiable par un large éventail d’agents utilisateurs, y compris les technologies d’assistance."
+            }
+        },
+        "guidelines": {
+            "1.1": {
+                "title": "Alternatives textuelles",
+                "description": "Fournir des alternatives textuelles à tout contenu non textuel."
+            },
+            "1.2": {
+                "title": "Médias temporels",
+                "description": "Fournir des alternatives aux médias temporels."
+            },
+            "1.3": {
+                "title": "Adaptable",
+                "description": "Créer des contenus pouvant être présentés de différentes manières sans perte d’information ni de structure."
+            },
+            "1.4": {
+                "title": "Distinguable",
+                "description": "Faciliter la perception visuelle et auditive du contenu."
+            },
+            "2.1": {
+                "title": "Accessible au clavier",
+                "description": "Rendre toutes les fonctionnalités accessibles au clavier."
+            },
+            "2.2": {
+                "title": "Temps suffisant",
+                "description": "Laisser aux utilisateurs suffisamment de temps pour lire et utiliser le contenu."
+            },
+            "2.4": {
+                "title": "Navigable",
+                "description": "Fournir des mécanismes pour aider les utilisateurs à naviguer, trouver le contenu et se repérer."
+            },
+            "2.5": {
+                "title": "Modalités d’entrée",
+                "description": "Faciliter l’utilisation des fonctionnalités via d’autres modalités que le clavier."
+            },
+            "3.1": {
+                "title": "Lisible",
+                "description": "Rendre le contenu textuel lisible et compréhensible."
+            },
+            "3.3": {
+                "title": "Assistance à la saisie",
+                "description": "Aider les utilisateurs à éviter et corriger les erreurs."
+            },
+            "4.1": {
+                "title": "Compatible",
+                "description": "Optimiser la compatibilité avec les agents utilisateurs actuels et futurs, y compris les technologies d’assistance."
+            }
+        },
+        "criteria": {
+            "1.1.1": {
+                "title": "Contenu non textuel"
+            },
+            "1.2.1": {
+                "title": "Audio uniquement et vidéo uniquement (préenregistrés)"
+            },
+            "1.2.2": {
+                "title": "Sous-titres (préenregistrés)"
+            },
+            "1.3.1": {
+                "title": "Informations et relations"
+            },
+            "1.3.4": {
+                "title": "Orientation"
+            },
+            "1.3.5": {
+                "title": "Identifier la finalité de la saisie"
+            },
+            "1.4.1": {
+                "title": "Usage de la couleur"
+            },
+            "1.4.2": {
+                "title": "Contrôle du son"
+            },
+            "1.4.3": {
+                "title": "Contraste minimum"
+            },
+            "1.4.4": {
+                "title": "Redimensionnement du texte"
+            },
+            "1.4.12": {
+                "title": "Espacement du texte"
+            },
+            "2.1.1": {
+                "title": "Clavier"
+            },
+            "2.1.3": {
+                "title": "Clavier sans exception"
+            },
+            "2.2.1": {
+                "title": "Ajustable dans le temps"
+            },
+            "2.2.2": {
+                "title": "Mettre en pause, arrêter, masquer"
+            },
+            "2.4.1": {
+                "title": "Contourner des blocs"
+            },
+            "2.4.2": {
+                "title": "Titre de page"
+            },
+            "2.4.4": {
+                "title": "Finalité du lien dans son contexte"
+            },
+            "2.5.3": {
+                "title": "Étiquette dans le nom"
+            },
+            "3.1.1": {
+                "title": "Langue de la page"
+            },
+            "3.1.2": {
+                "title": "Langue des parties"
+            },
+            "3.3.2": {
+                "title": "Étiquettes ou instructions"
+            },
+            "4.1.2": {
+                "title": "Nom, rôle, valeur"
+            }
+        }
+    }
+}

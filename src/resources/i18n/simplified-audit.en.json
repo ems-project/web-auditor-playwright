@@ -1,0 +1,210 @@
+{
+    "htmlLang": "en",
+    "pageTitle": "Simplified Audit Report",
+    "lead": "Compact CMS-ready version based on EN301 549-oriented accessibility findings produced by Web Auditor.",
+    "copyButton": "Copy HTML content",
+    "copySuccess": "The HTML content has been copied to the clipboard.",
+    "copyError": "Copy failed. Please check browser permissions.",
+    "generatedNotice": "This page is generated automatically and should be reviewed before publication.",
+    "sectionResults": "Simplified audit results",
+    "generalInfo": "General information",
+    "siteUrl": "Site URL",
+    "auditDate": "Audit date",
+    "auditType": "Audit type",
+    "auditTypeValue": "Simplified automated audit",
+    "standard": "Standard",
+    "standardValue": "EN301 549",
+    "pagesChecked": "Checked pages",
+    "provisionalStatus": "Indicative status",
+    "complianceStatusLabel": "Compliance status",
+    "summaryTitle": "Overview",
+    "summaryLead": "The summary below is based only on accessibility findings detected during the audit.",
+    "summaryCards": {
+        "findings": "Findings",
+        "ruleGroups": "Rule groups",
+        "affectedPages": "Impacted pages",
+        "plugins": "Audit sources"
+    },
+    "status": {
+        "compliant": "Compliant",
+        "partiallyCompliant": "Partially compliant",
+        "nonCompliant": "Non-compliant"
+    },
+    "statusDescriptions": {
+        "compliant": "No accessibility findings were detected by the checks included in this summary.",
+        "partiallyCompliant": "Accessibility warnings were detected. Human review is still required before drawing a final conclusion.",
+        "nonCompliant": "At least one accessibility finding with error severity was detected by the checks included in this summary."
+    },
+    "pluginBreakdownTitle": "Breakdown by audit source",
+    "findingsTitle": "Grouped technical findings",
+    "noFindings": "No accessibility findings were detected for this summary.",
+    "findingsLead": "Findings are grouped by technical code to make editorial publication easier.",
+    "auditDetailsIntro": "The tables below group accessibility findings by audit source. The editorial structure and layout are aligned with the Smals reference page while using EN301 549 positioning.",
+    "sourceHeading": "Audit source",
+    "sourceLead": "Grouped findings for this source.",
+    "columns": {
+        "severity": "Severity",
+        "plugin": "Source",
+        "code": "Code",
+        "message": "Technical message",
+        "pages": "Pages",
+        "example": "Example URL",
+        "description": "Description",
+        "status": "Result"
+    },
+    "severity": {
+        "error": "Error",
+        "warning": "Warning",
+        "info": "Info"
+    },
+    "breakdownErrors": "Errors",
+    "breakdownWarnings": "Warnings",
+    "breakdownInfos": "Infos",
+    "occurrences": "Occurrences",
+    "criteriaTitle": "EN301 549 criteria automatically checked by Axe",
+    "criteriaLead": "The table below exhaustively lists the EN301 549 criteria covered by Axe Core. Each row shows whether a non-compliance was detected during the audit and includes reference links to Axe documentation.",
+    "detectedFindingsLabel": "Detected findings",
+    "criterionStatus": {
+        "pass": "No issue detected",
+        "error": "Non-compliance detected",
+        "warning": "Warning detected",
+        "info": "Information detected"
+    },
+    "structure": {
+        "principles": {
+            "1": {
+                "title": "Perceivable",
+                "description": "Information and user interface components must be presented to users in ways they can perceive."
+            },
+            "2": {
+                "title": "Operable",
+                "description": "User interface components and navigation must be operable."
+            },
+            "3": {
+                "title": "Understandable",
+                "description": "Information and the operation of the user interface must be understandable."
+            },
+            "4": {
+                "title": "Robust",
+                "description": "Content must be robust enough that it can be interpreted reliably by a wide variety of user agents, including assistive technologies."
+            }
+        },
+        "guidelines": {
+            "1.1": {
+                "title": "Text Alternatives",
+                "description": "Provide text alternatives for non-text content."
+            },
+            "1.2": {
+                "title": "Time-based Media",
+                "description": "Provide alternatives for time-based media."
+            },
+            "1.3": {
+                "title": "Adaptable",
+                "description": "Create content that can be presented in different ways without losing information or structure."
+            },
+            "1.4": {
+                "title": "Distinguishable",
+                "description": "Make it easier for users to see and hear content."
+            },
+            "2.1": {
+                "title": "Keyboard Accessible",
+                "description": "Make all functionality available from a keyboard."
+            },
+            "2.2": {
+                "title": "Enough Time",
+                "description": "Provide users enough time to read and use content."
+            },
+            "2.4": {
+                "title": "Navigable",
+                "description": "Provide ways to help users navigate, find content, and determine where they are."
+            },
+            "2.5": {
+                "title": "Input Modalities",
+                "description": "Make it easier for users to operate functionality through inputs beyond keyboard."
+            },
+            "3.1": {
+                "title": "Readable",
+                "description": "Make text content readable and understandable."
+            },
+            "3.3": {
+                "title": "Input Assistance",
+                "description": "Help users avoid and correct mistakes."
+            },
+            "4.1": {
+                "title": "Compatible",
+                "description": "Maximize compatibility with current and future user agents, including assistive technologies."
+            }
+        },
+        "criteria": {
+            "1.1.1": {
+                "title": "Non-text Content"
+            },
+            "1.2.1": {
+                "title": "Audio-only and Video-only (Prerecorded)"
+            },
+            "1.2.2": {
+                "title": "Captions (Prerecorded)"
+            },
+            "1.3.1": {
+                "title": "Info and Relationships"
+            },
+            "1.3.4": {
+                "title": "Orientation"
+            },
+            "1.3.5": {
+                "title": "Identify Input Purpose"
+            },
+            "1.4.1": {
+                "title": "Use of Color"
+            },
+            "1.4.2": {
+                "title": "Audio Control"
+            },
+            "1.4.3": {
+                "title": "Contrast (Minimum)"
+            },
+            "1.4.4": {
+                "title": "Resize Text"
+            },
+            "1.4.12": {
+                "title": "Text Spacing"
+            },
+            "2.1.1": {
+                "title": "Keyboard"
+            },
+            "2.1.3": {
+                "title": "Keyboard (No Exception)"
+            },
+            "2.2.1": {
+                "title": "Timing Adjustable"
+            },
+            "2.2.2": {
+                "title": "Pause, Stop, Hide"
+            },
+            "2.4.1": {
+                "title": "Bypass Blocks"
+            },
+            "2.4.2": {
+                "title": "Page Titled"
+            },
+            "2.4.4": {
+                "title": "Link Purpose (In Context)"
+            },
+            "2.5.3": {
+                "title": "Label in Name"
+            },
+            "3.1.1": {
+                "title": "Language of Page"
+            },
+            "3.1.2": {
+                "title": "Language of Parts"
+            },
+            "3.3.2": {
+                "title": "Labels or Instructions"
+            },
+            "4.1.2": {
+                "title": "Name, Role, Value"
+            }
+        }
+    }
+}

@@ -229,7 +229,17 @@ th { font-size: 0.82rem; color: var(--muted); text-transform: uppercase; letter-
           <% for (const item of summary.runDetails) { %>
             <tr>
               <th><%= item.label %></th>
-              <td><%= formatValue(item.value) %></td>
+              <td>
+                <% if (isLinkValue(item.value)) { %>
+                  <a href="<%= item.value.href %>"><%= item.value.label %></a>
+                <% } else if (isLinkListValue(item.value)) { %>
+                  <% for (const link of item.value) { %>
+                    <div><a href="<%= link.href %>"><%= link.label %></a></div>
+                  <% } %>
+                <% } else { %>
+                  <%= formatValue(item.value) %>
+                <% } %>
+              </td>
             </tr>
           <% } %>
         </tbody>
@@ -271,7 +281,17 @@ th { font-size: 0.82rem; color: var(--muted); text-transform: uppercase; letter-
                   <% for (const item of section.items) { %>
                     <div class="detail-item">
                       <span><%= item.label %></span>
-                      <strong><%= formatValue(item.value) %></strong>
+                      <strong>
+                        <% if (isLinkValue(item.value)) { %>
+                          <a href="<%= item.value.href %>"><%= item.value.label %></a>
+                        <% } else if (isLinkListValue(item.value)) { %>
+                          <% for (const link of item.value) { %>
+                            <div><a href="<%= link.href %>"><%= link.label %></a></div>
+                          <% } %>
+                        <% } else { %>
+                          <%= formatValue(item.value) %>
+                        <% } %>
+                      </strong>
                     </div>
                   <% } %>
                 </div>

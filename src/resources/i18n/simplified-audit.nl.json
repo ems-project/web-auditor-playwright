@@ -1,0 +1,210 @@
+{
+    "htmlLang": "nl",
+    "pageTitle": "Vereenvoudigd auditrapport",
+    "lead": "Beknopte versie voor CMS-publicatie, gebaseerd op EN301 549-gerichte toegankelijkheidsbevindingen uit Web Auditor.",
+    "copyButton": "HTML-inhoud kopiëren",
+    "copySuccess": "De HTML-inhoud werd naar het klembord gekopieerd.",
+    "copyError": "Kopiëren is mislukt. Controleer de browserrechten.",
+    "generatedNotice": "Deze pagina wordt automatisch gegenereerd en moet vóór publicatie worden nagelezen.",
+    "sectionResults": "Resultaten van de vereenvoudigde controle",
+    "generalInfo": "Algemene informatie",
+    "siteUrl": "URL van de site",
+    "auditDate": "Controledatum",
+    "auditType": "Type audit",
+    "auditTypeValue": "Vereenvoudigd geautomatiseerd",
+    "standard": "Norm",
+    "standardValue": "EN301 549",
+    "pagesChecked": "Aantal gecontroleerde pagina’s",
+    "provisionalStatus": "Indicatieve status",
+    "complianceStatusLabel": "Conformiteitsstatus",
+    "summaryTitle": "Overzicht",
+    "summaryLead": "Het onderstaande overzicht is uitsluitend gebaseerd op toegankelijkheidsbevindingen uit de audit.",
+    "summaryCards": {
+        "findings": "Bevindingen",
+        "ruleGroups": "Regelgroepen",
+        "affectedPages": "Getroffen pagina’s",
+        "plugins": "Auditbronnen"
+    },
+    "status": {
+        "compliant": "Conform",
+        "partiallyCompliant": "Gedeeltelijk conform",
+        "nonCompliant": "Niet conform"
+    },
+    "statusDescriptions": {
+        "compliant": "Er werden geen toegankelijkheidsbevindingen gedetecteerd binnen de controles die in deze synthese zijn opgenomen.",
+        "partiallyCompliant": "Er werden toegankelijkheidswaarschuwingen gedetecteerd. Een menselijke beoordeling blijft nodig voor een definitieve conclusie.",
+        "nonCompliant": "Er werd minstens één toegankelijkheidsfout met ernstniveau error gedetecteerd binnen de opgenomen controles."
+    },
+    "pluginBreakdownTitle": "Verdeling per auditbron",
+    "findingsTitle": "Gegroepeerde technische bevindingen",
+    "noFindings": "Er werden geen toegankelijkheidsbevindingen opgenomen in deze synthese.",
+    "findingsLead": "De bevindingen zijn per technische code gegroepeerd om de publicatie van een redactionele samenvatting te vergemakkelijken.",
+    "auditDetailsIntro": "De onderstaande tabellen groeperen de toegankelijkheidsbevindingen per auditbron. De redactionele structuur en lay-out zijn afgestemd op de Smals referentiepagina, maar met EN301 549-positionering.",
+    "sourceHeading": "Auditbron",
+    "sourceLead": "Gegroepeerde bevindingen voor deze bron.",
+    "columns": {
+        "severity": "Ernst",
+        "plugin": "Bron",
+        "code": "Code",
+        "message": "Technische boodschap",
+        "pages": "Pagina’s",
+        "example": "Voorbeeld-URL",
+        "description": "Beschrijving",
+        "status": "Resultaat"
+    },
+    "severity": {
+        "error": "Fout",
+        "warning": "Waarschuwing",
+        "info": "Info"
+    },
+    "breakdownErrors": "Fouten",
+    "breakdownWarnings": "Waarschuwingen",
+    "breakdownInfos": "Info",
+    "occurrences": "Voorkomens",
+    "criteriaTitle": "EN301 549-criteria die automatisch door Axe werden gecontroleerd",
+    "criteriaLead": "De onderstaande tabel geeft een exhaustief overzicht van de EN301 549-criteria die door Axe Core worden afgedekt. Elke rij toont of tijdens de audit een niet-conformiteit werd gedetecteerd en bevat referentielinks naar de Axe-documentatie.",
+    "detectedFindingsLabel": "Gedetecteerde bevindingen",
+    "criterionStatus": {
+        "pass": "Geen probleem gedetecteerd",
+        "error": "Niet-conformiteit gedetecteerd",
+        "warning": "Waarschuwing gedetecteerd",
+        "info": "Informatie gedetecteerd"
+    },
+    "structure": {
+        "principles": {
+            "1": {
+                "title": "Waarneembaar",
+                "description": "Informatie en componenten van de gebruikersinterface moeten aan gebruikers worden gepresenteerd op een manier die zij kunnen waarnemen."
+            },
+            "2": {
+                "title": "Bedienbaar",
+                "description": "Componenten van de gebruikersinterface en navigatie moeten bedienbaar zijn."
+            },
+            "3": {
+                "title": "Begrijpelijk",
+                "description": "Informatie en de bediening van de gebruikersinterface moeten begrijpelijk zijn."
+            },
+            "4": {
+                "title": "Robuust",
+                "description": "Content moet robuust genoeg zijn om betrouwbaar geïnterpreteerd te kunnen worden door uiteenlopende user agents, inclusief hulptechnologieën."
+            }
+        },
+        "guidelines": {
+            "1.1": {
+                "title": "Tekstalternatieven",
+                "description": "Bied tekstalternatieven voor niet-tekstuele content."
+            },
+            "1.2": {
+                "title": "Tijdsgebonden media",
+                "description": "Bied alternatieven voor tijdsgebonden media."
+            },
+            "1.3": {
+                "title": "Aanpasbaar",
+                "description": "Creëer content die op verschillende manieren kan worden gepresenteerd zonder informatie of structuur te verliezen."
+            },
+            "1.4": {
+                "title": "Onderscheidbaar",
+                "description": "Maak het eenvoudiger voor gebruikers om content te zien en te horen."
+            },
+            "2.1": {
+                "title": "Toetsenbordtoegankelijk",
+                "description": "Maak alle functionaliteit beschikbaar via een toetsenbord."
+            },
+            "2.2": {
+                "title": "Voldoende tijd",
+                "description": "Geef gebruikers voldoende tijd om content te lezen en te gebruiken."
+            },
+            "2.4": {
+                "title": "Navigeerbaar",
+                "description": "Bied hulpmiddelen om te navigeren, content te vinden en te bepalen waar men zich bevindt."
+            },
+            "2.5": {
+                "title": "Invoermodaliteiten",
+                "description": "Maak bediening makkelijker via andere invoermodaliteiten dan alleen het toetsenbord."
+            },
+            "3.1": {
+                "title": "Leesbaar",
+                "description": "Maak tekstinhoud leesbaar en begrijpelijk."
+            },
+            "3.3": {
+                "title": "Hulp bij invoer",
+                "description": "Help gebruikers om fouten te vermijden en te corrigeren."
+            },
+            "4.1": {
+                "title": "Compatibel",
+                "description": "Maximaliseer compatibiliteit met huidige en toekomstige user agents, inclusief hulptechnologieën."
+            }
+        },
+        "criteria": {
+            "1.1.1": {
+                "title": "Niet-tekstuele content"
+            },
+            "1.2.1": {
+                "title": "Alleen audio en alleen video (vooraf opgenomen)"
+            },
+            "1.2.2": {
+                "title": "Ondertitels (vooraf opgenomen)"
+            },
+            "1.3.1": {
+                "title": "Info en relaties"
+            },
+            "1.3.4": {
+                "title": "Oriëntatie"
+            },
+            "1.3.5": {
+                "title": "Doel van invoer identificeren"
+            },
+            "1.4.1": {
+                "title": "Gebruik van kleur"
+            },
+            "1.4.2": {
+                "title": "Audiobediening"
+            },
+            "1.4.3": {
+                "title": "Contrast (minimum)"
+            },
+            "1.4.4": {
+                "title": "Tekst schalen"
+            },
+            "1.4.12": {
+                "title": "Tekstafstand"
+            },
+            "2.1.1": {
+                "title": "Toetsenbord"
+            },
+            "2.1.3": {
+                "title": "Toetsenbord zonder uitzondering"
+            },
+            "2.2.1": {
+                "title": "Aanpasbare timing"
+            },
+            "2.2.2": {
+                "title": "Pauzeren, stoppen, verbergen"
+            },
+            "2.4.1": {
+                "title": "Blokken omzeilen"
+            },
+            "2.4.2": {
+                "title": "Paginatitel"
+            },
+            "2.4.4": {
+                "title": "Doel van de link in context"
+            },
+            "2.5.3": {
+                "title": "Label in naam"
+            },
+            "3.1.1": {
+                "title": "Taal van de pagina"
+            },
+            "3.1.2": {
+                "title": "Taal van onderdelen"
+            },
+            "3.3.2": {
+                "title": "Labels of instructies"
+            },
+            "4.1.2": {
+                "title": "Naam, rol, waarde"
+            }
+        }
+    }
+}

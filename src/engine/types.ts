@@ -392,10 +392,17 @@ export type PluginPhase =
     | "beforeFinally"
     | "finally";
 
+export type ReportItemValue =
+    | string
+    | number
+    | boolean
+    | { href: string; label: string }
+    | Array<{ href: string; label: string }>;
+
 export type ReportItem = {
     key: string;
     label: string;
-    value: string | number | boolean;
+    value: ReportItemValue;
 };
 
 export type Report = {
