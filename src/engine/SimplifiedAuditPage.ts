@@ -60,6 +60,9 @@ type TranslationBundle = {
     findingsTitle: string;
     noFindings: string;
     findingsLead: string;
+    auditDetailsIntro: string;
+    sourceHeading: string;
+    sourceLead: string;
     columns: {
         severity: string;
         plugin: string;
@@ -67,6 +70,8 @@ type TranslationBundle = {
         message: string;
         pages: string;
         example: string;
+        description: string;
+        references: string;
     };
     severity: {
         error: string;
@@ -117,6 +122,21 @@ type SimplifiedAuditViewModel = {
         pages: number;
         exampleUrl: string | null;
         occurrences: number;
+    }>;
+    findingsByPlugin: Array<{
+        plugin: string;
+        pluginLabel: string;
+        findings: Array<{
+            severity: "error" | "warning" | "info";
+            severityLabel: string;
+            plugin: string;
+            pluginLabel: string;
+            code: string;
+            message: string;
+            pages: number;
+            exampleUrl: string | null;
+            occurrences: number;
+        }>;
     }>;
 };
 
@@ -204,6 +224,10 @@ const translations: Record<SimplifiedAuditLocale, TranslationBundle> = {
         noFindings: "Aucun constat accessibilité n’a été relevé pour cette synthèse.",
         findingsLead:
             "Les constats sont regroupés par code technique afin de faciliter la publication d’un résumé éditorial.",
+        auditDetailsIntro:
+            "Le tableau ci-dessous reprend les constats d’accessibilité regroupés par source d’audit. La logique éditoriale et la mise en page s’inspirent du rapport d’audit Smals, avec un positionnement EN 301 549.",
+        sourceHeading: "Source d’audit",
+        sourceLead: "Constats regroupés pour cette source.",
         columns: {
             severity: "Sévérité",
             plugin: "Source",
@@ -211,6 +235,8 @@ const translations: Record<SimplifiedAuditLocale, TranslationBundle> = {
             message: "Message technique",
             pages: "Pages",
             example: "Exemple d’URL",
+            description: "Description",
+            references: "Ref(s)",
         },
         severity: {
             error: "Erreur",
@@ -294,6 +320,10 @@ const translations: Record<SimplifiedAuditLocale, TranslationBundle> = {
         noFindings: "Er werden geen toegankelijkheidsbevindingen opgenomen in deze synthese.",
         findingsLead:
             "De bevindingen zijn per technische code gegroepeerd om de publicatie van een redactionele samenvatting te vergemakkelijken.",
+        auditDetailsIntro:
+            "De onderstaande tabellen groeperen de toegankelijkheidsbevindingen per auditbron. De redactionele structuur en lay-out zijn afgestemd op de Smals referentiepagina, maar met EN 301 549-positionering.",
+        sourceHeading: "Auditbron",
+        sourceLead: "Gegroepeerde bevindingen voor deze bron.",
         columns: {
             severity: "Ernst",
             plugin: "Bron",
@@ -301,6 +331,8 @@ const translations: Record<SimplifiedAuditLocale, TranslationBundle> = {
             message: "Technische boodschap",
             pages: "Pagina’s",
             example: "Voorbeeld-URL",
+            description: "Beschrijving",
+            references: "Ref(s)",
         },
         severity: {
             error: "Fout",
@@ -384,6 +416,10 @@ const translations: Record<SimplifiedAuditLocale, TranslationBundle> = {
         noFindings: "Für diese Zusammenfassung wurden keine Barrierefreiheitsbefunde festgestellt.",
         findingsLead:
             "Die Befunde sind nach technischem Code gruppiert, um die Erstellung einer redaktionellen Zusammenfassung zu erleichtern.",
+        auditDetailsIntro:
+            "Die folgenden Tabellen gruppieren die Barrierefreiheitsbefunde nach Auditquelle. Redaktioneller Aufbau und Layout orientieren sich an der Smals-Referenzseite, jedoch mit EN 301 549-Ausrichtung.",
+        sourceHeading: "Auditquelle",
+        sourceLead: "Gruppierte Befunde für diese Quelle.",
         columns: {
             severity: "Schweregrad",
             plugin: "Quelle",
@@ -391,6 +427,8 @@ const translations: Record<SimplifiedAuditLocale, TranslationBundle> = {
             message: "Technische Meldung",
             pages: "Seiten",
             example: "Beispiel-URL",
+            description: "Beschreibung",
+            references: "Ref(s)",
         },
         severity: {
             error: "Fehler",
@@ -474,6 +512,10 @@ const translations: Record<SimplifiedAuditLocale, TranslationBundle> = {
         noFindings: "No accessibility findings were detected for this summary.",
         findingsLead:
             "Findings are grouped by technical code to make editorial publication easier.",
+        auditDetailsIntro:
+            "The tables below group accessibility findings by audit source. The editorial structure and layout are aligned with the Smals reference page while using EN 301 549 positioning.",
+        sourceHeading: "Audit source",
+        sourceLead: "Grouped findings for this source.",
         columns: {
             severity: "Severity",
             plugin: "Source",
@@ -481,6 +523,8 @@ const translations: Record<SimplifiedAuditLocale, TranslationBundle> = {
             message: "Technical message",
             pages: "Pages",
             example: "Example URL",
+            description: "Description",
+            references: "Ref(s)",
         },
         severity: {
             error: "Error",
@@ -567,6 +611,7 @@ export function buildSimplifiedAuditViewModel(
         pluginCount: pluginBreakdown.length,
         pluginBreakdown,
         findings: groupedFindings,
+        findingsByPlugin: groupFindingsByPlugin(groupedFindings),
     };
 }
 
@@ -663,6 +708,26 @@ function groupIssues(
             }
             return `${left.plugin}|${left.code}`.localeCompare(`${right.plugin}|${right.code}`);
         });
+}
+
+function groupFindingsByPlugin(
+    findings: SimplifiedAuditViewModel["findings"],
+): SimplifiedAuditViewModel["findingsByPlugin"] {
+    const map = new Map<string, SimplifiedAuditViewModel["findingsByPlugin"][number]>();
+
+    for (const finding of findings) {
+        const bucket = map.get(finding.plugin) ?? {
+            plugin: finding.plugin,
+            pluginLabel: finding.pluginLabel,
+            findings: [],
+        };
+        bucket.findings.push(finding);
+        map.set(finding.plugin, bucket);
+    }
+
+    return [...map.values()].sort((left, right) =>
+        left.pluginLabel.localeCompare(right.pluginLabel),
+    );
 }
 
 function buildPluginBreakdown(issues: IssueEntry[]): SimplifiedAuditViewModel["pluginBreakdown"] {

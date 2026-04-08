@@ -8,212 +8,187 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
-        body { background: #f5f7fb; }
-        .audit-shell { max-width: 1120px; }
-        .audit-card { border-radius: 1.25rem; }
-        .audit-kpi { min-height: 100%; }
-        .audit-dl dt { font-weight: 600; }
-        .audit-dl dd { margin-bottom: 0.75rem; }
-        .table td, .table th { vertical-align: top; }
+        body {
+            background: #f5f6f8;
+            color: #1f2937;
+        }
+        .page-shell {
+            max-width: 1100px;
+        }
+        .page-card {
+            background: #fff;
+            border-radius: 1.25rem;
+            box-shadow: 0 1rem 3rem rgba(15, 23, 42, 0.08);
+        }
+        .copy-surface h2,
+        .copy-surface h3,
+        .copy-surface h4,
+        .copy-surface h5 {
+            color: #074374;
+        }
+        .copy-surface h2 {
+            margin-bottom: 1rem;
+        }
+        .copy-surface h3 {
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+        }
+        .copy-surface h4 {
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .copy-surface .table th {
+            background: #f8fafc;
+        }
+        .copy-surface .table td,
+        .copy-surface .table th {
+            vertical-align: top;
+        }
+        .copy-surface .lead {
+            color: #475569;
+        }
+        .section-block + .section-block {
+            margin-top: 2.5rem;
+        }
+        .back-link {
+            font-size: 0.95rem;
+            text-decoration: none;
+        }
         @media print {
-            body { background: #fff; }
-            .no-print { display: none !important; }
-            .audit-card { box-shadow: none !important; border: 0 !important; }
+            body {
+                background: #fff;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .page-card {
+                box-shadow: none;
+                border: none;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container-fluid py-4 py-lg-5 audit-shell">
+    <div class="container py-4 py-lg-5 page-shell">
         <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4 no-print">
             <div>
                 <h1 class="h2 mb-1"><%= model.t.pageTitle %></h1>
                 <p class="text-secondary mb-0"><%= model.t.lead %></p>
             </div>
-            <div class="d-flex align-items-center gap-2">
-                <button id="copy-html-button" type="button" class="btn btn-primary" data-copy-target="cms-copy-root">
-                    <%= model.t.copyButton %>
-                </button>
-            </div>
+            <button id="copy-html-button" type="button" class="btn btn-primary" data-copy-target="cms-copy-root">
+                <%= model.t.copyButton %>
+            </button>
         </div>
 
         <div id="copy-feedback" class="alert d-none no-print" role="status" aria-live="polite"></div>
 
-        <div id="cms-copy-root" class="bg-white border shadow-sm p-4 p-lg-5 audit-card">
-            <header class="mb-4 pb-3 border-bottom">
-                <div class="d-flex flex-column flex-xl-row justify-content-between gap-3">
-                    <div>
-                        <p class="text-uppercase small text-secondary mb-2"><%= model.t.generatedNotice %></p>
-                        <h1 class="display-6 mb-2"><%= model.pageTitle %></h1>
+        <div class="page-card p-4 p-lg-5 copy-surface" id="cms-copy-root">
+            <div class="row">
+                <div class="col-12 offset-lg-1 col-lg-10">
+                    <header class="mb-4">
+                        <a href="<%= model.origin %>" class="back-link text-decoration-underline"><%= model.t.siteUrl %></a>
+                        <h1 class="mt-3"><%= model.pageTitle %></h1>
                         <p class="lead mb-0"><%= model.t.lead %></p>
-                    </div>
-                    <div class="text-secondary small">
-                        <div><strong><%= model.t.auditDate %>:</strong> <%= model.generatedAtDisplay %></div>
-                        <div><strong><%= model.t.siteUrl %>:</strong> <a href="<%= model.origin %>"><%= model.origin %></a></div>
-                    </div>
-                </div>
-            </header>
+                    </header>
 
-            <section class="mb-5">
-                <h2 class="h4 mb-3"><%= model.t.sectionWhy %></h2>
-                <% for (const paragraph of model.t.whyParagraphs) { %>
-                    <p><%= paragraph %></p>
-                <% } %>
-            </section>
-
-            <section class="mb-5">
-                <h2 class="h4 mb-3"><%= model.t.sectionHow %></h2>
-                <% for (const paragraph of model.t.howParagraphs) { %>
-                    <p><%= paragraph %></p>
-                <% } %>
-                <ul class="mb-0">
-                    <% for (const bullet of model.t.howBullets) { %>
-                        <li><%= bullet %></li>
-                    <% } %>
-                </ul>
-            </section>
-
-            <section class="mb-5">
-                <h2 class="h4 mb-3"><%= model.t.sectionResults %></h2>
-                <div class="row g-4 mb-4">
-                    <div class="col-12 col-lg-5">
-                        <div class="border rounded-4 p-4 h-100 audit-kpi bg-light-subtle">
-                            <h3 class="h5 mb-3"><%= model.t.generalInfo %></h3>
-                            <dl class="row audit-dl mb-0">
-                                <dt class="col-sm-5"><%= model.t.siteName %></dt>
-                                <dd class="col-sm-7"><%= model.siteName %></dd>
-                                <dt class="col-sm-5"><%= model.t.siteUrl %></dt>
-                                <dd class="col-sm-7"><a href="<%= model.origin %>"><%= model.origin %></a></dd>
-                                <dt class="col-sm-5"><%= model.t.auditStartedAt %></dt>
-                                <dd class="col-sm-7"><%= model.startedAtDisplay %></dd>
-                                <dt class="col-sm-5"><%= model.t.auditEndedAt %></dt>
-                                <dd class="col-sm-7"><%= model.endedAtDisplay %></dd>
-                                <dt class="col-sm-5"><%= model.t.auditType %></dt>
-                                <dd class="col-sm-7"><%= model.t.auditTypeValue %></dd>
-                                <dt class="col-sm-5"><%= model.t.standard %></dt>
-                                <dd class="col-sm-7"><%= model.t.standardValue %></dd>
-                                <dt class="col-sm-5"><%= model.t.auditTool %></dt>
-                                <dd class="col-sm-7"><%= model.t.auditToolValue %></dd>
-                                <dt class="col-sm-5"><%= model.t.pagesChecked %></dt>
-                                <dd class="col-sm-7"><%= model.pagesChecked %></dd>
+                    <article>
+                        <section id="general-info" class="section-block">
+                            <h2><%= model.t.generalInfo %></h2>
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4"><%= model.t.siteName %></dt>
+                                <dd class="col-sm-8"><%= model.siteName %></dd>
+                                <dt class="col-sm-4"><%= model.t.siteUrl %></dt>
+                                <dd class="col-sm-8"><a href="<%= model.origin %>"><%= model.origin %></a></dd>
+                                <dt class="col-sm-4"><%= model.t.auditDate %></dt>
+                                <dd class="col-sm-8"><%= model.generatedAtDisplay %></dd>
+                                <dt class="col-sm-4"><%= model.t.auditStartedAt %></dt>
+                                <dd class="col-sm-8"><%= model.startedAtDisplay %></dd>
+                                <dt class="col-sm-4"><%= model.t.auditEndedAt %></dt>
+                                <dd class="col-sm-8"><%= model.endedAtDisplay %></dd>
+                                <dt class="col-sm-4"><%= model.t.auditType %></dt>
+                                <dd class="col-sm-8"><%= model.t.auditTypeValue %></dd>
+                                <dt class="col-sm-4"><%= model.t.standard %></dt>
+                                <dd class="col-sm-8"><%= model.t.standardValue %></dd>
+                                <dt class="col-sm-4"><%= model.t.auditTool %></dt>
+                                <dd class="col-sm-8"><%= model.t.auditToolValue %></dd>
+                                <dt class="col-sm-4"><%= model.t.pagesChecked %></dt>
+                                <dd class="col-sm-8"><%= model.pagesChecked %></dd>
+                                <dt class="col-sm-4"><%= model.t.complianceStatusLabel %></dt>
+                                <dd class="col-sm-8"><strong><%= model.statusLabel %></strong>.<br><span class="text-secondary"><%= model.statusDescription %></span></dd>
                             </dl>
-                        </div>
-                    </div>
-                    <div class="col-12 col-lg-7">
-                        <div class="border rounded-4 p-4 h-100 audit-kpi">
-                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
-                                <div>
-                                    <h3 class="h5 mb-1"><%= model.t.complianceStatusLabel %></h3>
-                                    <p class="text-secondary mb-0"><%= model.t.summaryLead %></p>
-                                </div>
-                                <span class="badge fs-6 <%= model.statusBadgeClass %>"><%= model.statusLabel %></span>
-                            </div>
-                            <p class="mb-4"><%= model.statusDescription %></p>
-                            <div class="row g-3">
-                                <div class="col-6 col-xl-3">
-                                    <div class="border rounded-3 p-3 bg-light h-100">
-                                        <div class="small text-secondary"><%= model.t.summaryCards.findings %></div>
-                                        <div class="fs-3 fw-semibold"><%= model.findingCount %></div>
-                                    </div>
-                                </div>
-                                <div class="col-6 col-xl-3">
-                                    <div class="border rounded-3 p-3 bg-light h-100">
-                                        <div class="small text-secondary"><%= model.t.summaryCards.ruleGroups %></div>
-                                        <div class="fs-3 fw-semibold"><%= model.groupedFindingCount %></div>
-                                    </div>
-                                </div>
-                                <div class="col-6 col-xl-3">
-                                    <div class="border rounded-3 p-3 bg-light h-100">
-                                        <div class="small text-secondary"><%= model.t.summaryCards.affectedPages %></div>
-                                        <div class="fs-3 fw-semibold"><%= model.affectedPageCount %></div>
-                                    </div>
-                                </div>
-                                <div class="col-6 col-xl-3">
-                                    <div class="border rounded-3 p-3 bg-light h-100">
-                                        <div class="small text-secondary"><%= model.t.summaryCards.plugins %></div>
-                                        <div class="fs-3 fw-semibold"><%= model.pluginCount %></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                        </section>
 
-                <div class="row g-4">
-                    <div class="col-12 col-xl-4">
-                        <div class="border rounded-4 p-4 h-100">
-                            <h3 class="h5 mb-3"><%= model.t.pluginBreakdownTitle %></h3>
-                            <% if (model.pluginBreakdown.length === 0) { %>
-                                <p class="mb-0 text-secondary"><%= model.t.noFindings %></p>
+                        <section class="section-block">
+                            <h2><%= model.t.sectionWhy %></h2>
+                            <% for (const paragraph of model.t.whyParagraphs) { %>
+                                <p><%= paragraph %></p>
+                            <% } %>
+                        </section>
+
+                        <section class="section-block">
+                            <h2><%= model.t.sectionHow %></h2>
+                            <% for (const paragraph of model.t.howParagraphs) { %>
+                                <p><%= paragraph %></p>
+                            <% } %>
+                            <ul>
+                                <% for (const bullet of model.t.howBullets) { %>
+                                    <li><%= bullet %></li>
+                                <% } %>
+                            </ul>
+                        </section>
+
+                        <section id="audit" class="section-block">
+                            <h2><%= model.t.sectionResults %></h2>
+                            <p><%= model.t.auditDetailsIntro %></p>
+
+                            <% if (model.findingsByPlugin.length === 0) { %>
+                                <p><%= model.t.noFindings %></p>
                             <% } else { %>
-                                <div class="list-group list-group-flush">
-                                    <% for (const plugin of model.pluginBreakdown) { %>
-                                        <div class="list-group-item px-0 py-3">
-                                            <div class="d-flex justify-content-between align-items-start gap-3">
-                                                <div>
-                                                    <div class="fw-semibold"><%= plugin.name %></div>
-                                                    <div class="small text-secondary"><%= model.t.breakdownErrors %>: <%= plugin.errors %> | <%= model.t.breakdownWarnings %>: <%= plugin.warnings %> | <%= model.t.breakdownInfos %>: <%= plugin.infos %></div>
-                                                </div>
-                                                <span class="badge text-bg-secondary"><%= plugin.total %></span>
-                                            </div>
+                                <% for (const group of model.findingsByPlugin) { %>
+                                    <section class="mt-4">
+                                        <h3><%= group.pluginLabel %></h3>
+                                        <p class="text-secondary"><%= model.t.sourceLead %></p>
+                                        <div class="table-responsive">
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col" style="width: 45%"><%= model.t.columns.description %></th>
+                                                        <th scope="col"><%= model.t.columns.pages %></th>
+                                                        <th scope="col"><%= model.t.occurrences %></th>
+                                                        <th scope="col"><%= model.t.columns.references %></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% for (const finding of group.findings) { %>
+                                                        <tr>
+                                                            <td>
+                                                                <div><%= finding.message %></div>
+                                                                <div class="small text-secondary mt-1"><%= finding.severityLabel %></div>
+                                                                <% if (finding.exampleUrl) { %>
+                                                                    <div class="small mt-2"><a href="<%= finding.exampleUrl %>"><%= finding.exampleUrl %></a></div>
+                                                                <% } %>
+                                                            </td>
+                                                            <td><%= finding.pages %></td>
+                                                            <td><%= finding.occurrences %></td>
+                                                            <td><code><%= finding.code %></code></td>
+                                                        </tr>
+                                                    <% } %>
+                                                </tbody>
+                                            </table>
                                         </div>
-                                    <% } %>
-                                </div>
+                                    </section>
+                                <% } %>
                             <% } %>
-                        </div>
-                    </div>
-                    <div class="col-12 col-xl-8">
-                        <div class="border rounded-4 p-4 h-100">
-                            <h3 class="h5 mb-2"><%= model.t.findingsTitle %></h3>
-                            <p class="text-secondary"><%= model.t.findingsLead %></p>
-                            <% if (model.findings.length === 0) { %>
-                                <div class="alert alert-success mb-0"><%= model.t.noFindings %></div>
-                            <% } else { %>
-                                <div class="table-responsive">
-                                    <table class="table table-sm align-middle mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th scope="col"><%= model.t.columns.severity %></th>
-                                                <th scope="col"><%= model.t.columns.plugin %></th>
-                                                <th scope="col"><%= model.t.columns.code %></th>
-                                                <th scope="col"><%= model.t.columns.message %></th>
-                                                <th scope="col" class="text-end"><%= model.t.columns.pages %></th>
-                                                <th scope="col"><%= model.t.columns.example %></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <% for (const finding of model.findings) { %>
-                                                <tr>
-                                                    <td><span class="badge <%= finding.severity === 'error' ? 'text-bg-danger' : finding.severity === 'warning' ? 'text-bg-warning' : 'text-bg-secondary' %>"><%= finding.severityLabel %></span></td>
-                                                    <td><%= finding.pluginLabel %></td>
-                                                    <td><code><%= finding.code %></code></td>
-                                                    <td>
-                                                        <div><%= finding.message %></div>
-                                                        <div class="small text-secondary"><%= model.t.occurrences %>: <%= finding.occurrences %></div>
-                                                    </td>
-                                                    <td class="text-end"><%= finding.pages %></td>
-                                                    <td>
-                                                        <% if (finding.exampleUrl) { %>
-                                                            <a href="<%= finding.exampleUrl %>"><%= finding.exampleUrl %></a>
-                                                        <% } else { %>
-                                                            <span class="text-secondary">-</span>
-                                                        <% } %>
-                                                    </td>
-                                                </tr>
-                                            <% } %>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            <% } %>
-                        </div>
-                    </div>
-                </div>
-            </section>
+                        </section>
 
-            <section>
-                <h2 class="h4 mb-3"><%= model.t.appendixTitle %></h2>
-                <p><%= model.t.appendixParagraph %></p>
-                <p class="text-secondary small mb-0"><%= model.t.rawMessagesNotice %></p>
-            </section>
+                        <section class="section-block">
+                            <h2><%= model.t.appendixTitle %></h2>
+                            <p><%= model.t.appendixParagraph %></p>
+                            <p class="text-secondary"><%= model.t.rawMessagesNotice %></p>
+                        </section>
+                    </article>
+                </div>
+            </div>
         </div>
     </div>
 
