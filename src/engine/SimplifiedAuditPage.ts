@@ -34,14 +34,10 @@ type TranslationBundle = {
     siteName: string;
     siteUrl: string;
     auditDate: string;
-    auditStartedAt: string;
-    auditEndedAt: string;
     auditType: string;
     auditTypeValue: string;
     standard: string;
     standardValue: string;
-    auditTool: string;
-    auditToolValue: string;
     pagesChecked: string;
     provisionalStatus: string;
     complianceStatusLabel: string;
@@ -118,8 +114,6 @@ type SimplifiedAuditViewModel = {
     origin: string;
     generatedAtIso: string;
     generatedAtDisplay: string;
-    startedAtDisplay: string;
-    endedAtDisplay: string;
     statusLabel: string;
     statusDescription: string;
     statusBadgeClass: string;
@@ -224,15 +218,6 @@ export function buildSimplifiedAuditViewModel(
         generatedAtIso: input.endedAt.toISOString(),
         generatedAtDisplay: formatDate(input.endedAt, input.locale, {
             dateStyle: "long",
-            timeStyle: "short",
-        }),
-        startedAtDisplay: formatDate(input.startedAt, input.locale, {
-            dateStyle: "medium",
-            timeStyle: "short",
-        }),
-        endedAtDisplay: formatDate(input.endedAt, input.locale, {
-            dateStyle: "medium",
-            timeStyle: "short",
         }),
         statusLabel: t.status[statusKey],
         statusDescription: t.statusDescriptions[statusKey],
