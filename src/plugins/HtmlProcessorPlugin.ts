@@ -14,6 +14,20 @@ type HtmlProcessorPluginOptions = {
     maxLinksPerPage?: number;
 };
 
+type InlineJavaScriptDetections = {
+    inlineScriptTags: string[];
+    javascriptUrls: string[];
+    inlineEventHandlers: Array<{ tag: string; attribute: string }>;
+};
+
+type DomFinding = {
+    type: FindingSeverity;
+    category: FindingCategory;
+    code: FindingCode;
+    message: string;
+    data?: Record<string, unknown>;
+};
+
 export class HtmlProcessorPlugin extends BasePlugin implements IPlugin {
     name = "html-processor";
     phases: PluginPhase[] = ["process", "error"];
@@ -167,6 +181,48 @@ export class HtmlProcessorPlugin extends BasePlugin implements IPlugin {
         return null;
     }
 
+    private buildInlineJavaScriptFindings(detections: InlineJavaScriptDetections): DomFinding[] {
+        const findings: DomFinding[] = [];
+
+        if (detections.inlineScriptTags.length > 0) {
+            findings.push({
+                type: "warning",
+                category: "html",
+                code: "INLINE_SCRIPT_TAG",
+                message: `Contains ${detections.inlineScriptTags.length} inline <script> tag(s).`,
+                data: {
+                    examples: detections.inlineScriptTags,
+                },
+            });
+        }
+
+        if (detections.javascriptUrls.length > 0) {
+            findings.push({
+                type: "warning",
+                category: "links",
+                code: "JAVASCRIPT_URL",
+                message: `Contains ${detections.javascriptUrls.length} javascript: URL(s).`,
+                data: {
+                    examples: detections.javascriptUrls,
+                },
+            });
+        }
+
+        if (detections.inlineEventHandlers.length > 0) {
+            findings.push({
+                type: "warning",
+                category: "html",
+                code: "INLINE_EVENT_HANDLER",
+                message: `Contains ${detections.inlineEventHandlers.length} inline event handler attribute(s).`,
+                data: {
+                    examples: detections.inlineEventHandlers,
+                },
+            });
+        }
+
+        return findings;
+    }
+
     private async extractFromDom(ctx: ResourceContext) {
         const result = await ctx.page.evaluate(() => {
             const title = document.querySelector("title")?.textContent ?? null;
@@ -185,12 +241,8 @@ export class HtmlProcessorPlugin extends BasePlugin implements IPlugin {
 
             const elements = Array.from(document.querySelectorAll("[href], [src]"));
             const links: ResourceReportLink[] = [];
-            const findings: Array<{
-                type: FindingSeverity;
-                category: FindingCategory;
-                code: FindingCode;
-                message: string;
-            }> = [];
+            const findings: DomFinding[] = [];
+            const javascriptUrls: string[] = [];
 
             for (const el of elements) {
                 let url: string | null = null;
@@ -223,6 +275,10 @@ export class HtmlProcessorPlugin extends BasePlugin implements IPlugin {
                     continue;
                 }
 
+                if (/^javascript:/i.test(url)) {
+                    javascriptUrls.push(url);
+                }
+
                 let absoluteUrl = url;
                 try {
                     absoluteUrl = new URL(url, document.baseURI).href;
@@ -244,6 +300,23 @@ export class HtmlProcessorPlugin extends BasePlugin implements IPlugin {
                 });
             }
 
+            const inlineScriptTags = Array.from(document.querySelectorAll("script:not([src])"))
+                .map((script) => script.textContent?.trim() ?? "")
+                .filter((content) => content.length > 0)
+                .slice(0, 10);
+
+            const inlineEventHandlers = Array.from(document.querySelectorAll("*"))
+                .flatMap((element) =>
+                    element
+                        .getAttributeNames()
+                        .filter((attribute) => /^on/i.test(attribute))
+                        .map((attribute) => ({
+                            tag: element.tagName.toLowerCase(),
+                            attribute,
+                        })),
+                )
+                .slice(0, 20);
+
             const clone = document.body.cloneNode(true) as HTMLElement;
             const selectors = ["script", "style", "noscript", "header", "footer", "nav", "aside"];
             selectors.forEach((selector) => {
@@ -259,16 +332,25 @@ export class HtmlProcessorPlugin extends BasePlugin implements IPlugin {
                 lang,
                 content,
                 findings,
+                inlineJavaScript: {
+                    inlineScriptTags,
+                    javascriptUrls: javascriptUrls.slice(0, 20),
+                    inlineEventHandlers,
+                },
             };
         });
 
-        for (const finding of result.findings) {
+        for (const finding of [
+            ...result.findings,
+            ...this.buildInlineJavaScriptFindings(result.inlineJavaScript),
+        ]) {
             this.registerFinding(
                 finding.type,
                 finding.category,
                 ctx,
                 finding.code,
                 finding.message,
+                finding.data,
             );
         }
 

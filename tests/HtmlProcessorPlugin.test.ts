@@ -4,6 +4,11 @@ import test from "node:test";
 import { HtmlProcessorPlugin } from "../src/plugins/HtmlProcessorPlugin.js";
 
 type ValidateSpecialHref = (href: string) => { code: string; message: string } | null;
+type BuildInlineJavaScriptFindings = (detections: {
+    inlineScriptTags: string[];
+    javascriptUrls: string[];
+    inlineEventHandlers: Array<{ tag: string; attribute: string }>;
+}) => Array<{ code: string; message: string; data?: unknown }>;
 
 function createValidator(): ValidateSpecialHref {
     const plugin = new HtmlProcessorPlugin();
@@ -14,6 +19,19 @@ function createValidator(): ValidateSpecialHref {
     }
 
     return candidate.bind(plugin) as ValidateSpecialHref;
+}
+
+function createInlineJavaScriptFindingBuilder(): BuildInlineJavaScriptFindings {
+    const plugin = new HtmlProcessorPlugin();
+    const candidate = (plugin as unknown as Record<string, unknown>)[
+        "buildInlineJavaScriptFindings"
+    ];
+
+    if (typeof candidate !== "function") {
+        throw new Error("buildInlineJavaScriptFindings is not accessible in tests");
+    }
+
+    return candidate.bind(plugin) as BuildInlineJavaScriptFindings;
 }
 
 test("validateSpecialHref accepts valid mailto hrefs", () => {
@@ -78,4 +96,19 @@ test("validateSpecialHref ignores non tel and mailto hrefs", () => {
 
     assert.equal(validateSpecialHref("https://example.com"), null);
     assert.equal(validateSpecialHref("/contact"), null);
+});
+
+test("buildInlineJavaScriptFindings reports inline scripts, javascript URLs and event handlers", () => {
+    const buildInlineJavaScriptFindings = createInlineJavaScriptFindingBuilder();
+
+    const findings = buildInlineJavaScriptFindings({
+        inlineScriptTags: ["alert('x')"],
+        javascriptUrls: ["javascript:void(0)"],
+        inlineEventHandlers: [{ tag: "button", attribute: "onclick" }],
+    });
+
+    assert.equal(findings.length, 3);
+    assert.equal(findings[0]?.code, "INLINE_SCRIPT_TAG");
+    assert.equal(findings[1]?.code, "JAVASCRIPT_URL");
+    assert.equal(findings[2]?.code, "INLINE_EVENT_HANDLER");
 });

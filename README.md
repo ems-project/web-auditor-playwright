@@ -58,7 +58,6 @@ The tool can be configured using [environment variables](#environment-variables)
 - Analyse text's complexity (something like [Scolarius](https://www.scolarius.com/))
 - JSON-LD structure (`@context": "https://schema.org"`)
 - Detects duplicates
-- page with Inline code
 - Information Architecture plugin
 
 ## Installing Playwright and launch an audit locally
@@ -242,31 +241,34 @@ Examples:
 
 ### Content / SEO / HTML
 
-| Plugin             | Code                       | Description                                                       | Profiles        | Recommended Actions |
-| ------------------ | -------------------------- | ----------------------------------------------------------------- | --------------- | ------------------- |
-| language-detection | LANGUAGE_UNDETERMINED      | Language not detected                                             | Copywriter      | Define lang         |
-| language-detection | LANGUAGE_DETECTION_SKIPPED | Detection skipped                                                 | Integrator      | Adjust config       |
-| language-detection | LANGUAGE_MISMATCHED        | Detected language does not match the resource's defined language. | Copywriter      | Adjust content      |
-| html-processor     | LOW_CONTENT                | Not enough content                                                | Copywriter      | Add content         |
-| html-processor     | MAIL_OR_TEL_LINK           | mailto/tel link detected                                          | Webmaster       | Validate usage      |
-| html-processor     | INVALID_MAILTO_HREF        | Invalid mailto href format                                        | Webmaster       | Fix the email link  |
-| html-processor     | INVALID_TEL_HREF           | Invalid tel href format                                           | Webmaster       | Fix the phone link  |
-| html-processor     | TITLE_MISSING              | Missing title                                                     | SEO, Copywriter | Add title           |
-| html-processor     | TITLE_TOO_SHORT            | Too short                                                         | SEO             | Improve             |
-| html-processor     | TITLE_TOO_LONG             | Too long                                                          | SEO             | Shorten             |
-| html-processor     | TITLE_BRAND_TOO_LONG       | Brand too long                                                    | SEO             | Reduce              |
-| html-processor     | TITLE_BRAND_DUPLICATED     | Brand duplicated                                                  | SEO             | Fix                 |
-| html-processor     | TITLE_MAIN_TOO_SHORT       | Main part too short                                               | SEO             | Improve             |
-| html-processor     | TITLE_TOO_MANY_PARTS       | Too many segments                                                 | SEO             | Simplify            |
-| seo-url-rules      | URL_CONSECUTIVE_HYPHENS    | URL contains consecutive hyphens                                  | SEO, Integrator | Simplify slug       |
-| seo-url-rules      | URL_UNDERSCORE             | URL contains an underscore                                        | SEO, Integrator | Replace with hyphen |
-| seo-url-rules      | URL_TECHNICAL_EXTENSION    | URL exposes a technical file extension                            | SEO, Integrator | Remove extension    |
-| seo-url-rules      | URL_UPPERCASE              | URL contains uppercase characters                                 | SEO, Integrator | Use lowercase       |
-| seo-url-rules      | URL_TOO_LONG               | URL is excessively long                                           | SEO, Integrator | Shorten URL         |
-| seo-url-rules      | URL_SPECIAL_CHARACTERS     | URL contains special or accented characters                       | SEO, Integrator | Normalize slug      |
-| seo-url-rules      | URL_SPACE                  | URL contains spaces                                               | SEO, Integrator | Remove spaces       |
-| soft-http-error    | SOFT_404_DETECTED          | Page looks like a soft 404 while returning a successful HTTP code | Webmaster       | Fix status or page  |
-| soft-http-error    | SOFT_500_DETECTED          | Page looks like a soft 500 while returning a successful HTTP code | Webmaster       | Fix status or page  |
+| Plugin             | Code                       | Description                                                       | Profiles           | Recommended Actions                          |
+| ------------------ | -------------------------- | ----------------------------------------------------------------- | ------------------ | -------------------------------------------- |
+| language-detection | LANGUAGE_UNDETERMINED      | Language not detected                                             | Copywriter         | Define lang                                  |
+| language-detection | LANGUAGE_DETECTION_SKIPPED | Detection skipped                                                 | Integrator         | Adjust config                                |
+| language-detection | LANGUAGE_MISMATCHED        | Detected language does not match the resource's defined language. | Copywriter         | Adjust content                               |
+| html-processor     | LOW_CONTENT                | Not enough content                                                | Copywriter         | Add content                                  |
+| html-processor     | MAIL_OR_TEL_LINK           | mailto/tel link detected                                          | Webmaster          | Validate usage                               |
+| html-processor     | INVALID_MAILTO_HREF        | Invalid mailto href format                                        | Webmaster          | Fix the email link                           |
+| html-processor     | INVALID_TEL_HREF           | Invalid tel href format                                           | Webmaster          | Fix the phone link                           |
+| html-processor     | INLINE_SCRIPT_TAG          | Inline <script> tag detected                                      | Frontend, Security | Move to external JS or review necessity      |
+| html-processor     | INLINE_EVENT_HANDLER       | Inline event handler attribute detected                           | Frontend, Security | Remove inline handlers and bind events in JS |
+| html-processor     | JAVASCRIPT_URL             | `javascript:` URL detected                                        | Frontend, Security | Replace with safe links or JS bindings       |
+| html-processor     | TITLE_MISSING              | Missing title                                                     | SEO, Copywriter    | Add title                                    |
+| html-processor     | TITLE_TOO_SHORT            | Too short                                                         | SEO                | Improve                                      |
+| html-processor     | TITLE_TOO_LONG             | Too long                                                          | SEO                | Shorten                                      |
+| html-processor     | TITLE_BRAND_TOO_LONG       | Brand too long                                                    | SEO                | Reduce                                       |
+| html-processor     | TITLE_BRAND_DUPLICATED     | Brand duplicated                                                  | SEO                | Fix                                          |
+| html-processor     | TITLE_MAIN_TOO_SHORT       | Main part too short                                               | SEO                | Improve                                      |
+| html-processor     | TITLE_TOO_MANY_PARTS       | Too many segments                                                 | SEO                | Simplify                                     |
+| seo-url-rules      | URL_CONSECUTIVE_HYPHENS    | URL contains consecutive hyphens                                  | SEO, Integrator    | Simplify slug                                |
+| seo-url-rules      | URL_UNDERSCORE             | URL contains an underscore                                        | SEO, Integrator    | Replace with hyphen                          |
+| seo-url-rules      | URL_TECHNICAL_EXTENSION    | URL exposes a technical file extension                            | SEO, Integrator    | Remove extension                             |
+| seo-url-rules      | URL_UPPERCASE              | URL contains uppercase characters                                 | SEO, Integrator    | Use lowercase                                |
+| seo-url-rules      | URL_TOO_LONG               | URL is excessively long                                           | SEO, Integrator    | Shorten URL                                  |
+| seo-url-rules      | URL_SPECIAL_CHARACTERS     | URL contains special or accented characters                       | SEO, Integrator    | Normalize slug                               |
+| seo-url-rules      | URL_SPACE                  | URL contains spaces                                               | SEO, Integrator    | Remove spaces                                |
+| soft-http-error    | SOFT_404_DETECTED          | Page looks like a soft 404 while returning a successful HTTP code | Webmaster          | Fix status or page                           |
+| soft-http-error    | SOFT_500_DETECTED          | Page looks like a soft 500 while returning a successful HTTP code | Webmaster          | Fix status or page                           |
 
 ### URL / Crawl
 
