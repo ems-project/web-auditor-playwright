@@ -305,6 +305,7 @@ async function main() {
         .register(
             new SecurityHeadersPlugin({
                 auditOnlyStartUrl: (process.env.SECURITY_ONLY_START_URL ?? "true") === "true",
+                maxCookieLifetimeDays: Number(process.env.COOKIE_MAX_LIFETIME_DAYS ?? 365),
             }),
         )
         .register(
