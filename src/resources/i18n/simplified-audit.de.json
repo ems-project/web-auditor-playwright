@@ -57,9 +57,6 @@
         "warning": "Warnung",
         "info": "Info"
     },
-    "appendixTitle": "Technischer Anhang",
-    "appendixParagraph": "Dieser Anhang enthält die Rohmeldungen der Audit-Engine, um die Erstellung redaktioneller Inhalte im CMS zu erleichtern.",
-    "rawMessagesNotice": "Die folgenden Meldungen werden unverändert dargestellt und können eine manuelle Umformulierung erfordern.",
     "breakdownErrors": "Fehler",
     "breakdownWarnings": "Warnungen",
     "breakdownInfos": "Infos",

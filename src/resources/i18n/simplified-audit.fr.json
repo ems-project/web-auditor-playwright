@@ -57,9 +57,6 @@
         "warning": "Avertissement",
         "info": "Info"
     },
-    "appendixTitle": "Annexe technique",
-    "appendixParagraph": "Cette annexe reprend les messages bruts du moteur pour aider à préparer un contenu plus éditorial dans le CMS.",
-    "rawMessagesNotice": "Les messages ci-dessous sont affichés tels quels et peuvent nécessiter une reformulation manuelle.",
     "breakdownErrors": "Erreurs",
     "breakdownWarnings": "Avertissements",
     "breakdownInfos": "Infos",
