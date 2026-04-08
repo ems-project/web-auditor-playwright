@@ -46,9 +46,9 @@ test("renderSimplifiedAuditPage renders BOSA-style EN 301 549 sections with help
         html,
         /cdn\.jsdelivr\.net\/npm\/bootstrap@5\.3\.3\/dist\/css\/bootstrap\.min\.css/,
     );
-    assert.match(html, /1\. Perceptible/);
-    assert.match(html, /1\.1 Alternatives textuelles/);
-    assert.match(html, /1\.1\.1/);
+    assert.match(html, /9\.1 Perceptible/);
+    assert.match(html, /9\.1\.1 Alternatives textuelles/);
+    assert.match(html, /9\.1\.1\.1/);
     assert.match(html, /Contenu non textuel/);
     assert.match(html, /Non-conformité détectée/);
     assert.match(

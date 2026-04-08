@@ -123,13 +123,13 @@
                             <p><%= model.t.criteriaLead %></p>
                             <% for (const principle of model.axePrinciples) { %>
                                 <section class="mt-4">
-                                    <h3><%= principle.code %>. <%= principle.title %></h3>
+                                    <h3>9.<%= principle.code %> <%= principle.title %></h3>
                                     <% if (principle.description) { %>
                                         <p class="text-secondary"><%= principle.description %></p>
                                     <% } %>
                                     <% for (const guideline of principle.guidelines) { %>
                                         <section class="mt-4">
-                                            <h4><%= guideline.code %> <%= guideline.title %></h4>
+                                            <h4>9.<%= guideline.code %> <%= guideline.title %></h4>
                                             <% if (guideline.description) { %>
                                                 <p class="text-secondary"><%= guideline.description %></p>
                                             <% } %>
@@ -149,7 +149,7 @@
                                                         <% for (const criterion of guideline.criteria) { %>
                                                             <tr>
                                                                 <td>
-                                                                    <strong><%= criterion.criterion %></strong><br>
+                                                                    <strong>9.<%= criterion.criterion %></strong><br>
                                                                     <span><%= criterion.criterionTitle %></span>
                                                                 </td>
                                                                 <td><span class="badge <%= criterion.statusBadgeClass %>"><%= criterion.statusLabel %></span></td>
