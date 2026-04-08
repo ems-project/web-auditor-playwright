@@ -135,3 +135,47 @@ test("detectResourceKind classifies css, js and image resources", () => {
         "image",
     );
 });
+
+
+test("enqueueSitemaps queues absolute and relative sitemap URLs once", () => {
+    const plugin = createPlugin();
+    const queued: Array<{ url: string; source?: string }> = [];
+    const state = {
+        parsed: null,
+        observedResources: [],
+        observedKeys: [],
+        blockedKeys: [],
+        enqueuedSitemaps: [],
+    };
+    const ctx = {
+        engineState: { origin: "https://example.com", any: {} },
+        crawler: {
+            enqueueUrl(request: { url: string; source?: string }) {
+                queued.push(request);
+                return { accepted: true };
+            },
+        },
+    };
+
+    callPrivateMethod<[typeof ctx, typeof state, string[]], void>(
+        plugin,
+        "enqueueSitemaps",
+        ctx,
+        state,
+        [
+            "https://example.com/sitemap.xml",
+            "/sitemap-images.xml",
+            "https://[invalid",
+            "https://example.com/sitemap.xml",
+        ],
+    );
+
+    assert.deepEqual(queued, [
+        { url: "https://example.com/sitemap.xml", source: "robots-txt" },
+        { url: "https://example.com/sitemap-images.xml", source: "robots-txt" },
+    ]);
+    assert.deepEqual(state.enqueuedSitemaps, [
+        "https://example.com/sitemap.xml",
+        "https://example.com/sitemap-images.xml",
+    ]);
+});

@@ -34,6 +34,7 @@ type RobotsTxtState = {
     observedResources: ObservedResource[];
     observedKeys: string[];
     blockedKeys: string[];
+    enqueuedSitemaps: string[];
 };
 
 export class RobotsTxtPlugin extends BasePlugin implements IPlugin {
@@ -85,6 +86,8 @@ export class RobotsTxtPlugin extends BasePlugin implements IPlugin {
         const wildcardGroups = parsed.groups.filter((group) =>
             group.userAgents.some((agent) => agent === "*"),
         );
+
+        this.enqueueSitemaps(ctx, state, parsed.sitemaps);
 
         ctx.report.metas ??= [];
         ctx.report.metas.push({ key: "robots_group_count", value: `${parsed.groups.length}` });
@@ -142,6 +145,33 @@ export class RobotsTxtPlugin extends BasePlugin implements IPlugin {
         }
 
         this.register(ctx);
+    }
+
+    private enqueueSitemaps(
+        ctx: ResourceContext,
+        state: RobotsTxtState,
+        sitemapUrls: string[],
+    ): void {
+        for (const sitemapUrl of sitemapUrls) {
+            const absoluteUrl = this.toAbsoluteUrl(ctx.engineState.origin, sitemapUrl);
+            if (!absoluteUrl || state.enqueuedSitemaps.includes(absoluteUrl)) {
+                continue;
+            }
+
+            state.enqueuedSitemaps.push(absoluteUrl);
+            ctx.crawler.enqueueUrl({
+                url: absoluteUrl,
+                source: this.name,
+            });
+        }
+    }
+
+    private toAbsoluteUrl(baseUrl: string, candidate: string): string | null {
+        try {
+            return new URL(candidate, baseUrl).href;
+        } catch {
+            return null;
+        }
     }
 
     private parseRobotsTxt(content: string): ParsedRobotsTxt {
@@ -414,6 +444,7 @@ export class RobotsTxtPlugin extends BasePlugin implements IPlugin {
             observedResources: [],
             observedKeys: [],
             blockedKeys: [],
+            enqueuedSitemaps: [],
         };
         state.any[this.name] = created;
         return created;
@@ -428,7 +459,8 @@ export class RobotsTxtPlugin extends BasePlugin implements IPlugin {
         return (
             Array.isArray(candidate.observedResources) &&
             Array.isArray(candidate.observedKeys) &&
-            Array.isArray(candidate.blockedKeys)
+            Array.isArray(candidate.blockedKeys) &&
+            Array.isArray(candidate.enqueuedSitemaps)
         );
     }
 }
