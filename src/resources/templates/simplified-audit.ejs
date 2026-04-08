@@ -173,18 +173,9 @@
                 return;
             }
 
-            async function writeClipboard(html, text) {
-                if (navigator.clipboard && window.ClipboardItem) {
-                    const item = new ClipboardItem({
-                        "text/html": new Blob([html], { type: "text/html" }),
-                        "text/plain": new Blob([text], { type: "text/plain" }),
-                    });
-                    await navigator.clipboard.write([item]);
-                    return;
-                }
-
+            async function writeClipboard(html) {
                 if (navigator.clipboard && navigator.clipboard.writeText) {
-                    await navigator.clipboard.writeText(text);
+                    await navigator.clipboard.writeText(html);
                     return;
                 }
 
@@ -209,10 +200,8 @@
                 }
 
                 const html = target.innerHTML.trim();
-                const text = target.innerText.trim();
-
                 try {
-                    await writeClipboard(html, text);
+                    await writeClipboard(html);
                     showFeedback(successMessage, "success");
                 } catch (error) {
                     console.error(error);
