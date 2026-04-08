@@ -7,7 +7,7 @@ import {
     renderSimplifiedAuditPage,
 } from "../src/engine/SimplifiedAuditPage.js";
 
-test("renderSimplifiedAuditPage renders localized bootstrap page with copy button", () => {
+test("renderSimplifiedAuditPage renders exhaustive EN 301 549 criteria with help_url references", () => {
     const model = buildSimplifiedAuditViewModel({
         locale: "fr",
         origin: "https://example.com",
@@ -21,6 +21,13 @@ test("renderSimplifiedAuditPage renders localized bootstrap page with copy butto
                 code: "image-alt",
                 message: "Images must have alternate text.",
                 url: "https://example.com/home",
+                data: {
+                    id: "image-alt",
+                    description: "Ensure <img> elements have text alternatives.",
+                    help_url:
+                        "https://dequeuniversity.com/rules/axe/4.11/image-alt?application=axeAPI",
+                    en301549_criteria: ["9.1.1.1"],
+                },
             },
         ],
         inventory: [
@@ -39,13 +46,17 @@ test("renderSimplifiedAuditPage renders localized bootstrap page with copy butto
         html,
         /cdn\.jsdelivr\.net\/npm\/bootstrap@5\.3\.3\/dist\/css\/bootstrap\.min\.css/,
     );
-    assert.match(html, /Copier le contenu HTML/);
-    assert.match(html, /EN 301 549/);
-    assert.match(html, /image-alt/);
+    assert.match(html, /Critère EN 301 549/);
+    assert.match(html, /9\.1\.1\.1/);
+    assert.match(html, /Non-conformité détectée/);
+    assert.match(
+        html,
+        /https:\/\/dequeuniversity\.com\/rules\/axe\/4\.11\/image-alt\?application=axeAPI/,
+    );
     assert.match(html, /ClipboardItem/);
 });
 
-test("buildSimplifiedAuditViewModel scopes the summary to accessibility issues only", () => {
+test("buildSimplifiedAuditViewModel lists exhaustive Axe criteria and marks criteria without findings as passing", () => {
     const model = buildSimplifiedAuditViewModel({
         locale: "en",
         origin: "https://example.com",
@@ -59,6 +70,12 @@ test("buildSimplifiedAuditViewModel scopes the summary to accessibility issues o
                 code: "color-contrast",
                 message: "Insufficient color contrast.",
                 url: "https://example.com/home",
+                data: {
+                    id: "color-contrast",
+                    help_url:
+                        "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+                    en301549_criteria: ["9.1.4.3"],
+                },
             },
             {
                 plugin: "security-headers",
@@ -83,6 +100,21 @@ test("buildSimplifiedAuditViewModel scopes the summary to accessibility issues o
     assert.equal(model.groupedFindingCount, 1);
     assert.equal(model.statusLabel, "Partially compliant");
     assert.equal(model.findings[0]?.code, "color-contrast");
+    assert.ok(model.axeCriteria.length > 10);
+
+    const failingCriterion = model.axeCriteria.find(
+        (criterion) => criterion.criterion === "9.1.4.3",
+    );
+    assert.ok(failingCriterion);
+    assert.equal(failingCriterion?.status, "warning");
+    assert.equal(
+        failingCriterion?.references[0]?.url,
+        "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+    );
+
+    const passingCriterion = model.axeCriteria.find((criterion) => criterion.status === "pass");
+    assert.ok(passingCriterion);
+    assert.equal(passingCriterion?.statusLabel, "No issue detected");
 });
 
 test("parseSimplifiedAuditLocales filters invalid locales and falls back to defaults", () => {

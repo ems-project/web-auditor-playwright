@@ -70,7 +70,10 @@
         "pages": "Seiten",
         "example": "Beispiel-URL",
         "description": "Beschreibung",
-        "references": "Ref(s)"
+        "references": "Ref(s)",
+        "criterion": "EN-301-549-Kriterium",
+        "status": "Ergebnis",
+        "checks": "Geprüfte Axe-Regeln"
     },
     "severity": {
         "error": "Fehler",
@@ -83,5 +86,14 @@
     "breakdownErrors": "Fehler",
     "breakdownWarnings": "Warnungen",
     "breakdownInfos": "Infos",
-    "occurrences": "Vorkommen"
+    "occurrences": "Vorkommen",
+    "criteriaTitle": "Von Axe automatisch geprüfte EN-301-549-Kriterien",
+    "criteriaLead": "Die folgende Tabelle listet vollständig alle EN-301-549-Kriterien auf, die von Axe Core abgedeckt werden. Jede Zeile zeigt, ob während des Audits eine Nichtkonformität erkannt wurde, und enthält Referenzlinks zur Axe-Dokumentation.",
+    "detectedFindingsLabel": "Erkannte Befunde",
+    "criterionStatus": {
+        "pass": "Kein Problem erkannt",
+        "error": "Nichtkonformität erkannt",
+        "warning": "Warnung erkannt",
+        "info": "Information erkannt"
+    }
 }

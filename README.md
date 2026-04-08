@@ -53,7 +53,6 @@ The tool can be configured using [environment variables](#environment-variables)
 
 - Scheduling and automation
 - Lighthouse plugin every x pages
-- European compatible accessibility report in french, dutch, german and english
 - Empty anchor links
 - Stats by locales
 - Analyse text's complexity (something like [Scolarius](https://www.scolarius.com/))

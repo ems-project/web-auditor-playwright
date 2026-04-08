@@ -13,7 +13,7 @@
             color: #1f2937;
         }
         .page-shell {
-            max-width: 1100px;
+            max-width: 1200px;
         }
         .page-card {
             background: #fff;
@@ -53,6 +53,13 @@
         .back-link {
             font-size: 0.95rem;
             text-decoration: none;
+        }
+        .criterion-list {
+            margin: 0;
+            padding-left: 1.1rem;
+        }
+        .criterion-list li + li {
+            margin-top: 0.35rem;
         }
         @media print {
             body {
@@ -139,46 +146,56 @@
 
                         <section id="audit" class="section-block">
                             <h2><%= model.t.sectionResults %></h2>
-                            <p><%= model.t.auditDetailsIntro %></p>
-
-                            <% if (model.findingsByPlugin.length === 0) { %>
-                                <p><%= model.t.noFindings %></p>
-                            <% } else { %>
-                                <% for (const group of model.findingsByPlugin) { %>
-                                    <section class="mt-4">
-                                        <h3><%= group.pluginLabel %></h3>
-                                        <p class="text-secondary"><%= model.t.sourceLead %></p>
-                                        <div class="table-responsive">
-                                            <table class="table">
-                                                <thead>
-                                                    <tr>
-                                                        <th scope="col" style="width: 45%"><%= model.t.columns.description %></th>
-                                                        <th scope="col"><%= model.t.columns.pages %></th>
-                                                        <th scope="col"><%= model.t.occurrences %></th>
-                                                        <th scope="col"><%= model.t.columns.references %></th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <% for (const finding of group.findings) { %>
-                                                        <tr>
-                                                            <td>
-                                                                <div><%= finding.message %></div>
-                                                                <div class="small text-secondary mt-1"><%= finding.severityLabel %></div>
-                                                                <% if (finding.exampleUrl) { %>
-                                                                    <div class="small mt-2"><a href="<%= finding.exampleUrl %>"><%= finding.exampleUrl %></a></div>
-                                                                <% } %>
-                                                            </td>
-                                                            <td><%= finding.pages %></td>
-                                                            <td><%= finding.occurrences %></td>
-                                                            <td><code><%= finding.code %></code></td>
-                                                        </tr>
+                            <p><%= model.t.criteriaLead %></p>
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col"><%= model.t.columns.criterion %></th>
+                                            <th scope="col"><%= model.t.columns.status %></th>
+                                            <th scope="col" style="width: 42%"><%= model.t.columns.description %></th>
+                                            <th scope="col"><%= model.t.columns.pages %></th>
+                                            <th scope="col"><%= model.t.occurrences %></th>
+                                            <th scope="col"><%= model.t.columns.references %></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% for (const criterion of model.axeCriteria) { %>
+                                            <tr>
+                                                <td><strong><%= criterion.criterion %></strong></td>
+                                                <td><span class="badge <%= criterion.statusBadgeClass %>"><%= criterion.statusLabel %></span></td>
+                                                <td>
+                                                    <div class="small text-secondary mb-2"><%= model.t.columns.checks %></div>
+                                                    <ul class="criterion-list mb-0">
+                                                        <% for (const check of criterion.checks) { %>
+                                                            <li><%= check %></li>
+                                                        <% } %>
+                                                    </ul>
+                                                    <% if (criterion.findingMessages.length > 0) { %>
+                                                        <div class="small text-secondary mt-3 mb-2"><%= model.t.detectedFindingsLabel %></div>
+                                                        <ul class="criterion-list mb-0">
+                                                            <% for (const finding of criterion.findingMessages) { %>
+                                                                <li><%= finding %></li>
+                                                            <% } %>
+                                                        </ul>
                                                     <% } %>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </section>
-                                <% } %>
-                            <% } %>
+                                                </td>
+                                                <td><%= criterion.pages %></td>
+                                                <td><%= criterion.occurrences %></td>
+                                                <td>
+                                                    <% if (criterion.references.length > 0) { %>
+                                                        <ul class="criterion-list mb-0">
+                                                            <% for (const ref of criterion.references) { %>
+                                                                <li><a href="<%= ref.url %>"><%= ref.label %></a></li>
+                                                            <% } %>
+                                                        </ul>
+                                                    <% } %>
+                                                </td>
+                                            </tr>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
                         </section>
 
                         <section class="section-block">

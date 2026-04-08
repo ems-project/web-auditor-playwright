@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import fs from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -11,6 +12,9 @@ export type SimplifiedAuditLocale = "fr" | "nl" | "de" | "en";
 
 const SUPPORTED_SIMPLIFIED_AUDIT_LOCALES = ["fr", "nl", "de", "en"] as const;
 export const DEFAULT_SIMPLIFIED_AUDIT_LOCALES: SimplifiedAuditLocale[] = ["fr", "nl", "de", "en"];
+
+const require = createRequire(import.meta.url);
+const axe = require("axe-core") as typeof import("axe-core");
 
 type TranslationBundle = {
     htmlLang: string;
@@ -59,10 +63,19 @@ type TranslationBundle = {
         partiallyCompliant: string;
         nonCompliant: string;
     };
+    criterionStatus: {
+        pass: string;
+        error: string;
+        warning: string;
+        info: string;
+    };
     pluginBreakdownTitle: string;
     findingsTitle: string;
     noFindings: string;
     findingsLead: string;
+    criteriaTitle: string;
+    criteriaLead: string;
+    detectedFindingsLabel: string;
     auditDetailsIntro: string;
     sourceHeading: string;
     sourceLead: string;
@@ -75,6 +88,9 @@ type TranslationBundle = {
         example: string;
         description: string;
         references: string;
+        criterion: string;
+        status: string;
+        checks: string;
     };
     severity: {
         error: string;
@@ -89,6 +105,8 @@ type TranslationBundle = {
     breakdownInfos: string;
     occurrences: string;
 };
+
+type CriterionStatus = "pass" | "error" | "warning" | "info";
 
 type SimplifiedAuditViewModel = {
     locale: SimplifiedAuditLocale;
@@ -141,6 +159,20 @@ type SimplifiedAuditViewModel = {
             occurrences: number;
         }>;
     }>;
+    axeCriteria: Array<{
+        criterion: string;
+        status: CriterionStatus;
+        statusLabel: string;
+        statusBadgeClass: string;
+        pages: number;
+        occurrences: number;
+        checks: string[];
+        findingMessages: string[];
+        references: Array<{
+            label: string;
+            url: string;
+        }>;
+    }>;
 };
 
 type BuildSimplifiedAuditPagesInput = {
@@ -154,6 +186,21 @@ type BuildSimplifiedAuditPagesInput = {
     locales?: SimplifiedAuditLocale[];
 };
 
+type AxeIssueData = {
+    help_url?: string;
+    description?: string;
+    help?: string;
+    id?: string;
+    en301549_criteria?: string[];
+};
+
+type AxeRuleEntry = {
+    criterion: string;
+    ruleId: string;
+    help: string;
+    helpUrl: string | null;
+};
+
 const engineDir = path.dirname(fileURLToPath(import.meta.url));
 const resourcesDir = path.join(engineDir, "../resources");
 const templatePath = path.join(resourcesDir, "templates/simplified-audit.ejs");
@@ -162,6 +209,7 @@ const translationDir = path.join(resourcesDir, "i18n");
 const translations = Object.fromEntries(
     SUPPORTED_SIMPLIFIED_AUDIT_LOCALES.map((locale) => [locale, readTranslationBundle(locale)]),
 ) as Record<SimplifiedAuditLocale, TranslationBundle>;
+const auditedAxeCriteria = buildAuditedAxeCriteria();
 
 export function parseSimplifiedAuditLocales(value: string | undefined): SimplifiedAuditLocale[] {
     const requested = (value ?? DEFAULT_SIMPLIFIED_AUDIT_LOCALES.join(","))
@@ -242,12 +290,190 @@ export function buildSimplifiedAuditViewModel(
         pluginBreakdown,
         findings: groupedFindings,
         findingsByPlugin: groupFindingsByPlugin(groupedFindings),
+        axeCriteria: buildAxeCriteriaRows(filteredIssues, t),
     };
 }
 
 function readTranslationBundle(locale: SimplifiedAuditLocale): TranslationBundle {
     const filePath = path.join(translationDir, `simplified-audit.${locale}.json`);
     return JSON.parse(readFileSync(filePath, "utf8")) as TranslationBundle;
+}
+
+function buildAuditedAxeCriteria(): Array<{ criterion: string; rules: AxeRuleEntry[] }> {
+    const registry = new Map<string, Map<string, AxeRuleEntry>>();
+
+    for (const rule of axe.getRules()) {
+        const tags = Array.isArray(rule.tags) ? rule.tags : [];
+        if (!tags.includes("EN-301-549")) {
+            continue;
+        }
+
+        const criteria = tags
+            .map((tag) => /^EN-(\d+(?:\.\d+)+)$/.exec(tag)?.[1] ?? null)
+            .filter((criterion): criterion is string => criterion !== null);
+        if (criteria.length === 0) {
+            continue;
+        }
+
+        for (const criterion of criteria) {
+            const bucket = registry.get(criterion) ?? new Map<string, AxeRuleEntry>();
+            bucket.set(rule.ruleId, {
+                criterion,
+                ruleId: rule.ruleId,
+                help: rule.help,
+                helpUrl:
+                    typeof rule.helpUrl === "string" && rule.helpUrl.length > 0
+                        ? rule.helpUrl
+                        : null,
+            });
+            registry.set(criterion, bucket);
+        }
+    }
+
+    return [...registry.entries()]
+        .map(([criterion, rules]) => ({
+            criterion,
+            rules: [...rules.values()].sort((left, right) =>
+                left.ruleId.localeCompare(right.ruleId),
+            ),
+        }))
+        .sort((left, right) => compareCriteria(left.criterion, right.criterion));
+}
+
+function buildAxeCriteriaRows(
+    issues: IssueEntry[],
+    t: TranslationBundle,
+): SimplifiedAuditViewModel["axeCriteria"] {
+    const buckets = new Map<
+        string,
+        {
+            status: Exclude<CriterionStatus, "pass">;
+            urls: Set<string>;
+            occurrences: number;
+            messages: Set<string>;
+            references: Map<string, { label: string; url: string }>;
+        }
+    >();
+
+    for (const issue of issues) {
+        if (issue.plugin !== "a11y-axe") {
+            continue;
+        }
+
+        const data = extractAxeIssueData(issue);
+        const criteria = data?.en301549_criteria?.filter(Boolean) ?? [];
+        if (criteria.length === 0) {
+            continue;
+        }
+
+        const severity = normalizeCriterionStatus(issue.type);
+        for (const criterion of criteria) {
+            const bucket = buckets.get(criterion) ?? {
+                status: severity,
+                urls: new Set<string>(),
+                occurrences: 0,
+                messages: new Set<string>(),
+                references: new Map<string, { label: string; url: string }>(),
+            };
+
+            bucket.status = higherCriterionStatus(bucket.status, severity);
+            bucket.occurrences += 1;
+            if (issue.url) {
+                bucket.urls.add(issue.url);
+            }
+            bucket.messages.add(issue.message);
+            if (data?.description) {
+                bucket.messages.add(data.description);
+            }
+            if (data?.help_url) {
+                const label = data.id ? data.id : issue.code;
+                bucket.references.set(data.help_url, { label, url: data.help_url });
+            }
+            buckets.set(criterion, bucket);
+        }
+    }
+
+    return auditedAxeCriteria.map(({ criterion, rules }) => {
+        const bucket = buckets.get(criterion);
+        const status: CriterionStatus = bucket?.status ?? "pass";
+        const references =
+            bucket && bucket.references.size > 0
+                ? [...bucket.references.values()].sort((left, right) =>
+                      left.label.localeCompare(right.label),
+                  )
+                : rules
+                      .filter((rule) => rule.helpUrl)
+                      .map((rule) => ({ label: rule.ruleId, url: rule.helpUrl! }));
+
+        return {
+            criterion,
+            status,
+            statusLabel: t.criterionStatus[status],
+            statusBadgeClass: criterionStatusBadgeClass(status),
+            pages: bucket?.urls.size ?? 0,
+            occurrences: bucket?.occurrences ?? 0,
+            checks: rules.map((rule) => `${rule.ruleId}: ${rule.help}`),
+            findingMessages: bucket
+                ? [...bucket.messages].sort((left, right) => left.localeCompare(right))
+                : [],
+            references,
+        };
+    });
+}
+
+function extractAxeIssueData(issue: IssueEntry): AxeIssueData | null {
+    if (!issue.data || typeof issue.data !== "object" || Array.isArray(issue.data)) {
+        return null;
+    }
+
+    return issue.data as AxeIssueData;
+}
+
+function criterionStatusBadgeClass(status: CriterionStatus): string {
+    if (status === "pass") {
+        return "text-bg-success";
+    }
+    if (status === "warning") {
+        return "text-bg-warning";
+    }
+    if (status === "info") {
+        return "text-bg-info";
+    }
+    return "text-bg-danger";
+}
+
+function compareCriteria(left: string, right: string): number {
+    const leftParts = left.split(".").map((part) => Number(part));
+    const rightParts = right.split(".").map((part) => Number(part));
+    const maxLength = Math.max(leftParts.length, rightParts.length);
+
+    for (let index = 0; index < maxLength; index += 1) {
+        const leftValue = leftParts[index] ?? -1;
+        const rightValue = rightParts[index] ?? -1;
+        if (leftValue !== rightValue) {
+            return leftValue - rightValue;
+        }
+    }
+
+    return left.localeCompare(right);
+}
+
+function higherCriterionStatus(
+    left: Exclude<CriterionStatus, "pass">,
+    right: Exclude<CriterionStatus, "pass">,
+): Exclude<CriterionStatus, "pass"> {
+    const rank = { info: 0, warning: 1, error: 2 } as const;
+    return rank[right] > rank[left] ? right : left;
+}
+
+function normalizeCriterionStatus(value: string): Exclude<CriterionStatus, "pass"> {
+    if (value === "warning") {
+        return "warning";
+    }
+    if (value === "info") {
+        return "info";
+    }
+    return "error";
 }
 
 function isSimplifiedAuditLocale(value: string): value is SimplifiedAuditLocale {

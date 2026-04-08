@@ -70,7 +70,10 @@
         "pages": "Pages",
         "example": "Example URL",
         "description": "Description",
-        "references": "Ref(s)"
+        "references": "Ref(s)",
+        "criterion": "EN 301 549 criterion",
+        "status": "Result",
+        "checks": "Audited Axe rules"
     },
     "severity": {
         "error": "Error",
@@ -83,5 +86,14 @@
     "breakdownErrors": "Errors",
     "breakdownWarnings": "Warnings",
     "breakdownInfos": "Infos",
-    "occurrences": "Occurrences"
+    "occurrences": "Occurrences",
+    "criteriaTitle": "EN 301 549 criteria automatically checked by Axe",
+    "criteriaLead": "The table below exhaustively lists the EN 301 549 criteria covered by Axe Core. Each row shows whether a non-compliance was detected during the audit and includes reference links to Axe documentation.",
+    "detectedFindingsLabel": "Detected findings",
+    "criterionStatus": {
+        "pass": "No issue detected",
+        "error": "Non-compliance detected",
+        "warning": "Warning detected",
+        "info": "Information detected"
+    }
 }
