@@ -51,13 +51,6 @@
         .copy-surface .lead {
             color: #475569;
         }
-        .section-block + .section-block {
-            margin-top: 2.5rem;
-        }
-        .back-link {
-            font-size: 0.95rem;
-            text-decoration: none;
-        }
         .criterion-list {
             margin: 0;
             padding-left: 1.1rem;
@@ -92,15 +85,15 @@
 
         <div id="copy-feedback" class="alert d-none no-print" role="status" aria-live="polite"></div>
 
-        <div class="page-card p-4 p-lg-5 copy-surface" id="cms-copy-root">
+        <div class="page-card p-4 p-lg-5 copy-surface">
             <div class="row">
                 <div class="col-12 offset-lg-1 col-lg-10">
                     <header class="mb-4">
                         <h1 class="mt-3"><%= model.t.pageTitle %></h1>
                     </header>
 
-                    <article>
-                        <section id="general-info" class="section-block">
+                    <article id="cms-copy-root">
+                        <div id="general-info" class="section-block">
                             <h2><%= model.t.generalInfo %></h2>
                             <dl class="row mb-0">
                                 <dt class="col-sm-4"><%= model.t.siteUrl %></dt>
@@ -118,17 +111,17 @@
                             </dl>
                         </section>
 
-                        <section id="audit" class="section-block">
+                        <div id="audit" class="section-block">
                             <h2><%= model.t.sectionResults %></h2>
                             <p><%= model.t.criteriaLead %></p>
                             <% for (const principle of model.axePrinciples) { %>
-                                <section class="mt-4">
+                                <div class="mt-4">
                                     <h3>9.<%= principle.code %> <%= principle.title %></h3>
                                     <% if (principle.description) { %>
                                         <p class="text-secondary"><%= principle.description %></p>
                                     <% } %>
                                     <% for (const guideline of principle.guidelines) { %>
-                                        <section class="mt-4">
+                                        <div class="mt-4">
                                             <h4>9.<%= guideline.code %> <%= guideline.title %></h4>
                                             <% if (guideline.description) { %>
                                                 <p class="text-secondary"><%= guideline.description %></p>
@@ -158,11 +151,11 @@
                                                     </tbody>
                                                 </table>
                                             </div>
-                                        </section>
+                                        </div>
                                     <% } %>
-                                </section>
+                                </div>
                             <% } %>
-                        </section>
+                        </div>
                     </article>
                 </div>
             </div>
