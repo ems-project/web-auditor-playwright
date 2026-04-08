@@ -19,6 +19,7 @@ import { ImagePlugin } from "./plugins/ImagePlugin.js";
 import { SeoUrlRulesPlugin } from "./plugins/SeoUrlRulesPlugin.js";
 import { SoftHttpErrorPlugin } from "./plugins/SoftHttpErrorPlugin.js";
 import { DownloaderPlugin } from "./plugins/DownloaderPlugin.js";
+import { RobotsTxtPlugin } from "./plugins/RobotsTxtPlugin.js";
 import { ImageMetadataPlugin } from "./plugins/ImageMetadataPlugin.js";
 import { CleanDownloadedPlugin } from "./plugins/CleanDownloadedPlugin.js";
 import { TextExtractorPlugin } from "./plugins/TextExtractorPlugin.js";
@@ -245,6 +246,13 @@ async function main() {
             new DownloaderPlugin({
                 outputDir: process.env.DOWNLOAD_OUTPUT_DIR ?? "./downloads",
                 keepFiles: process.env.DOWNLOAD_KEEP_FILES === "true",
+            }),
+        )
+        .register(
+            new RobotsTxtPlugin({
+                requireCrawlDelay:
+                    (process.env.ROBOTS_TXT_REQUIRE_CRAWL_DELAY ?? "true") === "true",
+                requireSitemap: (process.env.ROBOTS_TXT_REQUIRE_SITEMAP ?? "true") === "true",
             }),
         )
         .register(

@@ -55,9 +55,6 @@ The tool can be configured using [environment variables](#environment-variables)
 - Lighthouse plugin every x pages
 - European compatible accessibility report in french, dutch, german and english
 - Validate sitemap resources
-- Validate robots.txt
-    - Ensure that the robots.txt has a rule to throttle the robots
-    - Ensure that all page's CSS are not blocked by robots.txt's rules
 - Empty anchor links
 - Cookie plugin (lifetime)
 - Stats by locales
@@ -209,6 +206,8 @@ npm start
 | `IP_SUPPORT_AUDIT_ONLY_START_URL`           | `true`                                                           | If set to true, audits IP support only for the start URL.                                                                                                                                                                                                                                                            |
 | `IP_SUPPORT_TIMEOUT_MS`                     | `5000`                                                           | Maximum time in milliseconds allowed for IPv4/IPv6 connectivity checks.                                                                                                                                                                                                                                              |
 | `IP_SUPPORT_TEST_CONNECTIVITY`              | `false`                                                          | If set to true, also tests TCP connectivity over IPv4 and IPv6.                                                                                                                                                                                                                                                      |
+| `ROBOTS_TXT_REQUIRE_CRAWL_DELAY`            | `true`                                                           | When enabled, `robots-txt` warns if the `User-agent: *` group does not define a `Crawl-delay`.                                                                                                                                                                                                                       |
+| `ROBOTS_TXT_REQUIRE_SITEMAP`                | `true`                                                           | When enabled, `robots-txt` warns if `robots.txt` does not declare any `Sitemap` directive.                                                                                                                                                                                                                           |
 
 ## Performance Tuning
 
@@ -279,6 +278,19 @@ Examples:
 | html-processor      | NOT_PARSABLE_URL          | Invalid URL           | Integrator     | Fix                 |
 | standard-urls-audit | STANDARD_URL_NOT_ENQUEUED | Canonical not crawled | Integrator     | Fix crawler         |
 | standard-urls-audit | STANDARD_URL_MISSING      | Canonical URL missing | Webmaster, SEO | Add canonical link  |
+
+### Robots.txt
+
+| Plugin     | Code                           | Description                   | Profiles        | Recommended Actions   |
+| ---------- | ------------------------------ | ----------------------------- | --------------- | --------------------- |
+| robots-txt | ROBOTS_TXT_USER_AGENT_MISSING  | Missing `User-agent: *` group | SEO, Integrator | Add wildcard group    |
+| robots-txt | ROBOTS_TXT_SITEMAP_MISSING     | Missing sitemap declaration   | SEO, Integrator | Add Sitemap           |
+| robots-txt | ROBOTS_TXT_CRAWL_DELAY_MISSING | Missing crawl delay           | Infra, SEO      | Add Crawl-delay       |
+| robots-txt | ROBOTS_TXT_CRAWL_DELAY_INVALID | Invalid crawl delay value     | Infra           | Fix value             |
+| robots-txt | ROBOTS_TXT_BLOCKS_ALL_CRAWLERS | Blocks all crawlers           | SEO, Webmaster  | Review blocking rules |
+| robots-txt | ROBOTS_TXT_BLOCKS_CSS          | Blocks used CSS resource      | Frontend, SEO   | Allow required CSS    |
+| robots-txt | ROBOTS_TXT_BLOCKS_JS           | Blocks used JavaScript        | Frontend, SEO   | Allow required JS     |
+| robots-txt | ROBOTS_TXT_BLOCKS_IMAGE        | Blocks used image resource    | Frontend, SEO   | Allow required images |
 
 ### HTML Accessibility
 
