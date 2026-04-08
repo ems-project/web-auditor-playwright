@@ -115,9 +115,7 @@ type CriterionRow = {
 type SimplifiedAuditViewModel = {
     locale: SimplifiedAuditLocale;
     t: TranslationBundle;
-    pageTitle: string;
     origin: string;
-    siteName: string;
     generatedAtIso: string;
     generatedAtDisplay: string;
     startedAtDisplay: string;
@@ -218,14 +216,11 @@ export function buildSimplifiedAuditViewModel(
     const affectedPageCount = new Set(filteredIssues.map((issue) => issue.url).filter(Boolean))
         .size;
     const statusKey = computeStatus(filteredIssues);
-    const siteName = toSiteName(input.origin);
 
     return {
         locale: input.locale,
         t,
-        pageTitle: `${t.pageTitle} | ${siteName}`,
         origin: input.origin,
-        siteName,
         generatedAtIso: input.endedAt.toISOString(),
         generatedAtDisplay: formatDate(input.endedAt, input.locale, {
             dateStyle: "long",
@@ -555,14 +550,6 @@ function formatDate(
     options: Intl.DateTimeFormatOptions,
 ): string {
     return new Intl.DateTimeFormat(locale, options).format(value);
-}
-
-function toSiteName(origin: string): string {
-    try {
-        return new URL(origin).hostname;
-    } catch {
-        return origin;
-    }
 }
 
 function isSameOrigin(targetUrl: string, origin: string): boolean {
