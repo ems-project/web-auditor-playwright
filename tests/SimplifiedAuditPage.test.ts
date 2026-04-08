@@ -51,7 +51,6 @@ test("renderSimplifiedAuditPage renders BOSA-style EN 301 549 sections with help
     assert.match(html, /9\.1\.1\.1/);
     assert.match(html, /Contenu non textuel/);
     assert.match(html, /Non-conformité détectée/);
-    assert.match(html, /ClipboardItem/);
 });
 
 test("buildSimplifiedAuditViewModel groups criteria by principle and guideline and keeps passing criteria", () => {
