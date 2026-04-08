@@ -1,7 +1,7 @@
 {
     "htmlLang": "en",
     "pageTitle": "Simplified Audit Report",
-    "lead": "Compact CMS-ready version based on EN 301 549-oriented accessibility findings produced by Web Auditor.",
+    "lead": "Compact CMS-ready version based on EN301 549-oriented accessibility findings produced by Web Auditor.",
     "copyButton": "Copy HTML content",
     "copySuccess": "The HTML content has been copied to the clipboard.",
     "copyError": "Copy failed. Please check browser permissions.",
@@ -13,7 +13,7 @@
     "auditType": "Audit type",
     "auditTypeValue": "Simplified automated audit",
     "standard": "Standard",
-    "standardValue": "EN 301 549",
+    "standardValue": "EN301 549",
     "pagesChecked": "Checked pages",
     "provisionalStatus": "Indicative status",
     "complianceStatusLabel": "Compliance status",
@@ -39,7 +39,7 @@
     "findingsTitle": "Grouped technical findings",
     "noFindings": "No accessibility findings were detected for this summary.",
     "findingsLead": "Findings are grouped by technical code to make editorial publication easier.",
-    "auditDetailsIntro": "The tables below group accessibility findings by audit source. The editorial structure and layout are aligned with the Smals reference page while using EN 301 549 positioning.",
+    "auditDetailsIntro": "The tables below group accessibility findings by audit source. The editorial structure and layout are aligned with the Smals reference page while using EN301 549 positioning.",
     "sourceHeading": "Audit source",
     "sourceLead": "Grouped findings for this source.",
     "columns": {
@@ -51,7 +51,7 @@
         "example": "Example URL",
         "description": "Description",
         "references": "Ref(s)",
-        "criterion": "EN 301 549 criterion",
+        "criterion": "EN301 549 criterion",
         "status": "Result",
         "checks": "Audited Axe rules"
     },
@@ -67,8 +67,8 @@
     "breakdownWarnings": "Warnings",
     "breakdownInfos": "Infos",
     "occurrences": "Occurrences",
-    "criteriaTitle": "EN 301 549 criteria automatically checked by Axe",
-    "criteriaLead": "The table below exhaustively lists the EN 301 549 criteria covered by Axe Core. Each row shows whether a non-compliance was detected during the audit and includes reference links to Axe documentation.",
+    "criteriaTitle": "EN301 549 criteria automatically checked by Axe",
+    "criteriaLead": "The table below exhaustively lists the EN301 549 criteria covered by Axe Core. Each row shows whether a non-compliance was detected during the audit and includes reference links to Axe documentation.",
     "detectedFindingsLabel": "Detected findings",
     "criterionStatus": {
         "pass": "No issue detected",

@@ -1,7 +1,7 @@
 {
     "htmlLang": "nl",
     "pageTitle": "Vereenvoudigd auditrapport",
-    "lead": "Beknopte versie voor CMS-publicatie, gebaseerd op EN 301 549-gerichte toegankelijkheidsbevindingen uit Web Auditor.",
+    "lead": "Beknopte versie voor CMS-publicatie, gebaseerd op EN301 549-gerichte toegankelijkheidsbevindingen uit Web Auditor.",
     "copyButton": "HTML-inhoud kopiëren",
     "copySuccess": "De HTML-inhoud werd naar het klembord gekopieerd.",
     "copyError": "Kopiëren is mislukt. Controleer de browserrechten.",
@@ -13,7 +13,7 @@
     "auditType": "Type audit",
     "auditTypeValue": "Vereenvoudigd geautomatiseerd",
     "standard": "Norm",
-    "standardValue": "EN 301 549",
+    "standardValue": "EN301 549",
     "pagesChecked": "Aantal gecontroleerde pagina’s",
     "provisionalStatus": "Indicatieve status",
     "complianceStatusLabel": "Conformiteitsstatus",
@@ -39,7 +39,7 @@
     "findingsTitle": "Gegroepeerde technische bevindingen",
     "noFindings": "Er werden geen toegankelijkheidsbevindingen opgenomen in deze synthese.",
     "findingsLead": "De bevindingen zijn per technische code gegroepeerd om de publicatie van een redactionele samenvatting te vergemakkelijken.",
-    "auditDetailsIntro": "De onderstaande tabellen groeperen de toegankelijkheidsbevindingen per auditbron. De redactionele structuur en lay-out zijn afgestemd op de Smals referentiepagina, maar met EN 301 549-positionering.",
+    "auditDetailsIntro": "De onderstaande tabellen groeperen de toegankelijkheidsbevindingen per auditbron. De redactionele structuur en lay-out zijn afgestemd op de Smals referentiepagina, maar met EN301 549-positionering.",
     "sourceHeading": "Auditbron",
     "sourceLead": "Gegroepeerde bevindingen voor deze bron.",
     "columns": {
@@ -51,7 +51,7 @@
         "example": "Voorbeeld-URL",
         "description": "Beschrijving",
         "references": "Ref(s)",
-        "criterion": "EN 301 549-criterium",
+        "criterion": "EN301 549-criterium",
         "status": "Resultaat",
         "checks": "Geauditeerde Axe-regels"
     },
@@ -67,8 +67,8 @@
     "breakdownWarnings": "Waarschuwingen",
     "breakdownInfos": "Info",
     "occurrences": "Voorkomens",
-    "criteriaTitle": "EN 301 549-criteria die automatisch door Axe werden gecontroleerd",
-    "criteriaLead": "De onderstaande tabel geeft een exhaustief overzicht van de EN 301 549-criteria die door Axe Core worden afgedekt. Elke rij toont of tijdens de audit een niet-conformiteit werd gedetecteerd en bevat referentielinks naar de Axe-documentatie.",
+    "criteriaTitle": "EN301 549-criteria die automatisch door Axe werden gecontroleerd",
+    "criteriaLead": "De onderstaande tabel geeft een exhaustief overzicht van de EN301 549-criteria die door Axe Core worden afgedekt. Elke rij toont of tijdens de audit een niet-conformiteit werd gedetecteerd en bevat referentielinks naar de Axe-documentatie.",
     "detectedFindingsLabel": "Gedetecteerde bevindingen",
     "criterionStatus": {
         "pass": "Geen probleem gedetecteerd",

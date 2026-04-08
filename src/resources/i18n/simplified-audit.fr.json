@@ -1,7 +1,7 @@
 {
     "htmlLang": "fr",
     "pageTitle": "Rapport d’audit simplifié",
-    "lead": "Version synthétique orientée publication CMS, basée sur les constats accessibilité alignés EN 301 549 produits par Web Auditor.",
+    "lead": "Version synthétique orientée publication CMS, basée sur les constats accessibilité alignés EN301 549 produits par Web Auditor.",
     "copyButton": "Copier le contenu HTML",
     "copySuccess": "Le contenu HTML a été copié dans le presse-papier.",
     "copyError": "La copie a échoué. Vérifiez les permissions du navigateur.",
@@ -13,7 +13,7 @@
     "auditType": "Type d’audit",
     "auditTypeValue": "Simplifié automatisé",
     "standard": "Référentiel",
-    "standardValue": "EN 301 549",
+    "standardValue": "EN301 549",
     "pagesChecked": "Nombre de pages vérifiées",
     "provisionalStatus": "Statut indicatif",
     "complianceStatusLabel": "Statut de conformité",
@@ -39,7 +39,7 @@
     "findingsTitle": "Constats techniques regroupés",
     "noFindings": "Aucun constat accessibilité n’a été relevé pour cette synthèse.",
     "findingsLead": "Les constats sont regroupés par code technique afin de faciliter la publication d’un résumé éditorial.",
-    "auditDetailsIntro": "Le tableau ci-dessous reprend les constats d’accessibilité regroupés par source d’audit. La logique éditoriale et la mise en page s’inspirent du rapport d’audit Smals, avec un positionnement EN 301 549.",
+    "auditDetailsIntro": "Le tableau ci-dessous reprend les constats d’accessibilité regroupés par source d’audit. La logique éditoriale et la mise en page s’inspirent du rapport d’audit Smals, avec un positionnement EN301 549.",
     "sourceHeading": "Source d’audit",
     "sourceLead": "Constats regroupés pour cette source.",
     "columns": {
@@ -51,7 +51,7 @@
         "example": "Exemple d’URL",
         "description": "Description",
         "references": "Ref(s)",
-        "criterion": "Critère EN 301 549",
+        "criterion": "Critère EN301 549",
         "status": "Résultat",
         "checks": "Règles Axe auditées"
     },
@@ -67,8 +67,8 @@
     "breakdownWarnings": "Avertissements",
     "breakdownInfos": "Infos",
     "occurrences": "Occurrences",
-    "criteriaTitle": "Critères EN 301 549 contrôlés automatiquement par Axe",
-    "criteriaLead": "Le tableau ci-dessous liste exhaustivement les critères EN 301 549 couverts par Axe Core. Chaque ligne indique si une non-conformité a été détectée pendant l’audit et reprend des liens de référence vers la documentation Axe.",
+    "criteriaTitle": "Critères EN301 549 contrôlés automatiquement par Axe",
+    "criteriaLead": "Le tableau ci-dessous liste exhaustivement les critères EN301 549 couverts par Axe Core. Chaque ligne indique si une non-conformité a été détectée pendant l’audit et reprend des liens de référence vers la documentation Axe.",
     "detectedFindingsLabel": "Constats détectés",
     "criterionStatus": {
         "pass": "Aucun problème détecté",

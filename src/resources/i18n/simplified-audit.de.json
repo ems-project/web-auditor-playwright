@@ -1,7 +1,7 @@
 {
     "htmlLang": "de",
     "pageTitle": "Vereinfachter Auditbericht",
-    "lead": "Kompakte Fassung für die Veröffentlichung im CMS auf Basis von EN 301 549-orientierten Barrierefreiheitsbefunden aus Web Auditor.",
+    "lead": "Kompakte Fassung für die Veröffentlichung im CMS auf Basis von EN301 549-orientierten Barrierefreiheitsbefunden aus Web Auditor.",
     "copyButton": "HTML-Inhalt kopieren",
     "copySuccess": "Der HTML-Inhalt wurde in die Zwischenablage kopiert.",
     "copyError": "Das Kopieren ist fehlgeschlagen. Bitte die Browserberechtigungen prüfen.",
@@ -13,7 +13,7 @@
     "auditType": "Audittyp",
     "auditTypeValue": "Vereinfachte automatisierte Prüfung",
     "standard": "Norm",
-    "standardValue": "EN 301 549",
+    "standardValue": "EN301 549",
     "pagesChecked": "Geprüfte Seiten",
     "provisionalStatus": "Indikativer Status",
     "complianceStatusLabel": "Konformitätsstatus",
@@ -39,7 +39,7 @@
     "findingsTitle": "Gruppierte technische Befunde",
     "noFindings": "Für diese Zusammenfassung wurden keine Barrierefreiheitsbefunde festgestellt.",
     "findingsLead": "Die Befunde sind nach technischem Code gruppiert, um die Erstellung einer redaktionellen Zusammenfassung zu erleichtern.",
-    "auditDetailsIntro": "Die folgenden Tabellen gruppieren die Barrierefreiheitsbefunde nach Auditquelle. Redaktioneller Aufbau und Layout orientieren sich an der Smals-Referenzseite, jedoch mit EN 301 549-Ausrichtung.",
+    "auditDetailsIntro": "Die folgenden Tabellen gruppieren die Barrierefreiheitsbefunde nach Auditquelle. Redaktioneller Aufbau und Layout orientieren sich an der Smals-Referenzseite, jedoch mit EN301 549-Ausrichtung.",
     "sourceHeading": "Auditquelle",
     "sourceLead": "Gruppierte Befunde für diese Quelle.",
     "columns": {
