@@ -381,6 +381,11 @@ async function main() {
         registry,
     );
 
+    let resolveWebUiShutdownRequested: (() => void) | null = null;
+    const webUiShutdownRequested = new Promise<void>((resolve) => {
+        resolveWebUiShutdownRequested = resolve;
+    });
+
     const progressServer =
         webUiEnabled && webUiPort > 0
             ? new CrawlProgressServer({
@@ -389,6 +394,8 @@ async function main() {
                   host: webUiHost,
                   getRunId: () => engine.getCurrentRunId(),
                   staticRootDir: path.join(reportOutputDir, websiteId),
+                  onRequestGracefulStop: () => engine.requestStop(),
+                  onRequestShutdown: () => resolveWebUiShutdownRequested?.(),
               })
             : null;
 
@@ -610,9 +617,9 @@ async function main() {
             }),
         );
         console.log("Audit summary available at " + progressServer.getUrl());
-        console.log("Press Ctrl+C to stop the HTTP server.");
+        console.log("Press Ctrl+C or use the web UI button to stop the HTTP server.");
         process.exitCode = hasErrors ? 2 : 0;
-        await waitForTerminationSignal();
+        await Promise.race([waitForTerminationSignal(), webUiShutdownRequested]);
         await progressServer.stop();
         return;
     }

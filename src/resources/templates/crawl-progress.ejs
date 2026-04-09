@@ -15,7 +15,9 @@
   --accent: #0d6b5f;
   --accent-soft: rgba(13,107,95,0.12);
   --warn: #a35d00;
+  --warn-soft: rgba(163,93,0,0.12);
   --error: #9f1d35;
+  --error-soft: rgba(159,29,53,0.12);
 }
 * { box-sizing: border-box; }
 body {
@@ -26,6 +28,9 @@ body {
     radial-gradient(circle at top left, rgba(13,107,95,0.18), transparent 28%),
     radial-gradient(circle at right, rgba(195,129,66,0.18), transparent 24%),
     linear-gradient(180deg, #f8f4ec 0%, var(--bg) 100%);
+}
+button {
+  font: inherit;
 }
 main {
   margin: 0 auto;
@@ -44,6 +49,33 @@ header h1 {
   line-height: 1;
 }
 header p { margin: 8px 0 0; color: var(--muted); }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: end;
+}
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(159,29,53,0.22);
+  border-radius: 999px;
+  background: var(--error-soft);
+  color: var(--error);
+  font-weight: 600;
+  cursor: pointer;
+}
+.action-button:hover:not(:disabled) {
+  background: rgba(159,29,53,0.18);
+}
+.action-button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -75,14 +107,25 @@ th { font-size: 0.82rem; color: var(--muted); text-transform: uppercase; letter-
   font-weight: 600;
   font-size: 0.78rem;
 }
-.badge.warning { background: rgba(163,93,0,0.12); color: var(--warn); }
-.badge.error { background: rgba(159,29,53,0.12); color: var(--error); }
+.badge.warning { background: var(--warn-soft); color: var(--warn); }
+.badge.error { background: var(--error-soft); color: var(--error); }
 .two-cols {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 16px;
 }
 .empty { color: var(--muted); font-style: italic; }
+@media (max-width: 720px) {
+  header {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
 </style>
 </head>
 <body>
@@ -92,7 +135,10 @@ th { font-size: 0.82rem; color: var(--muted); text-transform: uppercase; letter-
       <h1>Crawl Monitor</h1>
       <p id="subtitle">Waiting for crawl data...</p>
     </div>
-    <div class="badge" id="status-badge">idle</div>
+    <div class="header-actions">
+      <button id="graceful-stop-button" class="action-button" type="button">Graceful Stop</button>
+      <div class="badge" id="status-badge">idle</div>
+    </div>
   </header>
   <div class="grid" id="cards"></div>
   <div class="two-cols">
@@ -112,16 +158,19 @@ const subtitle = document.getElementById("subtitle");
 const statusBadge = document.getElementById("status-badge");
 const urlsBody = document.getElementById("urls-body");
 const findingsBody = document.getElementById("findings-body");
+const gracefulStopButton = document.getElementById("graceful-stop-button");
 const statusApiPath = <%- JSON.stringify(statusApiPath) %>;
+const gracefulStopApiPath = <%- JSON.stringify(gracefulStopApiPath) %>;
 const refreshIntervalMs = <%- JSON.stringify(refreshIntervalMs) %>;
 let completionReloadScheduled = false;
+let gracefulStopRequested = false;
 
 function escapeHtml(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
+    .replace(/\"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
 
@@ -170,6 +219,11 @@ function renderRecentFindings(rows) {
   }).join('');
 }
 
+function setGracefulStopButtonState(isDisabled, label) {
+  gracefulStopButton.disabled = isDisabled;
+  gracefulStopButton.textContent = label;
+}
+
 function render(snapshot) {
   if (!snapshot || !snapshot.run) {
     subtitle.textContent = 'Waiting for the first crawl run...';
@@ -178,6 +232,7 @@ function render(snapshot) {
     cards.innerHTML = '';
     urlsBody.innerHTML = '<tr><td colspan="4" class="empty">No data yet.</td></tr>';
     findingsBody.innerHTML = '<tr><td colspan="4" class="empty">No findings yet.</td></tr>';
+    setGracefulStopButtonState(false, gracefulStopRequested ? 'Graceful Stop Requested' : 'Graceful Stop');
     return;
   }
 
@@ -185,11 +240,21 @@ function render(snapshot) {
   statusBadge.className = badgeClass(snapshot.run.status);
   statusBadge.textContent = snapshot.run.status;
 
-  if ((snapshot.run.status === 'finished' || snapshot.run.status === 'failed') && !completionReloadScheduled) {
+  const isCompleted = snapshot.run.status === 'finished' || snapshot.run.status === 'failed';
+  if (isCompleted && !completionReloadScheduled) {
     completionReloadScheduled = true;
     window.setTimeout(function () {
       window.location.reload();
     }, 300);
+  }
+
+  if (isCompleted) {
+    setGracefulStopButtonState(true, gracefulStopRequested ? 'Graceful Stop Requested' : 'Graceful Stop Unavailable');
+  } else if (gracefulStopRequested || snapshot.run.stopRequested) {
+    gracefulStopRequested = true;
+    setGracefulStopButtonState(true, 'Graceful Stop Requested');
+  } else {
+    setGracefulStopButtonState(false, 'Graceful Stop');
   }
 
   const metrics = [
@@ -208,6 +273,23 @@ function render(snapshot) {
   findingsBody.innerHTML = renderRecentFindings(snapshot.recentFindings);
 }
 
+async function requestGracefulStop() {
+  if (gracefulStopRequested) {
+    return;
+  }
+
+  gracefulStopRequested = true;
+  setGracefulStopButtonState(true, 'Graceful Stop Requested');
+
+  try {
+    await fetch(gracefulStopApiPath, { method: 'POST', cache: 'no-store' });
+  } catch (_error) {
+    gracefulStopRequested = false;
+    setGracefulStopButtonState(false, 'Graceful Stop');
+    subtitle.textContent = 'Failed to request a graceful stop.';
+  }
+}
+
 async function refresh() {
   try {
     const response = await fetch(statusApiPath, { cache: 'no-store' });
@@ -217,6 +299,7 @@ async function refresh() {
   }
 }
 
+gracefulStopButton.addEventListener('click', requestGracefulStop);
 refresh();
 setInterval(refresh, refreshIntervalMs);
 </script>

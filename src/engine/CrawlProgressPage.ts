@@ -15,6 +15,7 @@ type CrawlProgressPageModel = {
     title: string;
     refreshIntervalMs: number;
     statusApiPath: string;
+    gracefulStopApiPath: string;
 };
 
 export function renderCrawlProgressPage(model: CrawlProgressPageModel): string {

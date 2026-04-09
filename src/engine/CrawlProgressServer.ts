@@ -15,6 +15,8 @@ type CrawlProgressServerOptions = {
     getRunId?: () => number | undefined;
     host?: string;
     staticRootDir?: string;
+    onRequestGracefulStop?: () => void;
+    onRequestShutdown?: () => void | Promise<void>;
 };
 
 export class CrawlProgressServer {
@@ -51,6 +53,18 @@ export class CrawlProgressServer {
             if (requestUrl.pathname === "/api/completion") {
                 res.writeHead(200, { "content-type": "application/json; charset=utf-8" });
                 res.end(JSON.stringify(this.completionSummary ?? null));
+                return;
+            }
+
+            if (requestUrl.pathname === "/api/request-graceful-stop" && req.method === "POST") {
+                this.options.onRequestGracefulStop?.();
+                res.writeHead(202, { "content-type": "application/json; charset=utf-8" });
+                res.end(JSON.stringify({ ok: true }));
+                return;
+            }
+
+            if (requestUrl.pathname === "/api/shutdown" && req.method === "POST") {
+                void this.handleShutdownRequest(res);
                 return;
             }
 
@@ -136,6 +150,7 @@ export class CrawlProgressServer {
             title: "Web Auditor Crawl Monitor",
             statusApiPath: "/api/status",
             refreshIntervalMs: 2000,
+            gracefulStopApiPath: "/api/request-graceful-stop",
         });
     }
 
@@ -166,6 +181,19 @@ export class CrawlProgressServer {
         } catch {
             res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
             res.end("Not found");
+        }
+    }
+
+    private async handleShutdownRequest(res: http.ServerResponse): Promise<void> {
+        res.writeHead(202, { "content-type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({ ok: true }));
+
+        try {
+            await this.options.onRequestShutdown?.();
+        } finally {
+            setTimeout(() => {
+                void this.stop();
+            }, 0);
         }
     }
 }

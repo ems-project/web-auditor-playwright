@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { renderCrawlCompletionPage } from "../src/engine/CrawlCompletionPage.js";
 
-test("renderCrawlCompletionPage renders clickable artifact links", () => {
+test("renderCrawlCompletionPage renders clickable artifact links and shutdown control", () => {
     const html = renderCrawlCompletionPage({
         status: "finished",
         title: "Audit Summary",
@@ -38,4 +38,6 @@ test("renderCrawlCompletionPage renders clickable artifact links", () => {
     assert.match(html, /Open report\.json/);
     assert.match(html, /href="\/artifacts\/simplified-audit\.fr\.html"/);
     assert.match(html, /href="\/artifacts\/simplified-audit\.en\.html"/);
+    assert.match(html, /Stop Web Server/);
+    assert.match(html, /fetch\('\/api\/shutdown'/);
 });

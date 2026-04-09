@@ -30,6 +30,7 @@ body {
     linear-gradient(180deg, #faf6ef 0%, var(--bg) 100%);
 }
 a { color: inherit; }
+button { font: inherit; }
 main {
   margin: 0 auto;
   padding: 32px 20px 56px;
@@ -47,6 +48,33 @@ header h1 {
   line-height: 1;
 }
 header p { margin: 8px 0 0; color: var(--muted); }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: end;
+}
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(31,35,40,0.14);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.74);
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+}
+.action-button:hover:not(:disabled) {
+  background: rgba(255,255,255,0.9);
+}
+.action-button:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -200,6 +228,17 @@ th { font-size: 0.82rem; color: var(--muted); text-transform: uppercase; letter-
     grid-template-columns: 1fr;
   }
 }
+@media (max-width: 720px) {
+  header {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
 </style>
 </head>
 <body>
@@ -209,7 +248,10 @@ th { font-size: 0.82rem; color: var(--muted); text-transform: uppercase; letter-
       <h1><%= summary.title %></h1>
       <p><%= summary.subtitle %></p>
     </div>
-    <div class="badge <%= summary.status === 'failed' ? 'failed' : 'finished' %>"><%= summary.status %></div>
+    <div class="header-actions">
+      <button id="shutdown-server-button" class="action-button" type="button">Stop Web Server</button>
+      <div class="badge <%= summary.status === 'failed' ? 'failed' : 'finished' %>"><%= summary.status %></div>
+    </div>
   </header>
 
   <div class="grid">
@@ -375,6 +417,8 @@ th { font-size: 0.82rem; color: var(--muted); text-transform: uppercase; letter-
 <script>
 const links = Array.from(document.querySelectorAll('[data-plugin-link]'));
 const panels = Array.from(document.querySelectorAll('[data-plugin-panel]'));
+const shutdownServerButton = document.getElementById('shutdown-server-button');
+let shutdownRequested = false;
 
 function activate(hash) {
   const normalizedHash = hash && hash.length > 1 ? hash : (panels[0] ? `#${panels[0].id}` : '');
@@ -390,6 +434,26 @@ function activate(hash) {
 
 window.addEventListener('hashchange', () => activate(window.location.hash));
 activate(window.location.hash);
+
+async function requestServerShutdown() {
+  if (shutdownRequested) {
+    return;
+  }
+
+  shutdownRequested = true;
+  shutdownServerButton.disabled = true;
+  shutdownServerButton.textContent = 'Stopping Web Server...';
+
+  try {
+    await fetch('/api/shutdown', { method: 'POST', cache: 'no-store' });
+  } catch (_error) {
+    shutdownRequested = false;
+    shutdownServerButton.disabled = false;
+    shutdownServerButton.textContent = 'Stop Web Server';
+  }
+}
+
+shutdownServerButton.addEventListener('click', requestServerShutdown);
 
 for (const row of Array.from(document.querySelectorAll('[data-finding-row]'))) {
   const detailRow = row.nextElementSibling;
