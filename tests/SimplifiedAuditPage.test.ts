@@ -9,6 +9,8 @@ import {
 
 test("renderSimplifiedAuditPage renders BOSA-style EN 301 549 sections with help_url references", () => {
     const model = buildSimplifiedAuditViewModel({
+        locales: [],
+        outputDir: "",
         locale: "fr",
         origin: "https://example.com",
         startedAt: new Date("2026-04-08T10:00:00Z"),
@@ -55,6 +57,8 @@ test("renderSimplifiedAuditPage renders BOSA-style EN 301 549 sections with help
 
 test("buildSimplifiedAuditViewModel groups criteria by principle and guideline and keeps passing criteria", () => {
     const model = buildSimplifiedAuditViewModel({
+        locales: [],
+        outputDir: "",
         locale: "en",
         origin: "https://example.com",
         startedAt: new Date("2026-04-08T10:00:00Z"),
