@@ -37,7 +37,12 @@ export class TextractExtractorPlugin extends BasePlugin implements IPlugin {
     }
 
     applies(ctx: ResourceContext): boolean {
-        return ctx.downloaded?.savedPath !== undefined;
+        return (
+            ctx.downloaded?.savedPath !== undefined &&
+            undefined !== ctx.mime &&
+            !["image/x-icon", "image/webp", "text/css"].includes(ctx.mime) &&
+            !ctx.report.title?.endsWith(".ico")
+        );
     }
 
     async run(_phase: PluginPhase, ctx: ResourceContext): Promise<void> {
