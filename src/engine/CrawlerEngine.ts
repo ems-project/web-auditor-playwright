@@ -241,12 +241,14 @@ export class CrawlerEngine {
                 } else {
                     await this.registry.runPhase("periodic", ctx);
                 }
+                state.successCount += 1;
             } catch (e: unknown) {
                 const download = await downloadPromise;
                 if (download) {
                     ctx.download = download;
                     ctx.downloadTrigger = "playwright-download";
                     await this.registry.runPhase("download", ctx);
+                    state.successCount += 1;
                 } else {
                     const errorMessage = ErrorUtils.errorMessage(
                         "Failed to open or download the url",
@@ -263,19 +265,11 @@ export class CrawlerEngine {
                     this.store.markUrlFailed(runId, item.id, errorMessage);
                     failedInStore = true;
                     await this.registry.runPhase("error", ctx);
+                    state.errorCount += 1;
                 }
             } finally {
                 await this.registry.runPhase("beforeFinally", ctx);
-                if (ctx.findings.some((f) => f.type === "info")) {
-                    state.infoCount += 1;
-                }
-                if (ctx.findings.some((f) => f.type === "warning")) {
-                    state.warningCount += 1;
-                }
-                const hasErrorFinding = ctx.findings.some((f) => f.type === "error");
-                if (hasErrorFinding) {
-                    state.errorCount += 1;
-                } else if (!ctx.audited) {
+                if (!ctx.audited) {
                     state.warningCount += 1;
                     ctx.findings.push({
                         plugin: "engine",
@@ -285,9 +279,6 @@ export class CrawlerEngine {
                         message: "This URL is not supported",
                         url: ctx.url,
                     });
-                    state.successCount += 1;
-                } else {
-                    state.successCount += 1;
                 }
                 state.processedCount += 1;
                 state.activeWorkers -= 1;
