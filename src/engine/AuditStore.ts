@@ -27,6 +27,12 @@ type MigrationRow = {
     version: number;
 };
 
+type FindingCountByPluginRow = {
+    plugin: string;
+    severity: string;
+    count: number;
+};
+
 export class AuditStore {
     private db: Database.Database;
 
@@ -429,6 +435,48 @@ export class AuditStore {
             url: row.resource_url ?? undefined,
             data: row.payload_json ? JSON.parse(row.payload_json) : undefined,
         }));
+    }
+
+    public getFindingCountsByPlugin(
+        runId: number,
+        excludedCodes: string[] = [],
+    ): Record<string, { info: number; warning: number; error: number }> {
+        const placeholders = excludedCodes.map(() => "?").join(", ");
+        const rows = this.db
+            .prepare(
+                `
+      SELECT plugin, severity, COUNT(*) AS count
+      FROM findings
+      WHERE run_id = ?
+        ${excludedCodes.length > 0 ? `AND code NOT IN (${placeholders})` : ""}
+      GROUP BY plugin, severity
+    `,
+            )
+            .all(runId, ...excludedCodes) as FindingCountByPluginRow[];
+
+        const countsByPlugin: Record<string, { info: number; warning: number; error: number }> = {};
+
+        for (const row of rows) {
+            const counts = countsByPlugin[row.plugin] ?? {
+                info: 0,
+                warning: 0,
+                error: 0,
+            };
+
+            if (row.severity === "info") {
+                counts.info = Number(row.count);
+            }
+            if (row.severity === "warning") {
+                counts.warning = Number(row.count);
+            }
+            if (row.severity === "error") {
+                counts.error = Number(row.count);
+            }
+
+            countsByPlugin[row.plugin] = counts;
+        }
+
+        return countsByPlugin;
     }
 
     public getInventory(runId: number): Array<{

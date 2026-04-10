@@ -51,6 +51,7 @@ type BuildCompletionSummaryInput = {
     reports: Report[];
     issues: CompletionFinding[];
     artifactItems?: ReportItem[];
+    countsByPlugins: Record<string, { info: number; warning: number; error: number }>;
 };
 
 export function buildCrawlCompletionSummary(
@@ -78,9 +79,9 @@ export function buildCrawlCompletionSummary(
             plugin: "engine",
             label: engineReport.label,
             treatedUrls: input.state.seen.size,
-            infos: input.state.infoCount,
-            warnings: input.state.warningCount,
-            errors: input.state.errorCount,
+            infos: input.countsByPlugins["engine"]?.info ?? 0,
+            warnings: input.countsByPlugins["engine"]?.warning ?? 0,
+            errors: input.countsByPlugins["engine"]?.error ?? 0,
         };
         const findings = [...(issuesByPlugin.get("engine") ?? [])].sort(compareFindings);
         const sections: CompletionPluginDetail["sections"] = [
@@ -160,17 +161,17 @@ export function buildCrawlCompletionSummary(
                     {
                         key: "infos",
                         label: "Infos",
-                        value: summary.infos,
+                        value: input.countsByPlugins[plugin.name]?.info ?? 0,
                     },
                     {
                         key: "warnings",
                         label: "Warnings",
-                        value: summary.warnings,
+                        value: input.countsByPlugins[plugin.name]?.warning ?? 0,
                     },
                     {
                         key: "errors",
                         label: "Errors",
-                        value: summary.errors,
+                        value: input.countsByPlugins[plugin.name]?.error ?? 0,
                     },
                 ],
             },
@@ -187,9 +188,9 @@ export function buildCrawlCompletionSummary(
             plugin: summary.plugin,
             label,
             treatedUrls: summary.treatedUrls,
-            infos: summary.infos,
-            warnings: summary.warnings,
-            errors: summary.errors,
+            infos: input.countsByPlugins[plugin.name]?.info ?? 0,
+            warnings: input.countsByPlugins[plugin.name]?.warning ?? 0,
+            errors: input.countsByPlugins[plugin.name]?.error ?? 0,
         });
 
         pluginDetails.push({

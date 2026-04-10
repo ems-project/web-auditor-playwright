@@ -571,6 +571,8 @@ async function main() {
     const hasErrors = pluginSummaries.reduce((sum, p) => sum + p.errors, 0) > 0;
 
     if (progressServer) {
+        const countsByPlugins = auditStore.getFindingCountsByPlugin(runId, findingCodesBlocklist);
+
         progressServer.setCompletionSummary(
             buildCrawlCompletionSummary({
                 registry,
@@ -614,6 +616,7 @@ async function main() {
                 reports,
                 issues,
                 artifactItems,
+                countsByPlugins,
             }),
         );
         console.log("Audit summary available at " + progressServer.getUrl());
