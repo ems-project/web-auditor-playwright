@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.15
-FROM mcr.microsoft.com/playwright:v1.58.2-jammy AS builder
+FROM mcr.microsoft.com/playwright:v1.59.1-jammy AS builder
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ RUN mkdir -p /opt/reports /opt/downloads \
     && chown -R pwuser:0 /opt/reports /opt/downloads /app/dist /app/node_modules \
     && chmod 775 /opt/reports /opt/downloads /app/dist /app/node_modules
 
-FROM mcr.microsoft.com/playwright:v1.58.2-jammy
+FROM mcr.microsoft.com/playwright:v1.59.1-jammy
 
 WORKDIR /app
 

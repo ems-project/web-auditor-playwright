@@ -21,7 +21,7 @@
         "franc": "^6.2.0",
         "mammoth": "^1.12.0",
         "pdfjs-dist": "^5.5.207",
-        "playwright": "^1.49.0",
+        "playwright": "1.59.1",
         "textract": "2.5.0"
     },
     "devDependencies": {
