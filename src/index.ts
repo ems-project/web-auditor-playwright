@@ -120,16 +120,46 @@ function escapeXml(value: string): string {
         .replace(/'/g, "&apos;");
 }
 
-async function waitForTerminationSignal(): Promise<void> {
+async function waitForSummaryServerShutdown(webUiShutdownRequested: Promise<void>): Promise<void> {
     await new Promise<void>((resolve) => {
-        const onSignal = (): void => {
-            process.off("SIGINT", onSignal);
-            process.off("SIGTERM", onSignal);
+        const stdin = process.stdin;
+        const wasRaw = stdin.isTTY && stdin.isRaw;
+        let resolved = false;
+
+        const cleanup = (): void => {
+            process.off("SIGINT", stop);
+            process.off("SIGTERM", stop);
+            stdin.off("data", onData);
+            if (stdin.isTTY) {
+                stdin.setRawMode(wasRaw);
+            }
+            stdin.pause();
+        };
+
+        const stop = (): void => {
+            if (resolved) {
+                return;
+            }
+            resolved = true;
+            cleanup();
             resolve();
         };
 
-        process.on("SIGINT", onSignal);
-        process.on("SIGTERM", onSignal);
+        const onData = (chunk: Buffer): void => {
+            const input = chunk.toString("utf8").toLowerCase();
+            if (input.includes("s") || input.includes("\u0003")) {
+                stop();
+            }
+        };
+
+        process.on("SIGINT", stop);
+        process.on("SIGTERM", stop);
+        stdin.on("data", onData);
+        if (stdin.isTTY) {
+            stdin.setRawMode(true);
+        }
+        stdin.resume();
+        webUiShutdownRequested.then(stop, stop);
     });
 }
 
@@ -620,9 +650,9 @@ async function main() {
             }),
         );
         console.log("Audit summary available at " + progressServer.getUrl());
-        console.log("Press Ctrl+C or use the web UI button to stop the HTTP server.");
+        console.log("Press s, Ctrl+C, or use the web UI button to stop the HTTP server.");
         process.exitCode = hasErrors ? 2 : 0;
-        await Promise.race([waitForTerminationSignal(), webUiShutdownRequested]);
+        await waitForSummaryServerShutdown(webUiShutdownRequested);
         await progressServer.stop();
         return;
     }
