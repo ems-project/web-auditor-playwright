@@ -118,6 +118,27 @@ docker run --rm \
 The crawler can be configured using environment variables.  
 These variables control crawl behavior, performance limits, and execution parameters.
 
+### TL;DR
+
+There is an example if you want to audit a local Symfony website:
+
+```shell
+docker run --rm -it \
+  --network skeleton \
+  -v $(pwd)/reports:/opt/reports \
+  -p 3030:3030 \
+  -e START_URL="http://preview.cv.docker:9000" \
+  -e WEBSITE_ID="mdk" \
+  -e MAX_PAGES="80" \
+  -e MAX_DEPTH="15" \
+  -e CONCURRENCY="3" \
+  -e URL_BLOCKLIST_REGEX="^https?:\\/\\/[a-z0-9.-]+(:[0-9]+)?\\/(_profiler|_wdt)" \
+  -e RATE_LIMIT_MS="100" \
+  -e FINDING_CODES_BLOCKLIST="MAIL_OR_TEL_LINK,INLINE_SCRIPT_TAG" \
+  -e DISABLED_PLUGINS="robots-txt,sitemap,security-headers,tls-certificate,ip-support" \
+  elasticms/web-auditor:latest
+```
+
 You can define them directly in the shell, in a `.env` file, or via Docker environment variables.
 
 Example:
