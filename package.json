@@ -10,7 +10,7 @@
         "lint:fix": "eslint . --fix",
         "format": "prettier . --write",
         "format:check": "prettier . --check",
-        "test": "node --import tsx --test tests/**/*.test.ts"
+        "test": "node --import tsx --test tests/*.test.ts"
     },
     "dependencies": {
         "@axe-core/playwright": "^4.9.0",

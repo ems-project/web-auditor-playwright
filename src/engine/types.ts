@@ -55,6 +55,7 @@ export type CrawlOptions = {
     concurrency: number;
     navTimeoutMs: number;
     userAgent?: string;
+    extraHTTPHeaders?: Record<string, string>;
     rateLimitMs: number;
     urlAllowlist?: RegExp[];
     urlBlocklist?: RegExp[];

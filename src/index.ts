@@ -402,6 +402,9 @@ async function main() {
             concurrency: Number(process.env.CONCURRENCY ?? 3),
             navTimeoutMs: Number(process.env.NAV_TIMEOUT_MS ?? 30000),
             userAgent: process.env.USER_AGENT,
+            extraHTTPHeaders: TextUtils.parseHttpHeadersJson(
+                process.env.PLAYWRIGHT_EXTRA_HTTP_HEADERS,
+            ),
             rateLimitMs: Number(process.env.RATE_LIMIT_MS ?? 500),
             urlAllowlist: urlAllowlist,
             urlBlocklist: urlBlocklist,

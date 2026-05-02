@@ -115,6 +115,7 @@ export class CrawlerEngine {
         const browser = await chromium.launch({ headless: true });
         const context = await browser.newContext({
             userAgent: this.opts.userAgent,
+            extraHTTPHeaders: this.opts.extraHTTPHeaders,
             ignoreHTTPSErrors: this.opts.ignoreHttpsError,
         });
 
