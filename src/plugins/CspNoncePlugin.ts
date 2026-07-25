@@ -11,9 +11,9 @@ import type {
 
 type NonceInfo = {
     nonce: string;
-    directive: 'script-src' | 'style-src';
-    source: 'csp-header' | 'inline-element';
-    elementType?: 'script' | 'style';
+    directive: "script-src" | "style-src";
+    source: "csp-header" | "inline-element";
+    elementType?: "script" | "style";
     content?: string;
     location?: string;
 };
@@ -23,7 +23,12 @@ type CspNonceState = {
 };
 
 type PageNonceState = {
-    inlineElements: Array<{ type: 'script' | 'style'; nonce?: string; content: string; location: string }>;
+    inlineElements: Array<{
+        type: "script" | "style";
+        nonce?: string;
+        content: string;
+        location: string;
+    }>;
 };
 
 export type CspNoncePluginOptions = {
@@ -55,10 +60,11 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
         if (ctx.download || phase !== "afterGoto") return;
 
         // Only analyze HTML pages, but be more flexible about detection
-        const isHtmlPage = ctx.mime?.includes('text/html') || 
-                          ctx.url.endsWith('.html') || 
-                          (!ctx.mime && ctx.response?.headers()['content-type']?.includes('text/html'));
-        
+        const isHtmlPage =
+            ctx.mime?.includes("text/html") ||
+            ctx.url.endsWith(".html") ||
+            (!ctx.mime && ctx.response?.headers()["content-type"]?.includes("text/html"));
+
         if (!isHtmlPage) {
             this.register(ctx);
             return;
@@ -81,7 +87,7 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
                 label: "Pages with nonce analysis",
                 value: nonceStats.totalPages,
             });
-            
+
             if (nonceStats.pagesWithNonces > 0) {
                 reportItems.push({
                     key: "pagesWithNonces",
@@ -89,7 +95,7 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
                     value: nonceStats.pagesWithNonces,
                 });
             }
-            
+
             if (nonceStats.totalNonceIssues > 0) {
                 reportItems.push({
                     key: "nonceIssues",
@@ -97,7 +103,7 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
                     value: nonceStats.totalNonceIssues,
                 });
             }
-            
+
             if (nonceStats.uniqueNonces > 0) {
                 reportItems.push({
                     key: "uniqueNonces",
@@ -125,8 +131,8 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
     private getPageState(page: Page): PageNonceState {
         let existing = this.pageStates.get(page);
         if (!existing) {
-            existing = { 
-                inlineElements: []
+            existing = {
+                inlineElements: [],
             };
             this.pageStates.set(page, existing);
         }
@@ -152,32 +158,32 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
         const styleNonces: string[] = [];
 
         // Parse CSP directives
-        const directives = cspHeader.split(';').map(d => d.trim());
-        
+        const directives = cspHeader.split(";").map((d) => d.trim());
+
         for (const directive of directives) {
             const parts = directive.split(/\s+/);
             if (parts.length < 2) continue;
-            
+
             const directiveName = parts[0].toLowerCase();
             const values = parts.slice(1);
-            
-            if (directiveName === 'script-src' || directiveName === 'default-src') {
+
+            if (directiveName === "script-src" || directiveName === "default-src") {
                 for (const value of values) {
                     const nonceMatch = value.match(/^'nonce-([^']+)'$/);
-                    if (nonceMatch && directiveName === 'script-src') {
+                    if (nonceMatch && directiveName === "script-src") {
                         scriptNonces.push(nonceMatch[1]);
-                    } else if (nonceMatch && directiveName === 'default-src') {
+                    } else if (nonceMatch && directiveName === "default-src") {
                         // default-src nonces apply to both script and style if specific directives aren't present
                         scriptNonces.push(nonceMatch[1]);
                         styleNonces.push(nonceMatch[1]);
                     }
                 }
             }
-            
-            if (directiveName === 'style-src' || directiveName === 'default-src') {
+
+            if (directiveName === "style-src" || directiveName === "default-src") {
                 for (const value of values) {
                     const nonceMatch = value.match(/^'nonce-([^']+)'$/);
-                    if (nonceMatch && directiveName === 'style-src') {
+                    if (nonceMatch && directiveName === "style-src") {
                         styleNonces.push(nonceMatch[1]);
                     }
                 }
@@ -190,40 +196,49 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
     /**
      * Extract inline scripts and styles from page content
      */
-    private async extractInlineElements(page: Page): Promise<Array<{ type: 'script' | 'style'; nonce?: string; content: string; location: string }>> {
+    private async extractInlineElements(
+        page: Page,
+    ): Promise<
+        Array<{ type: "script" | "style"; nonce?: string; content: string; location: string }>
+    > {
         try {
             return await page.evaluate(() => {
-                const elements: Array<{ type: 'script' | 'style'; nonce?: string; content: string; location: string }> = [];
-                
+                const elements: Array<{
+                    type: "script" | "style";
+                    nonce?: string;
+                    content: string;
+                    location: string;
+                }> = [];
+
                 // Find inline script tags
-                const scripts = document.querySelectorAll('script:not([src])');
+                const scripts = document.querySelectorAll("script:not([src])");
                 scripts.forEach((script, index) => {
-                    const nonce = script.getAttribute('nonce') || undefined;
-                    const content = script.textContent || script.innerHTML || '';
+                    const nonce = script.getAttribute("nonce") || undefined;
+                    const content = script.textContent || script.innerHTML || "";
                     elements.push({
-                        type: 'script',
+                        type: "script",
                         nonce,
                         content: content.trim(),
-                        location: `inline-script-${index + 1}`
+                        location: `inline-script-${index + 1}`,
                     });
                 });
 
                 // Find inline style tags
-                const styles = document.querySelectorAll('style');
+                const styles = document.querySelectorAll("style");
                 styles.forEach((style, index) => {
-                    const nonce = style.getAttribute('nonce') || undefined;
-                    const content = style.textContent || style.innerHTML || '';
+                    const nonce = style.getAttribute("nonce") || undefined;
+                    const content = style.textContent || style.innerHTML || "";
                     elements.push({
-                        type: 'style',
+                        type: "style",
                         nonce,
                         content: content.trim(),
-                        location: `inline-style-${index + 1}`
+                        location: `inline-style-${index + 1}`,
                     });
                 });
 
                 return elements;
             });
-        } catch (error) {
+        } catch {
             // If page evaluation fails, return empty array
             return [];
         }
@@ -232,10 +247,14 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
     /**
      * Validate nonces and report issues
      */
-    private validateNonces(ctx: ResourceContext, pageState: PageNonceState, cspNonces: { scriptNonces: string[]; styleNonces: string[] }): void {
+    private validateNonces(
+        ctx: ResourceContext,
+        pageState: PageNonceState,
+        cspNonces: { scriptNonces: string[]; styleNonces: string[] },
+    ): void {
         const url = ctx.url;
         const globalState = this.getNonceState(ctx.engineState);
-        
+
         // Store nonce information
         if (!globalState.nonces[url]) {
             globalState.nonces[url] = [];
@@ -243,11 +262,11 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
 
         // Track all nonces found in CSP headers
         const allCspNonces = new Set([...cspNonces.scriptNonces, ...cspNonces.styleNonces]);
-        
+
         // Check each inline element
-        const inlineScripts = pageState.inlineElements.filter(el => el.type === 'script');
-        const inlineStyles = pageState.inlineElements.filter(el => el.type === 'style');
-        
+        const inlineScripts = pageState.inlineElements.filter((el) => el.type === "script");
+        const inlineStyles = pageState.inlineElements.filter((el) => el.type === "style");
+
         // Validate script nonces
         for (const script of inlineScripts) {
             if (!script.nonce) {
@@ -258,11 +277,11 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
                         "security",
                         "CSP_INLINE_WITHOUT_NONCE",
                         `Inline script found without nonce attribute while CSP defines script nonces.`,
-                        { 
+                        {
                             location: script.location,
                             availableNonces: cspNonces.scriptNonces,
-                            contentPreview: script.content.substring(0, 100)
-                        }
+                            contentPreview: script.content.substring(0, 100),
+                        },
                     );
                 }
             } else {
@@ -277,19 +296,19 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
                             location: script.location,
                             elementNonce: script.nonce,
                             expectedNonces: cspNonces.scriptNonces,
-                            contentPreview: script.content.substring(0, 100)
-                        }
+                            contentPreview: script.content.substring(0, 100),
+                        },
                     );
                 }
-                
+
                 // Store nonce info
                 globalState.nonces[url].push({
                     nonce: script.nonce,
-                    directive: 'script-src',
-                    source: 'inline-element',
-                    elementType: 'script',
+                    directive: "script-src",
+                    source: "inline-element",
+                    elementType: "script",
                     content: script.content.substring(0, 200),
-                    location: script.location
+                    location: script.location,
                 });
             }
         }
@@ -304,11 +323,11 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
                         "security",
                         "CSP_INLINE_WITHOUT_NONCE",
                         `Inline style found without nonce attribute while CSP defines style nonces.`,
-                        { 
+                        {
                             location: style.location,
                             availableNonces: cspNonces.styleNonces,
-                            contentPreview: style.content.substring(0, 100)
-                        }
+                            contentPreview: style.content.substring(0, 100),
+                        },
                     );
                 }
             } else {
@@ -323,19 +342,19 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
                             location: style.location,
                             elementNonce: style.nonce,
                             expectedNonces: cspNonces.styleNonces,
-                            contentPreview: style.content.substring(0, 100)
-                        }
+                            contentPreview: style.content.substring(0, 100),
+                        },
                     );
                 }
-                
+
                 // Store nonce info
                 globalState.nonces[url].push({
                     nonce: style.nonce,
-                    directive: 'style-src',
-                    source: 'inline-element',
-                    elementType: 'style',
+                    directive: "style-src",
+                    source: "inline-element",
+                    elementType: "style",
                     content: style.content.substring(0, 200),
-                    location: style.location
+                    location: style.location,
                 });
             }
         }
@@ -344,16 +363,16 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
         for (const nonce of cspNonces.scriptNonces) {
             globalState.nonces[url].push({
                 nonce,
-                directive: 'script-src',
-                source: 'csp-header'
+                directive: "script-src",
+                source: "csp-header",
             });
         }
-        
+
         for (const nonce of cspNonces.styleNonces) {
             globalState.nonces[url].push({
                 nonce,
-                directive: 'style-src',
-                source: 'csp-header'
+                directive: "style-src",
+                source: "csp-header",
             });
         }
 
@@ -366,17 +385,23 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
     /**
      * Check for nonce reuse across different pages
      */
-    private checkForNonceReuse(ctx: ResourceContext, globalState: CspNonceState, currentNonces: Set<string>): void {
+    private checkForNonceReuse(
+        ctx: ResourceContext,
+        globalState: CspNonceState,
+        currentNonces: Set<string>,
+    ): void {
         const currentUrl = ctx.url;
-        
+
         for (const [url, nonceInfos] of Object.entries(globalState.nonces)) {
             if (url === currentUrl) continue; // Skip current page
-            
-            const urlNonces = new Set(nonceInfos.filter(info => info.source === 'csp-header').map(info => info.nonce));
-            
+
+            const urlNonces = new Set(
+                nonceInfos.filter((info) => info.source === "csp-header").map((info) => info.nonce),
+            );
+
             // Check for intersection
-            const reusedNonces = [...currentNonces].filter(nonce => urlNonces.has(nonce));
-            
+            const reusedNonces = [...currentNonces].filter((nonce) => urlNonces.has(nonce));
+
             if (reusedNonces.length > 0) {
                 this.registerError(
                     ctx,
@@ -387,8 +412,8 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
                         reusedNonces,
                         currentUrl,
                         otherUrl: url,
-                        recommendation: "Generate unique nonces for each page load"
-                    }
+                        recommendation: "Generate unique nonces for each page load",
+                    },
                 );
             }
         }
@@ -397,22 +422,25 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
     /**
      * Perform comprehensive nonce analysis for the current page
      */
-    private async performNonceAnalysis(ctx: ResourceContext, pageState: PageNonceState): Promise<void> {
+    private async performNonceAnalysis(
+        ctx: ResourceContext,
+        pageState: PageNonceState,
+    ): Promise<void> {
         try {
             // Extract CSP headers from response
             const cspNonces = { scriptNonces: [] as string[], styleNonces: [] as string[] };
-            
+
             if (ctx.response) {
                 const headers = ctx.response.headers();
-                const cspHeader = headers['content-security-policy'];
-                const cspReportOnlyHeader = headers['content-security-policy-report-only'];
-                
+                const cspHeader = headers["content-security-policy"];
+                const cspReportOnlyHeader = headers["content-security-policy-report-only"];
+
                 if (cspHeader) {
                     const parsed = this.parseCspNonces(cspHeader);
                     cspNonces.scriptNonces.push(...parsed.scriptNonces);
                     cspNonces.styleNonces.push(...parsed.styleNonces);
                 }
-                
+
                 if (cspReportOnlyHeader) {
                     const parsed = this.parseCspNonces(cspReportOnlyHeader);
                     cspNonces.scriptNonces.push(...parsed.scriptNonces);
@@ -424,15 +452,27 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
             pageState.inlineElements = await this.extractInlineElements(ctx.page);
 
             // Validate nonces if any were found
-            if (cspNonces.scriptNonces.length > 0 || cspNonces.styleNonces.length > 0 || pageState.inlineElements.length > 0) {
+            if (
+                cspNonces.scriptNonces.length > 0 ||
+                cspNonces.styleNonces.length > 0 ||
+                pageState.inlineElements.length > 0
+            ) {
                 this.validateNonces(ctx, pageState, cspNonces);
             }
 
             // Report missing nonces if inline elements exist but no CSP nonces are defined
-            if (pageState.inlineElements.length > 0 && cspNonces.scriptNonces.length === 0 && cspNonces.styleNonces.length === 0) {
-                const scriptCount = pageState.inlineElements.filter(el => el.type === 'script').length;
-                const styleCount = pageState.inlineElements.filter(el => el.type === 'style').length;
-                
+            if (
+                pageState.inlineElements.length > 0 &&
+                cspNonces.scriptNonces.length === 0 &&
+                cspNonces.styleNonces.length === 0
+            ) {
+                const scriptCount = pageState.inlineElements.filter(
+                    (el) => el.type === "script",
+                ).length;
+                const styleCount = pageState.inlineElements.filter(
+                    (el) => el.type === "style",
+                ).length;
+
                 if (scriptCount > 0 || styleCount > 0) {
                     this.registerInfo(
                         ctx,
@@ -442,12 +482,11 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
                         {
                             inlineScripts: scriptCount,
                             inlineStyles: styleCount,
-                            recommendation: "Consider implementing CSP nonces for better security"
-                        }
+                            recommendation: "Consider implementing CSP nonces for better security",
+                        },
                     );
                 }
             }
-
         } catch (error) {
             // Log error but don't fail the entire plugin
             console.warn(`CSP nonce analysis failed for ${ctx.url}:`, error);
@@ -471,7 +510,7 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
         const nonceUsage = new Map<string, number>();
 
         for (const [url, nonceInfos] of Object.entries(state.nonces)) {
-            const hasHeaderNonces = nonceInfos.some(info => info.source === 'csp-header');
+            const hasHeaderNonces = nonceInfos.some((info) => info.source === "csp-header");
             if (hasHeaderNonces) {
                 pagesWithNonces++;
             }
@@ -479,15 +518,19 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
             // Collect all unique nonces and track usage
             for (const info of nonceInfos) {
                 allNonces.add(info.nonce);
-                if (info.source === 'csp-header') {
+                if (info.source === "csp-header") {
                     nonceUsage.set(info.nonce, (nonceUsage.get(info.nonce) || 0) + 1);
                 }
             }
 
             // Count potential issues (this is a simplified count - actual issues are tracked via findings)
-            const headerNonces = nonceInfos.filter(info => info.source === 'csp-header').map(info => info.nonce);
-            const elementNonces = nonceInfos.filter(info => info.source === 'inline-element').map(info => info.nonce);
-            
+            const headerNonces = nonceInfos
+                .filter((info) => info.source === "csp-header")
+                .map((info) => info.nonce);
+            const elementNonces = nonceInfos
+                .filter((info) => info.source === "inline-element")
+                .map((info) => info.nonce);
+
             // Count mismatched nonces as potential issues
             for (const elementNonce of elementNonces) {
                 if (elementNonce && !headerNonces.includes(elementNonce)) {
@@ -497,14 +540,14 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
         }
 
         // Count reused nonces
-        const reusedNonces = Array.from(nonceUsage.values()).filter(count => count > 1).length;
+        const reusedNonces = Array.from(nonceUsage.values()).filter((count) => count > 1).length;
 
         return {
             totalPages,
             pagesWithNonces,
             uniqueNonces: allNonces.size,
             totalNonceIssues,
-            reusedNonces
+            reusedNonces,
         };
     }
 }
