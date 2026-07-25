@@ -189,6 +189,11 @@ async function main() {
     if (!Number.isInteger(webUiPort) || webUiPort < 0 || webUiPort > 65535) {
         throw new Error("Invalid WEB_UI_PORT: " + webUiPortValue);
     }
+    const reportMaxIssuesValue = process.env.REPORT_MAX_ISSUES ?? "1000";
+    const reportMaxIssues = Number(reportMaxIssuesValue);
+    if (!Number.isInteger(reportMaxIssues) || webUiPort < reportMaxIssues) {
+        throw new Error("Invalid REPORT_MAX_ISSUES: " + webUiPortValue);
+    }
     const webUiHost = process.env.WEB_UI_HOST ?? "127.0.0.1";
     const findingCodesBlocklist = (process.env.FINDING_CODES_BLOCKLIST ?? "")
         .split(",")
@@ -473,7 +478,7 @@ async function main() {
     const auditStore = new AuditStore(path.join(reportOutputDir, websiteId, "audit.db"));
     const runId = Number(state.any["runId"]);
     const issues = auditStore
-        .getFindings(runId)
+        .getFindings(runId, reportMaxIssues)
         .filter((finding) => !findingCodesBlocklist.includes(finding.code));
     const inventory = auditStore.getInventory(runId);
     const run = auditStore.getRun(runId);
@@ -559,7 +564,7 @@ async function main() {
         issues,
         inventory,
     };
-    
+
     // Handle potential RangeError for very large reports
     let jsonReport: string;
     try {
@@ -569,23 +574,27 @@ async function main() {
             // Fallback: serialize each property separately to avoid string length limits
             const parts: string[] = [];
             parts.push("{");
-            
+
             const keys = Object.keys(globalReport);
             for (let i = 0; i < keys.length; i++) {
                 const key = keys[i];
                 const keyStr = JSON.stringify(key);
-                
+
                 try {
-                    const valueStr = JSON.stringify(globalReport[key as keyof typeof globalReport], null, 4);
+                    const valueStr = JSON.stringify(
+                        globalReport[key as keyof typeof globalReport],
+                        null,
+                        4,
+                    );
                     const separator = i < keys.length - 1 ? "," : "";
                     parts.push(`${keyStr}: ${valueStr}${separator}`);
-                } catch (propError) {
+                } catch {
                     // If individual property is too large, provide a summary
                     const value = globalReport[key as keyof typeof globalReport];
                     let summary: string;
                     if (Array.isArray(value)) {
                         summary = `"[Array with ${value.length} items - too large to serialize]"`;
-                    } else if (typeof value === 'object' && value !== null) {
+                    } else if (typeof value === "object" && value !== null) {
                         const objKeys = Object.keys(value);
                         summary = `"[Object with ${objKeys.length} properties - too large to serialize]"`;
                     } else {
@@ -595,7 +604,7 @@ async function main() {
                     parts.push(`${keyStr}: ${summary}${separator}`);
                 }
             }
-            
+
             parts.push("}");
             jsonReport = parts.join("\n");
         } else {
