@@ -6,14 +6,14 @@ describe("CspInventoryPlugin", () => {
     describe("Plugin Configuration", () => {
         it("should use default options when none provided", () => {
             const plugin = new CspInventoryPlugin();
-            
+
             assert.equal(plugin.name, "csp-inventory");
             assert.deepEqual(plugin.phases, ["beforeGoto", "afterGoto", "finally"]);
         });
 
         it("should accept custom options", () => {
             const plugin = new CspInventoryPlugin({ maxExampleUrls: 5 });
-            
+
             assert.equal(plugin.name, "csp-inventory");
             // maxExampleUrls is private, but we can verify the plugin was created successfully
             assert.ok(plugin);
@@ -21,10 +21,10 @@ describe("CspInventoryPlugin", () => {
 
         it("should apply to non-download contexts", () => {
             const plugin = new CspInventoryPlugin();
-            
+
             const mockContext = { download: false } as any;
             assert.equal(plugin.applies(mockContext), true);
-            
+
             const mockDownloadContext = { download: true } as any;
             assert.equal(plugin.applies(mockDownloadContext), false);
         });
@@ -35,12 +35,12 @@ describe("CspInventoryPlugin", () => {
             const plugin = new CspInventoryPlugin();
             const mockEngineState = {
                 any: {
-                    cspInventoryState: { entries: {} }
-                }
+                    cspInventoryState: { entries: {} },
+                },
             } as any;
-            
+
             const report = plugin.getReport(mockEngineState);
-            
+
             assert.equal(report.plugin, "csp-inventory");
             assert.equal(report.label, "CSP Inventory");
             assert.equal(report.items.length, 1); // Only uniqueExternalOrigins with value 0
@@ -59,35 +59,37 @@ describe("CspInventoryPlugin", () => {
                                 resourceType: "script",
                                 directive: "script-src",
                                 count: 5,
-                                exampleUrls: ["https://cdn.example.com/app.js"]
+                                exampleUrls: ["https://cdn.example.com/app.js"],
                             },
                             "https://fonts.googleapis.com|font": {
                                 origin: "https://fonts.googleapis.com",
                                 resourceType: "font",
                                 directive: "font-src",
                                 count: 2,
-                                exampleUrls: ["https://fonts.googleapis.com/font.woff2"]
-                            }
-                        }
-                    }
-                }
+                                exampleUrls: ["https://fonts.googleapis.com/font.woff2"],
+                            },
+                        },
+                    },
+                },
             } as any;
-            
+
             const report = plugin.getReport(mockEngineState);
-            
+
             assert.equal(report.plugin, "csp-inventory");
             assert.equal(report.label, "CSP Inventory");
             assert.ok(report.items.length > 1);
-            
-            const uniqueOriginsItem = report.items.find(item => item.key === "uniqueExternalOrigins");
+
+            const uniqueOriginsItem = report.items.find(
+                (item) => item.key === "uniqueExternalOrigins",
+            );
             assert.ok(uniqueOriginsItem);
             assert.equal(uniqueOriginsItem.value, 2);
-            
-            const scriptSrcItem = report.items.find(item => item.key === "script-src");
+
+            const scriptSrcItem = report.items.find((item) => item.key === "script-src");
             assert.ok(scriptSrcItem);
             assert.equal(scriptSrcItem.value, "https://cdn.example.com");
-            
-            const fontSrcItem = report.items.find(item => item.key === "font-src");
+
+            const fontSrcItem = report.items.find((item) => item.key === "font-src");
             assert.ok(fontSrcItem);
             assert.equal(fontSrcItem.value, "https://fonts.googleapis.com");
         });
