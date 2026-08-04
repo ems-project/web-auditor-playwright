@@ -91,6 +91,131 @@ describe("CspInventoryPlugin", () => {
             assert.ok(fontSrcItem);
             assert.equal(fontSrcItem.value, "https://fonts.googleapis.com");
         });
+
+        it("should handle iframe resource detection with enhanced structure", () => {
+            const plugin = new CspInventoryPlugin();
+            
+            // Mock page state with both main page and iframe resources
+            const mockPageState = {
+                requests: [
+                    {
+                        origin: "https://cdn.example.com",
+                        resourceType: "script",
+                        url: "https://cdn.example.com/app.js",
+                        isFromIframe: false,
+                        iframeUrl: undefined
+                    },
+                    {
+                        origin: "https://www.youtube.com",
+                        resourceType: "document",
+                        url: "https://www.youtube.com/embed/abc",
+                        isFromIframe: false, // iframe document itself is loaded by main document
+                        iframeUrl: undefined
+                    },
+                    {
+                        origin: "https://i.ytimg.com",
+                        resourceType: "image",
+                        url: "https://i.ytimg.com/vi/abc/maxresdefault.jpg",
+                        isFromIframe: true, // image loaded BY the iframe
+                        iframeUrl: "https://www.youtube.com/embed/abc"
+                    },
+                    {
+                        origin: "https://www.youtube.com",
+                        resourceType: "script", 
+                        url: "https://www.youtube.com/s/player/script.js",
+                        isFromIframe: true, // script loaded BY the iframe
+                        iframeUrl: "https://www.youtube.com/embed/abc"
+                    },
+                    {
+                        origin: "https://mixed.example.com",
+                        resourceType: "script",
+                        url: "https://mixed.example.com/main.js",
+                        isFromIframe: false,
+                        iframeUrl: undefined
+                    },
+                    {
+                        origin: "https://mixed.example.com",
+                        resourceType: "image",
+                        url: "https://mixed.example.com/iframe.png",
+                        isFromIframe: true,
+                        iframeUrl: "https://www.example.com/embed"
+                    }
+                ],
+                blockedResources: []
+            };
+
+            // Test the enhanced structure logic
+            const perPageOrigins: Record<string, any> = {};
+            
+            for (const { origin, resourceType, url, isFromIframe, iframeUrl } of mockPageState.requests) {
+                const directive = "img-src"; // Simplified for test
+                
+                if (!perPageOrigins[origin]) {
+                    perPageOrigins[origin] = { 
+                        directive, 
+                        resourceTypes: [], 
+                        exampleUrls: [],
+                        sourceContext: isFromIframe ? 'iframe' : 'main_document'
+                    };
+                }
+                const pageOrigin = perPageOrigins[origin];
+                
+                // Update source context if we have mixed sources
+                if (pageOrigin.sourceContext !== (isFromIframe ? 'iframe' : 'main_document')) {
+                    pageOrigin.sourceContext = 'mixed';
+                }
+                
+                // Handle iframe information
+                if (isFromIframe && iframeUrl) {
+                    if (!pageOrigin.iframeInfo) {
+                        pageOrigin.iframeInfo = {
+                            iframeSources: [],
+                            iframeResourceCount: 0,
+                            mainDocumentResourceCount: 0
+                        };
+                    }
+                    if (!pageOrigin.iframeInfo.iframeSources.includes(iframeUrl)) {
+                        pageOrigin.iframeInfo.iframeSources.push(iframeUrl);
+                    }
+                    pageOrigin.iframeInfo.iframeResourceCount++;
+                } else if (!isFromIframe) {
+                    if (!pageOrigin.iframeInfo) {
+                        pageOrigin.iframeInfo = {
+                            iframeSources: [],
+                            iframeResourceCount: 0,
+                            mainDocumentResourceCount: 0
+                        };
+                    }
+                    pageOrigin.iframeInfo.mainDocumentResourceCount++;
+                }
+            }
+
+            // Verify main document only origin
+            assert.equal(perPageOrigins["https://cdn.example.com"].sourceContext, "main_document");
+            assert.equal(perPageOrigins["https://cdn.example.com"].iframeInfo.mainDocumentResourceCount, 1);
+            assert.equal(perPageOrigins["https://cdn.example.com"].iframeInfo.iframeResourceCount, 0);
+            
+            // Verify iframe only origin (images loaded BY the iframe)
+            assert.equal(perPageOrigins["https://i.ytimg.com"].sourceContext, "iframe");
+            assert.equal(perPageOrigins["https://i.ytimg.com"].iframeInfo.iframeResourceCount, 1);
+            assert.equal(perPageOrigins["https://i.ytimg.com"].iframeInfo.mainDocumentResourceCount, 0);
+            assert.equal(perPageOrigins["https://i.ytimg.com"].iframeInfo.iframeSources.length, 1);
+            assert.equal(perPageOrigins["https://i.ytimg.com"].iframeInfo.iframeSources[0], "https://www.youtube.com/embed/abc");
+            
+            // Verify YouTube origin is now mixed (document loaded by main, script loaded by iframe)
+            assert.equal(perPageOrigins["https://www.youtube.com"].sourceContext, "mixed");
+            assert.equal(perPageOrigins["https://www.youtube.com"].iframeInfo.mainDocumentResourceCount, 1); // iframe document
+            assert.equal(perPageOrigins["https://www.youtube.com"].iframeInfo.iframeResourceCount, 1); // script loaded by iframe
+            assert.equal(perPageOrigins["https://www.youtube.com"].iframeInfo.iframeSources.length, 1);
+            assert.equal(perPageOrigins["https://www.youtube.com"].iframeInfo.iframeSources[0], "https://www.youtube.com/embed/abc");
+            
+            // Verify mixed origin
+            assert.equal(perPageOrigins["https://mixed.example.com"].sourceContext, "mixed");
+            assert.equal(perPageOrigins["https://mixed.example.com"].iframeInfo.mainDocumentResourceCount, 1);
+            assert.equal(perPageOrigins["https://mixed.example.com"].iframeInfo.iframeResourceCount, 1);
+            assert.equal(perPageOrigins["https://mixed.example.com"].iframeInfo.iframeSources.length, 1);
+            assert.equal(perPageOrigins["https://mixed.example.com"].iframeInfo.iframeSources[0], "https://www.example.com/embed");
+        });
     });
 
     describe("CSP Violation Parsing", () => {

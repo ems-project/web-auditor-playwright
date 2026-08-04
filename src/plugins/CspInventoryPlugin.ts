@@ -68,10 +68,17 @@ type CspInventoryState = {
 
 type PageCspState = {
     attached: boolean;
-    requests: Array<{ origin: string; resourceType: string; url: string }>;
+    requests: Array<{ 
+        origin: string; 
+        resourceType: string; 
+        url: string; 
+        isFromIframe: boolean;
+        iframeUrl?: string;
+    }>;
     blockedResources: CspBlockedResource[];
     requestListener: ((request: Request) => void) | null;
     consoleListener: ((message: any) => void) | null;
+    mainFrame: any;
 };
 
 export type CspInventoryPluginOptions = {
@@ -106,19 +113,34 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
         if (phase === "beforeGoto") {
             pageState.requests = [];
             pageState.blockedResources = [];
+            pageState.mainFrame = ctx.page.mainFrame();
             this.attachListeners(ctx.page, pageState, ctx.engineState.origin);
             this.register(ctx);
             return;
         }
 
         if (phase === "afterGoto") {
+            // Wait a bit for iframe resources to load
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
             const globalState = this.getInventoryState(ctx.engineState);
             const perPageOrigins: Record<
                 string,
-                { directive: string; resourceTypes: string[]; exampleUrls: string[] }
+                { 
+                    directive: string; 
+                    resourceTypes: string[]; 
+                    exampleUrls: string[];
+                    sourceContext: 'main_document' | 'iframe' | 'mixed';
+                    iframeInfo?: {
+                        iframeSources: string[];
+                        iframeResourceCount: number;
+                        mainDocumentResourceCount: number;
+                    };
+                }
             > = {};
 
-            for (const { origin, resourceType, url } of pageState.requests) {
+
+            for (const { origin, resourceType, url, isFromIframe, iframeUrl } of pageState.requests) {
                 const directive = RESOURCE_TYPE_TO_DIRECTIVE[resourceType] ?? "default-src";
                 const globalKey = `${origin}|${resourceType}`;
 
@@ -141,11 +163,46 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
                     entry.exampleUrls.push(url);
                 }
 
-                // Build per-page summary (grouped by origin)
+                // Build per-page summary (grouped by origin) with source context
                 if (!perPageOrigins[origin]) {
-                    perPageOrigins[origin] = { directive, resourceTypes: [], exampleUrls: [] };
+                    perPageOrigins[origin] = { 
+                        directive, 
+                        resourceTypes: [], 
+                        exampleUrls: [],
+                        sourceContext: isFromIframe ? 'iframe' : 'main_document'
+                    };
                 }
                 const pageOrigin = perPageOrigins[origin];
+                
+                // Update source context if we have mixed sources
+                if (pageOrigin.sourceContext !== (isFromIframe ? 'iframe' : 'main_document')) {
+                    pageOrigin.sourceContext = 'mixed';
+                }
+                
+                // Handle iframe information
+                if (isFromIframe && iframeUrl) {
+                    if (!pageOrigin.iframeInfo) {
+                        pageOrigin.iframeInfo = {
+                            iframeSources: [],
+                            iframeResourceCount: 0,
+                            mainDocumentResourceCount: 0
+                        };
+                    }
+                    if (!pageOrigin.iframeInfo.iframeSources.includes(iframeUrl)) {
+                        pageOrigin.iframeInfo.iframeSources.push(iframeUrl);
+                    }
+                    pageOrigin.iframeInfo.iframeResourceCount++;
+                } else if (!isFromIframe) {
+                    if (!pageOrigin.iframeInfo) {
+                        pageOrigin.iframeInfo = {
+                            iframeSources: [],
+                            iframeResourceCount: 0,
+                            mainDocumentResourceCount: 0
+                        };
+                    }
+                    pageOrigin.iframeInfo.mainDocumentResourceCount++;
+                }
+
                 if (!pageOrigin.resourceTypes.includes(resourceType)) {
                     pageOrigin.resourceTypes.push(resourceType);
                 }
@@ -286,14 +343,26 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
             const url = request.url();
             try {
                 const parsed = new URL(url);
+                
                 // Skip same-origin and non-http(s) requests (data:, blob:, etc.)
                 if (parsed.hostname === startHostname) return;
                 if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return;
+
+                // Determine if request is from main page or iframe
+                const requestFrame = request.frame();
+                const resourceType = request.resourceType();
+                
+                // The iframe document itself should be considered as loaded by the main document
+                // Only resources loaded BY the iframe (not the iframe itself) are iframe-initiated
+                const isFromIframe = requestFrame !== state.mainFrame && resourceType !== 'document';
+                const iframeUrl = isFromIframe ? requestFrame.url() : undefined;
 
                 state.requests.push({
                     origin: parsed.origin,
                     resourceType: request.resourceType(),
                     url,
+                    isFromIframe,
+                    iframeUrl,
                 });
             } catch {
                 // Ignore unparseable URLs
@@ -455,18 +524,21 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
     }
 
     private getPageState(page: Page): PageCspState {
-        let existing = this.pageStates.get(page);
-        if (!existing) {
-            existing = {
-                attached: false,
-                requests: [],
-                blockedResources: [],
-                requestListener: null,
-                consoleListener: null
-            };
-            this.pageStates.set(page, existing);
+        const existing = this.pageStates.get(page);
+        if (existing) {
+            return existing;
         }
-        return existing;
+        
+        const newState: PageCspState = {
+            attached: false,
+            requests: [],
+            blockedResources: [],
+            requestListener: null,
+            consoleListener: null,
+            mainFrame: null,
+        };
+        this.pageStates.set(page, newState);
+        return newState;
     }
 
     private getInventoryState(engineState: EngineState): CspInventoryState {
