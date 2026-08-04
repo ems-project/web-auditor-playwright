@@ -559,7 +559,7 @@ async function main() {
         issues,
         inventory,
     };
-    
+
     // Handle potential RangeError for very large reports
     let jsonReport: string;
     try {
@@ -569,14 +569,18 @@ async function main() {
             // Fallback: serialize each property separately to avoid string length limits
             const parts: string[] = [];
             parts.push("{");
-            
+
             const keys = Object.keys(globalReport);
             for (let i = 0; i < keys.length; i++) {
                 const key = keys[i];
                 const keyStr = JSON.stringify(key);
-                
+
                 try {
-                    const valueStr = JSON.stringify(globalReport[key as keyof typeof globalReport], null, 4);
+                    const valueStr = JSON.stringify(
+                        globalReport[key as keyof typeof globalReport],
+                        null,
+                        4,
+                    );
                     const separator = i < keys.length - 1 ? "," : "";
                     parts.push(`${keyStr}: ${valueStr}${separator}`);
                 } catch (propError) {
@@ -585,7 +589,7 @@ async function main() {
                     let summary: string;
                     if (Array.isArray(value)) {
                         summary = `"[Array with ${value.length} items - too large to serialize]"`;
-                    } else if (typeof value === 'object' && value !== null) {
+                    } else if (typeof value === "object" && value !== null) {
                         const objKeys = Object.keys(value);
                         summary = `"[Object with ${objKeys.length} properties - too large to serialize]"`;
                     } else {
@@ -595,7 +599,7 @@ async function main() {
                     parts.push(`${keyStr}: ${summary}${separator}`);
                 }
             }
-            
+
             parts.push("}");
             jsonReport = parts.join("\n");
         } else {

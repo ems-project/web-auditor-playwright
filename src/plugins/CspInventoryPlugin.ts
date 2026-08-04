@@ -68,10 +68,10 @@ type CspInventoryState = {
 
 type PageCspState = {
     attached: boolean;
-    requests: Array<{ 
-        origin: string; 
-        resourceType: string; 
-        url: string; 
+    requests: Array<{
+        origin: string;
+        resourceType: string;
+        url: string;
         isFromIframe: boolean;
         iframeUrl?: string;
     }>;
@@ -121,16 +121,16 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
 
         if (phase === "afterGoto") {
             // Wait a bit for iframe resources to load
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+
             const globalState = this.getInventoryState(ctx.engineState);
             const perPageOrigins: Record<
                 string,
-                { 
-                    directive: string; 
-                    resourceTypes: string[]; 
+                {
+                    directive: string;
+                    resourceTypes: string[];
                     exampleUrls: string[];
-                    sourceContext: 'main_document' | 'iframe' | 'mixed';
+                    sourceContext: "main_document" | "iframe" | "mixed";
                     iframeInfo?: {
                         iframeSources: string[];
                         iframeResourceCount: number;
@@ -139,8 +139,13 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
                 }
             > = {};
 
-
-            for (const { origin, resourceType, url, isFromIframe, iframeUrl } of pageState.requests) {
+            for (const {
+                origin,
+                resourceType,
+                url,
+                isFromIframe,
+                iframeUrl,
+            } of pageState.requests) {
                 const directive = RESOURCE_TYPE_TO_DIRECTIVE[resourceType] ?? "default-src";
                 const globalKey = `${origin}|${resourceType}`;
 
@@ -165,27 +170,27 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
 
                 // Build per-page summary (grouped by origin) with source context
                 if (!perPageOrigins[origin]) {
-                    perPageOrigins[origin] = { 
-                        directive, 
-                        resourceTypes: [], 
+                    perPageOrigins[origin] = {
+                        directive,
+                        resourceTypes: [],
                         exampleUrls: [],
-                        sourceContext: isFromIframe ? 'iframe' : 'main_document'
+                        sourceContext: isFromIframe ? "iframe" : "main_document",
                     };
                 }
                 const pageOrigin = perPageOrigins[origin];
-                
+
                 // Update source context if we have mixed sources
-                if (pageOrigin.sourceContext !== (isFromIframe ? 'iframe' : 'main_document')) {
-                    pageOrigin.sourceContext = 'mixed';
+                if (pageOrigin.sourceContext !== (isFromIframe ? "iframe" : "main_document")) {
+                    pageOrigin.sourceContext = "mixed";
                 }
-                
+
                 // Handle iframe information
                 if (isFromIframe && iframeUrl) {
                     if (!pageOrigin.iframeInfo) {
                         pageOrigin.iframeInfo = {
                             iframeSources: [],
                             iframeResourceCount: 0,
-                            mainDocumentResourceCount: 0
+                            mainDocumentResourceCount: 0,
                         };
                     }
                     if (!pageOrigin.iframeInfo.iframeSources.includes(iframeUrl)) {
@@ -197,7 +202,7 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
                         pageOrigin.iframeInfo = {
                             iframeSources: [],
                             iframeResourceCount: 0,
-                            mainDocumentResourceCount: 0
+                            mainDocumentResourceCount: 0,
                         };
                     }
                     pageOrigin.iframeInfo.mainDocumentResourceCount++;
@@ -220,11 +225,18 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
                 globalState.blockedResources.push(...pageState.blockedResources);
 
                 // Group blocked resources by violation type
-                const blockedCount = pageState.blockedResources.filter(r => r.violationType === "blocked").length;
-                const reportOnlyCount = pageState.blockedResources.filter(r => r.violationType === "report-only").length;
+                const blockedCount = pageState.blockedResources.filter(
+                    (r) => r.violationType === "blocked",
+                ).length;
+                const reportOnlyCount = pageState.blockedResources.filter(
+                    (r) => r.violationType === "report-only",
+                ).length;
 
                 // Extract blocked URLs similar to how externalOrigins works
-                const blockedUrls: Record<string, { directive: string; violationType: string; count: number; message: string }> = {};
+                const blockedUrls: Record<
+                    string,
+                    { directive: string; violationType: string; count: number; message: string }
+                > = {};
                 for (const resource of pageState.blockedResources) {
                     if (resource.url) {
                         const key = resource.url;
@@ -233,7 +245,7 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
                                 directive: resource.directive,
                                 violationType: resource.violationType,
                                 count: 0,
-                                message: resource.message
+                                message: resource.message,
                             };
                         }
                         blockedUrls[key].count += 1;
@@ -249,17 +261,11 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
                     message = `CSP reported ${reportOnlyCount} violation(s) in report-only mode.`;
                 }
 
-                this.registerWarning(
-                    ctx,
-                    "security",
-                    "CSP_BLOCKED_RESOURCE",
-                    message,
-                    {
-                        blockedResources: blockedUrls,
-                        blockedCount,
-                        reportOnlyCount
-                    }
-                );
+                this.registerWarning(ctx, "security", "CSP_BLOCKED_RESOURCE", message, {
+                    blockedResources: blockedUrls,
+                    blockedCount,
+                    reportOnlyCount,
+                });
             }
 
             const originCount = Object.keys(perPageOrigins).length;
@@ -343,7 +349,7 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
             const url = request.url();
             try {
                 const parsed = new URL(url);
-                
+
                 // Skip same-origin and non-http(s) requests (data:, blob:, etc.)
                 if (parsed.hostname === startHostname) return;
                 if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return;
@@ -351,10 +357,11 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
                 // Determine if request is from main page or iframe
                 const requestFrame = request.frame();
                 const resourceType = request.resourceType();
-                
+
                 // The iframe document itself should be considered as loaded by the main document
                 // Only resources loaded BY the iframe (not the iframe itself) are iframe-initiated
-                const isFromIframe = requestFrame !== state.mainFrame && resourceType !== 'document';
+                const isFromIframe =
+                    requestFrame !== state.mainFrame && resourceType !== "document";
                 const iframeUrl = isFromIframe ? requestFrame.url() : undefined;
 
                 state.requests.push({
@@ -415,20 +422,22 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
             /violates the following (Content Security Policy )?directive/i,
             /blocked by Content Security Policy/i,
             /blocked the loading of a resource/i,
-            /\[Report Only\]/i
+            /\[Report Only\]/i,
         ];
 
-        return cspPatterns.some(pattern => pattern.test(text));
+        return cspPatterns.some((pattern) => pattern.test(text));
     }
 
     private parseCspViolation(message: string): CspBlockedResource | null {
         try {
-            let url = '';
-            let directive = '';
+            let url = "";
+            let directive = "";
             let resourceType: string | undefined;
 
             // Pattern 1: "blocked the loading of a resource (frame-src) at https://example.com"
-            const pattern1 = message.match(/blocked the loading of a resource \(([^)]+)\) at ([^\s?]+)/i);
+            const pattern1 = message.match(
+                /blocked the loading of a resource \(([^)]+)\) at ([^\s?]+)/i,
+            );
             if (pattern1) {
                 resourceType = pattern1[1];
                 url = pattern1[2];
@@ -437,7 +446,9 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
 
             // Pattern 2: "Loading the script 'https://example.com/script.js' violates..."
             if (!url) {
-                const urlMatch = message.match(/Loading the (?:script|stylesheet|image|font|frame|media|object|worker|manifest)\s+['"]([^'"]+)['"]/i);
+                const urlMatch = message.match(
+                    /Loading the (?:script|stylesheet|image|font|frame|media|object|worker|manifest)\s+['"]([^'"]+)['"]/i,
+                );
                 if (urlMatch) {
                     url = urlMatch[1];
                 }
@@ -445,13 +456,17 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
 
             // Pattern 3: Traditional format "refused to load ... because it violates ... directive: 'script-src'"
             if (!url) {
-                const urlMatch = message.match(/(?:from|at|load|execute|apply)\s+['"]?([^'"'\s?]+)['"]?/i);
-                url = urlMatch ? urlMatch[1] : '';
+                const urlMatch = message.match(
+                    /(?:from|at|load|execute|apply)\s+['"]?([^'"'\s?]+)['"]?/i,
+                );
+                url = urlMatch ? urlMatch[1] : "";
             }
 
             // Extract directive from various formats
             if (!directive) {
-                const directiveMatch = message.match(/violates the following (?:Content Security Policy )?directive:\s*['"]\s*([^'"]+?)\s*['"]/i);
+                const directiveMatch = message.match(
+                    /violates the following (?:Content Security Policy )?directive:\s*['"]\s*([^'"]+?)\s*['"]/i,
+                );
                 if (directiveMatch) {
                     // Extract the first directive name from the policy string
                     const policyString = directiveMatch[1];
@@ -462,13 +477,17 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
 
             // Extract directive from "because it violates the following directive:" format
             if (!directive) {
-                const directiveMatch2 = message.match(/because it violates the following directive:\s*['"]?([^'"'\s]+)['"]?/i);
-                directive = directiveMatch2 ? directiveMatch2[1] : '';
+                const directiveMatch2 = message.match(
+                    /because it violates the following directive:\s*['"]?([^'"'\s]+)['"]?/i,
+                );
+                directive = directiveMatch2 ? directiveMatch2[1] : "";
             }
 
             // Determine if it's report-only or blocking
             const isReportOnly = /\[Report Only\]/i.test(message);
-            const violationType: "blocked" | "report-only" = isReportOnly ? "report-only" : "blocked";
+            const violationType: "blocked" | "report-only" = isReportOnly
+                ? "report-only"
+                : "blocked";
 
             // Try to determine resource type from URL if not already determined
             if (!resourceType && url) {
@@ -480,26 +499,26 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
 
             // Determine resource type from message content
             if (!resourceType) {
-                if (message.includes('Loading the script')) resourceType = "script";
-                else if (message.includes('Loading the stylesheet')) resourceType = "stylesheet";
-                else if (message.includes('Loading the image')) resourceType = "image";
-                else if (message.includes('Loading the font')) resourceType = "font";
-                else if (message.includes('Loading the frame')) resourceType = "frame";
+                if (message.includes("Loading the script")) resourceType = "script";
+                else if (message.includes("Loading the stylesheet")) resourceType = "stylesheet";
+                else if (message.includes("Loading the image")) resourceType = "image";
+                else if (message.includes("Loading the font")) resourceType = "font";
+                else if (message.includes("Loading the frame")) resourceType = "frame";
             }
 
             // Map common resource types to proper directive names
             if (resourceType) {
                 const typeMapping: Record<string, string> = {
-                    'frame-src': 'frame-src',
-                    'script-src': 'script-src',
-                    'style-src': 'style-src',
-                    'img-src': 'img-src',
-                    'font-src': 'font-src',
-                    'connect-src': 'connect-src',
-                    'media-src': 'media-src',
-                    'object-src': 'object-src',
-                    'worker-src': 'worker-src',
-                    'manifest-src': 'manifest-src'
+                    "frame-src": "frame-src",
+                    "script-src": "script-src",
+                    "style-src": "style-src",
+                    "img-src": "img-src",
+                    "font-src": "font-src",
+                    "connect-src": "connect-src",
+                    "media-src": "media-src",
+                    "object-src": "object-src",
+                    "worker-src": "worker-src",
+                    "manifest-src": "manifest-src",
                 };
 
                 if (typeMapping[resourceType]) {
@@ -513,7 +532,7 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
                     directive,
                     resourceType,
                     violationType,
-                    message: message.trim()
+                    message: message.trim(),
                 };
             }
         } catch (error) {
@@ -528,7 +547,7 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
         if (existing) {
             return existing;
         }
-        
+
         const newState: PageCspState = {
             attached: false,
             requests: [],
