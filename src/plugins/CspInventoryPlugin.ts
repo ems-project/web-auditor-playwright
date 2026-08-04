@@ -1,4 +1,4 @@
-import type { Page, Request } from "playwright";
+import type { Page, Request, ConsoleMessage, Frame } from "playwright";
 
 import { BasePlugin } from "../engine/BasePlugin.js";
 import type {
@@ -77,8 +77,8 @@ type PageCspState = {
     }>;
     blockedResources: CspBlockedResource[];
     requestListener: ((request: Request) => void) | null;
-    consoleListener: ((message: any) => void) | null;
-    mainFrame: any;
+    consoleListener: ((message: ConsoleMessage) => void) | null;
+    mainFrame: Frame | null;
 };
 
 export type CspInventoryPluginOptions = {
@@ -377,7 +377,7 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
         };
 
         // Listen for CSP violations in console messages
-        state.consoleListener = (message: any) => {
+        state.consoleListener = (message: ConsoleMessage) => {
             const text = message.text();
             const type = message.type();
 
@@ -535,7 +535,7 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
                     message: message.trim(),
                 };
             }
-        } catch (error) {
+        } catch {
             // Ignore parsing errors
         }
 

@@ -238,7 +238,7 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
 
                 return elements;
             });
-        } catch (error) {
+        } catch {
             // If page evaluation fails, return empty array
             return [];
         }
@@ -509,7 +509,7 @@ export class CspNoncePlugin extends BasePlugin implements IPlugin {
         let totalNonceIssues = 0;
         const nonceUsage = new Map<string, number>();
 
-        for (const [url, nonceInfos] of Object.entries(state.nonces)) {
+        for (const [, nonceInfos] of Object.entries(state.nonces)) {
             const hasHeaderNonces = nonceInfos.some((info) => info.source === "csp-header");
             if (hasHeaderNonces) {
                 pagesWithNonces++;

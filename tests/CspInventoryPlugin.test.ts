@@ -1,6 +1,7 @@
 import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
 import { CspInventoryPlugin } from "../src/plugins/CspInventoryPlugin.js";
+import type { ResourceContext, EngineState } from "../src/engine/types.js";
 
 describe("CspInventoryPlugin", () => {
     describe("Plugin Configuration", () => {
@@ -22,10 +23,10 @@ describe("CspInventoryPlugin", () => {
         it("should apply to non-download contexts", () => {
             const plugin = new CspInventoryPlugin();
 
-            const mockContext = { download: false } as any;
+            const mockContext = { download: false } as ResourceContext;
             assert.equal(plugin.applies(mockContext), true);
 
-            const mockDownloadContext = { download: true } as any;
+            const mockDownloadContext = { download: true } as ResourceContext;
             assert.equal(plugin.applies(mockDownloadContext), false);
         });
     });
@@ -37,7 +38,7 @@ describe("CspInventoryPlugin", () => {
                 any: {
                     cspInventoryState: { entries: {} },
                 },
-            } as any;
+            } as EngineState;
 
             const report = plugin.getReport(mockEngineState);
 
@@ -71,7 +72,7 @@ describe("CspInventoryPlugin", () => {
                         },
                     },
                 },
-            } as any;
+            } as EngineState;
 
             const report = plugin.getReport(mockEngineState);
 
@@ -95,7 +96,7 @@ describe("CspInventoryPlugin", () => {
         });
 
         it("should handle iframe resource detection with enhanced structure", () => {
-            const plugin = new CspInventoryPlugin();
+            // const plugin = new CspInventoryPlugin();
 
             // Mock page state with both main page and iframe resources
             const mockPageState = {
@@ -147,12 +148,20 @@ describe("CspInventoryPlugin", () => {
             };
 
             // Test the enhanced structure logic
-            const perPageOrigins: Record<string, any> = {};
+            const perPageOrigins: Record<string, {
+                directive: string;
+                resourceTypes: string[];
+                exampleUrls: string[];
+                sourceContext: string;
+                iframeInfo?: {
+                    iframeSources: string[];
+                    iframeResourceCount: number;
+                    mainDocumentResourceCount: number;
+                };
+            }> = {};
 
             for (const {
                 origin,
-                resourceType,
-                url,
                 isFromIframe,
                 iframeUrl,
             } of mockPageState.requests) {
@@ -267,7 +276,7 @@ describe("CspInventoryPlugin", () => {
             const plugin = new CspInventoryPlugin();
 
             // Test the private method through reflection
-            const parseCspViolation = (plugin as any).parseCspViolation.bind(plugin);
+            const parseCspViolation = (plugin as unknown as { parseCspViolation: (message: string) => unknown }).parseCspViolation.bind(plugin);
 
             // Test pattern 1: "blocked the loading of a resource (frame-src) at https://example.com"
             const violation1 = parseCspViolation(
@@ -307,7 +316,7 @@ describe("CspInventoryPlugin", () => {
         });
 
         it("should extract blocked URLs in the correct format", () => {
-            const plugin = new CspInventoryPlugin();
+            // const plugin = new CspInventoryPlugin();
 
             // Mock page state with blocked resources
             const mockPageState = {

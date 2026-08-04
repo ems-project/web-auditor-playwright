@@ -583,7 +583,7 @@ async function main() {
                     );
                     const separator = i < keys.length - 1 ? "," : "";
                     parts.push(`${keyStr}: ${valueStr}${separator}`);
-                } catch (propError) {
+                } catch {
                     // If individual property is too large, provide a summary
                     const value = globalReport[key as keyof typeof globalReport];
                     let summary: string;
