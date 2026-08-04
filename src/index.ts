@@ -189,6 +189,11 @@ async function main() {
     if (!Number.isInteger(webUiPort) || webUiPort < 0 || webUiPort > 65535) {
         throw new Error("Invalid WEB_UI_PORT: " + webUiPortValue);
     }
+    const reportMaxIssuesValue = process.env.REPORT_MAX_ISSUES ?? "1000";
+    const reportMaxIssues = Number(reportMaxIssuesValue);
+    if (!Number.isInteger(reportMaxIssues) || webUiPort < reportMaxIssues) {
+        throw new Error("Invalid REPORT_MAX_ISSUES: " + webUiPortValue);
+    }
     const webUiHost = process.env.WEB_UI_HOST ?? "127.0.0.1";
     const findingCodesBlocklist = (process.env.FINDING_CODES_BLOCKLIST ?? "")
         .split(",")
@@ -473,7 +478,7 @@ async function main() {
     const auditStore = new AuditStore(path.join(reportOutputDir, websiteId, "audit.db"));
     const runId = Number(state.any["runId"]);
     const issues = auditStore
-        .getFindings(runId)
+        .getFindings(runId, reportMaxIssues)
         .filter((finding) => !findingCodesBlocklist.includes(finding.code));
     const inventory = auditStore.getInventory(runId);
     const run = auditStore.getRun(runId);

@@ -398,7 +398,10 @@ export class AuditStore {
         };
     }
 
-    public getFindings(runId: number): Array<{
+    public getFindings(
+        runId: number,
+        size: number,
+    ): Array<{
         plugin: string;
         type: string;
         category: string;
@@ -414,9 +417,10 @@ export class AuditStore {
       FROM findings
       WHERE run_id = ?
       ORDER BY id ASC
+      LIMIT ?
     `,
             )
-            .all(runId) as Array<{
+            .all(runId, size) as Array<{
             plugin: string;
             severity: string;
             category: string | null;
