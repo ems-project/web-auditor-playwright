@@ -1,6 +1,7 @@
 import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
 import { CspInventoryPlugin } from "../src/plugins/CspInventoryPlugin.js";
+import type { ResourceContext, EngineState } from "../src/engine/types.js";
 
 describe("CspInventoryPlugin", () => {
     describe("Plugin Configuration", () => {
@@ -22,10 +23,10 @@ describe("CspInventoryPlugin", () => {
         it("should apply to non-download contexts", () => {
             const plugin = new CspInventoryPlugin();
 
-            const mockContext = { download: false } as any;
+            const mockContext = { download: false } as ResourceContext;
             assert.equal(plugin.applies(mockContext), true);
 
-            const mockDownloadContext = { download: true } as any;
+            const mockDownloadContext = { download: true } as ResourceContext;
             assert.equal(plugin.applies(mockDownloadContext), false);
         });
     });
@@ -35,9 +36,9 @@ describe("CspInventoryPlugin", () => {
             const plugin = new CspInventoryPlugin();
             const mockEngineState = {
                 any: {
-                    cspInventoryState: { entries: {} }
-                }
-            } as any;
+                    cspInventoryState: { entries: {} },
+                },
+            } as EngineState;
 
             const report = plugin.getReport(mockEngineState);
 
@@ -59,19 +60,19 @@ describe("CspInventoryPlugin", () => {
                                 resourceType: "script",
                                 directive: "script-src",
                                 count: 5,
-                                exampleUrls: ["https://cdn.example.com/app.js"]
+                                exampleUrls: ["https://cdn.example.com/app.js"],
                             },
                             "https://fonts.googleapis.com|font": {
                                 origin: "https://fonts.googleapis.com",
                                 resourceType: "font",
                                 directive: "font-src",
                                 count: 2,
-                                exampleUrls: ["https://fonts.googleapis.com/font.woff2"]
-                            }
-                        }
-                    }
-                }
-            } as any;
+                                exampleUrls: ["https://fonts.googleapis.com/font.woff2"],
+                            },
+                        },
+                    },
+                },
+            } as EngineState;
 
             const report = plugin.getReport(mockEngineState);
 
@@ -79,50 +80,235 @@ describe("CspInventoryPlugin", () => {
             assert.equal(report.label, "CSP Inventory");
             assert.ok(report.items.length > 1);
 
-            const uniqueOriginsItem = report.items.find(item => item.key === "uniqueExternalOrigins");
+            const uniqueOriginsItem = report.items.find(
+                (item) => item.key === "uniqueExternalOrigins",
+            );
             assert.ok(uniqueOriginsItem);
             assert.equal(uniqueOriginsItem.value, 2);
 
-            const scriptSrcItem = report.items.find(item => item.key === "script-src");
+            const scriptSrcItem = report.items.find((item) => item.key === "script-src");
             assert.ok(scriptSrcItem);
             assert.equal(scriptSrcItem.value, "https://cdn.example.com");
 
-            const fontSrcItem = report.items.find(item => item.key === "font-src");
+            const fontSrcItem = report.items.find((item) => item.key === "font-src");
             assert.ok(fontSrcItem);
             assert.equal(fontSrcItem.value, "https://fonts.googleapis.com");
+        });
+
+        it("should handle iframe resource detection with enhanced structure", () => {
+            // const plugin = new CspInventoryPlugin();
+
+            // Mock page state with both main page and iframe resources
+            const mockPageState = {
+                requests: [
+                    {
+                        origin: "https://cdn.example.com",
+                        resourceType: "script",
+                        url: "https://cdn.example.com/app.js",
+                        isFromIframe: false,
+                        iframeUrl: undefined,
+                    },
+                    {
+                        origin: "https://www.youtube.com",
+                        resourceType: "document",
+                        url: "https://www.youtube.com/embed/abc",
+                        isFromIframe: false, // iframe document itself is loaded by main document
+                        iframeUrl: undefined,
+                    },
+                    {
+                        origin: "https://i.ytimg.com",
+                        resourceType: "image",
+                        url: "https://i.ytimg.com/vi/abc/maxresdefault.jpg",
+                        isFromIframe: true, // image loaded BY the iframe
+                        iframeUrl: "https://www.youtube.com/embed/abc",
+                    },
+                    {
+                        origin: "https://www.youtube.com",
+                        resourceType: "script",
+                        url: "https://www.youtube.com/s/player/script.js",
+                        isFromIframe: true, // script loaded BY the iframe
+                        iframeUrl: "https://www.youtube.com/embed/abc",
+                    },
+                    {
+                        origin: "https://mixed.example.com",
+                        resourceType: "script",
+                        url: "https://mixed.example.com/main.js",
+                        isFromIframe: false,
+                        iframeUrl: undefined,
+                    },
+                    {
+                        origin: "https://mixed.example.com",
+                        resourceType: "image",
+                        url: "https://mixed.example.com/iframe.png",
+                        isFromIframe: true,
+                        iframeUrl: "https://www.example.com/embed",
+                    },
+                ],
+                blockedResources: [],
+            };
+
+            // Test the enhanced structure logic
+            const perPageOrigins: Record<string, {
+                directive: string;
+                resourceTypes: string[];
+                exampleUrls: string[];
+                sourceContext: string;
+                iframeInfo?: {
+                    iframeSources: string[];
+                    iframeResourceCount: number;
+                    mainDocumentResourceCount: number;
+                };
+            }> = {};
+
+            for (const {
+                origin,
+                isFromIframe,
+                iframeUrl,
+            } of mockPageState.requests) {
+                const directive = "img-src"; // Simplified for test
+
+                if (!perPageOrigins[origin]) {
+                    perPageOrigins[origin] = {
+                        directive,
+                        resourceTypes: [],
+                        exampleUrls: [],
+                        sourceContext: isFromIframe ? "iframe" : "main_document",
+                    };
+                }
+                const pageOrigin = perPageOrigins[origin];
+
+                // Update source context if we have mixed sources
+                if (pageOrigin.sourceContext !== (isFromIframe ? "iframe" : "main_document")) {
+                    pageOrigin.sourceContext = "mixed";
+                }
+
+                // Handle iframe information
+                if (isFromIframe && iframeUrl) {
+                    if (!pageOrigin.iframeInfo) {
+                        pageOrigin.iframeInfo = {
+                            iframeSources: [],
+                            iframeResourceCount: 0,
+                            mainDocumentResourceCount: 0,
+                        };
+                    }
+                    if (!pageOrigin.iframeInfo.iframeSources.includes(iframeUrl)) {
+                        pageOrigin.iframeInfo.iframeSources.push(iframeUrl);
+                    }
+                    pageOrigin.iframeInfo.iframeResourceCount++;
+                } else if (!isFromIframe) {
+                    if (!pageOrigin.iframeInfo) {
+                        pageOrigin.iframeInfo = {
+                            iframeSources: [],
+                            iframeResourceCount: 0,
+                            mainDocumentResourceCount: 0,
+                        };
+                    }
+                    pageOrigin.iframeInfo.mainDocumentResourceCount++;
+                }
+            }
+
+            // Verify main document only origin
+            assert.equal(perPageOrigins["https://cdn.example.com"].sourceContext, "main_document");
+            assert.equal(
+                perPageOrigins["https://cdn.example.com"].iframeInfo.mainDocumentResourceCount,
+                1,
+            );
+            assert.equal(
+                perPageOrigins["https://cdn.example.com"].iframeInfo.iframeResourceCount,
+                0,
+            );
+
+            // Verify iframe only origin (images loaded BY the iframe)
+            assert.equal(perPageOrigins["https://i.ytimg.com"].sourceContext, "iframe");
+            assert.equal(perPageOrigins["https://i.ytimg.com"].iframeInfo.iframeResourceCount, 1);
+            assert.equal(
+                perPageOrigins["https://i.ytimg.com"].iframeInfo.mainDocumentResourceCount,
+                0,
+            );
+            assert.equal(perPageOrigins["https://i.ytimg.com"].iframeInfo.iframeSources.length, 1);
+            assert.equal(
+                perPageOrigins["https://i.ytimg.com"].iframeInfo.iframeSources[0],
+                "https://www.youtube.com/embed/abc",
+            );
+
+            // Verify YouTube origin is now mixed (document loaded by main, script loaded by iframe)
+            assert.equal(perPageOrigins["https://www.youtube.com"].sourceContext, "mixed");
+            assert.equal(
+                perPageOrigins["https://www.youtube.com"].iframeInfo.mainDocumentResourceCount,
+                1,
+            ); // iframe document
+            assert.equal(
+                perPageOrigins["https://www.youtube.com"].iframeInfo.iframeResourceCount,
+                1,
+            ); // script loaded by iframe
+            assert.equal(
+                perPageOrigins["https://www.youtube.com"].iframeInfo.iframeSources.length,
+                1,
+            );
+            assert.equal(
+                perPageOrigins["https://www.youtube.com"].iframeInfo.iframeSources[0],
+                "https://www.youtube.com/embed/abc",
+            );
+
+            // Verify mixed origin
+            assert.equal(perPageOrigins["https://mixed.example.com"].sourceContext, "mixed");
+            assert.equal(
+                perPageOrigins["https://mixed.example.com"].iframeInfo.mainDocumentResourceCount,
+                1,
+            );
+            assert.equal(
+                perPageOrigins["https://mixed.example.com"].iframeInfo.iframeResourceCount,
+                1,
+            );
+            assert.equal(
+                perPageOrigins["https://mixed.example.com"].iframeInfo.iframeSources.length,
+                1,
+            );
+            assert.equal(
+                perPageOrigins["https://mixed.example.com"].iframeInfo.iframeSources[0],
+                "https://www.example.com/embed",
+            );
         });
     });
 
     describe("CSP Violation Parsing", () => {
         it("should parse CSP violation messages correctly", () => {
             const plugin = new CspInventoryPlugin();
-            
+
             // Test the private method through reflection
-            const parseCspViolation = (plugin as any).parseCspViolation.bind(plugin);
-            
+            const parseCspViolation = (plugin as unknown as { parseCspViolation: (message: string) => unknown }).parseCspViolation.bind(plugin);
+
             // Test pattern 1: "blocked the loading of a resource (frame-src) at https://example.com"
-            const violation1 = parseCspViolation("Content Security Policy: The page's settings blocked the loading of a resource (frame-src) at https://example.com/iframe");
+            const violation1 = parseCspViolation(
+                "Content Security Policy: The page's settings blocked the loading of a resource (frame-src) at https://example.com/iframe",
+            );
             assert.ok(violation1);
             assert.equal(violation1.url, "https://example.com/iframe");
             assert.equal(violation1.directive, "frame-src");
             assert.equal(violation1.violationType, "blocked");
-            
+
             // Test pattern 2: Traditional format
-            const violation2 = parseCspViolation("Refused to load the script 'https://cdn.example.com/script.js' because it violates the following Content Security Policy directive: 'script-src'");
+            const violation2 = parseCspViolation(
+                "Refused to load the script 'https://cdn.example.com/script.js' because it violates the following Content Security Policy directive: 'script-src'",
+            );
             assert.ok(violation2);
             assert.equal(violation2.url, "https://cdn.example.com/script.js");
             assert.equal(violation2.directive, "script-src");
             assert.equal(violation2.violationType, "blocked");
-            
+
             // Test report-only mode
-            const violation3 = parseCspViolation("[Report Only] Refused to load the stylesheet 'https://fonts.googleapis.com/css' because it violates the following directive: 'style-src'");
+            const violation3 = parseCspViolation(
+                "[Report Only] Refused to load the stylesheet 'https://fonts.googleapis.com/css' because it violates the following directive: 'style-src'",
+            );
             assert.ok(violation3);
             assert.equal(violation3.url, "https://fonts.googleapis.com/css");
             assert.equal(violation3.directive, "style-src");
             assert.equal(violation3.violationType, "report-only");
-            
+
             // Test the actual message format from the report
-            const violation4 = parseCspViolation("Loading the script 'https://www.youtube.com/iframe_api' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' https://cdn-a.cumul.io https://cdn.luzmo.com https://dataviz.static.bosa.fgov.be https://matomo.bosa.be https://player.vimeo.com https://static.doubleclick.net\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.");
+            const violation4 = parseCspViolation(
+                "Loading the script 'https://www.youtube.com/iframe_api' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' https://cdn-a.cumul.io https://cdn.luzmo.com https://dataviz.static.bosa.fgov.be https://matomo.bosa.be https://player.vimeo.com https://static.doubleclick.net\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
+            );
             assert.ok(violation4);
             assert.equal(violation4.url, "https://www.youtube.com/iframe_api");
             assert.equal(violation4.directive, "script-src");
@@ -130,8 +316,8 @@ describe("CspInventoryPlugin", () => {
         });
 
         it("should extract blocked URLs in the correct format", () => {
-            const plugin = new CspInventoryPlugin();
-            
+            // const plugin = new CspInventoryPlugin();
+
             // Mock page state with blocked resources
             const mockPageState = {
                 blockedResources: [
@@ -139,25 +325,28 @@ describe("CspInventoryPlugin", () => {
                         url: "https://example.com/script.js",
                         directive: "script-src",
                         violationType: "blocked",
-                        message: "CSP violation"
+                        message: "CSP violation",
                     },
                     {
                         url: "https://example.com/script.js", // Same URL, should be counted
-                        directive: "script-src", 
+                        directive: "script-src",
                         violationType: "blocked",
-                        message: "CSP violation"
+                        message: "CSP violation",
                     },
                     {
                         url: "https://fonts.googleapis.com/css",
                         directive: "style-src",
                         violationType: "report-only",
-                        message: "CSP violation"
-                    }
-                ]
+                        message: "CSP violation",
+                    },
+                ],
             };
 
             // Extract blocked URLs similar to the plugin logic
-            const blockedUrls: Record<string, { directive: string; violationType: string; count: number; message: string }> = {};
+            const blockedUrls: Record<
+                string,
+                { directive: string; violationType: string; count: number; message: string }
+            > = {};
             for (const resource of mockPageState.blockedResources) {
                 if (resource.url) {
                     const key = resource.url;
@@ -166,7 +355,7 @@ describe("CspInventoryPlugin", () => {
                             directive: resource.directive,
                             violationType: resource.violationType,
                             count: 0,
-                            message: resource.message
+                            message: resource.message,
                         };
                     }
                     blockedUrls[key].count += 1;
@@ -182,7 +371,10 @@ describe("CspInventoryPlugin", () => {
 
             assert.ok(blockedUrls["https://fonts.googleapis.com/css"]);
             assert.equal(blockedUrls["https://fonts.googleapis.com/css"].directive, "style-src");
-            assert.equal(blockedUrls["https://fonts.googleapis.com/css"].violationType, "report-only");
+            assert.equal(
+                blockedUrls["https://fonts.googleapis.com/css"].violationType,
+                "report-only",
+            );
             assert.equal(blockedUrls["https://fonts.googleapis.com/css"].count, 1);
             assert.equal(blockedUrls["https://fonts.googleapis.com/css"].message, "CSP violation");
         });
