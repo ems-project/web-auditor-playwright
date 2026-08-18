@@ -4,13 +4,13 @@ FROM mcr.microsoft.com/playwright:v1.59.1-jammy AS builder
 WORKDIR /app
 
 # Dependencies
-COPY package.json tsconfig.json ./
+COPY package.json package-lock.json tsconfig.json ./
 
 # Sources
 COPY src ./src
 
 RUN mkdir -p /opt/reports /opt/downloads \
-    && npm install \
+    && npm ci \
     && npm run build \
     && chown -R pwuser:0 /opt/reports /opt/downloads /app/dist /app/node_modules \
     && chmod 775 /opt/reports /opt/downloads /app/dist /app/node_modules
