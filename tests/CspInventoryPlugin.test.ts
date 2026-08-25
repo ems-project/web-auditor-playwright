@@ -9,7 +9,7 @@ describe("CspInventoryPlugin", () => {
             const plugin = new CspInventoryPlugin();
 
             assert.equal(plugin.name, "csp-inventory");
-            assert.deepEqual(plugin.phases, ["beforeGoto", "afterGoto", "finally"]);
+            assert.deepEqual(plugin.phases, ["beforeGoto", "process", "finally"]);
         });
 
         it("should accept custom options", () => {
@@ -148,23 +148,22 @@ describe("CspInventoryPlugin", () => {
             };
 
             // Test the enhanced structure logic
-            const perPageOrigins: Record<string, {
-                directive: string;
-                resourceTypes: string[];
-                exampleUrls: string[];
-                sourceContext: string;
-                iframeInfo?: {
-                    iframeSources: string[];
-                    iframeResourceCount: number;
-                    mainDocumentResourceCount: number;
-                };
-            }> = {};
+            const perPageOrigins: Record<
+                string,
+                {
+                    directive: string;
+                    resourceTypes: string[];
+                    exampleUrls: string[];
+                    sourceContext: string;
+                    iframeInfo?: {
+                        iframeSources: string[];
+                        iframeResourceCount: number;
+                        mainDocumentResourceCount: number;
+                    };
+                }
+            > = {};
 
-            for (const {
-                origin,
-                isFromIframe,
-                iframeUrl,
-            } of mockPageState.requests) {
+            for (const { origin, isFromIframe, iframeUrl } of mockPageState.requests) {
                 const directive = "img-src"; // Simplified for test
 
                 if (!perPageOrigins[origin]) {
@@ -276,7 +275,9 @@ describe("CspInventoryPlugin", () => {
             const plugin = new CspInventoryPlugin();
 
             // Test the private method through reflection
-            const parseCspViolation = (plugin as unknown as { parseCspViolation: (message: string) => unknown }).parseCspViolation.bind(plugin);
+            const parseCspViolation = (
+                plugin as unknown as { parseCspViolation: (message: string) => unknown }
+            ).parseCspViolation.bind(plugin);
 
             // Test pattern 1: "blocked the loading of a resource (frame-src) at https://example.com"
             const violation1 = parseCspViolation(

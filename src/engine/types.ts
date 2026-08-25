@@ -46,6 +46,14 @@ export interface PersistPageResultInput {
 
 export type Mime = string;
 
+export type FrameLoadingInfo = {
+    iframeCount: number;
+    framesReady: boolean;
+    frameUrls: string[];
+    frameLoadDuration?: number;
+    frameLoadStartTime?: number;
+};
+
 export type CrawlOptions = {
     startUrl: string;
     allowedHosts?: string[];
@@ -97,6 +105,7 @@ export type ResourceContext = {
     console: { type: string; text: string; location?: string }[];
     pageErrors: string[];
     extractedText?: string; // ex: textract PDF
+    frameLoadingInfo?: FrameLoadingInfo;
 
     audited?: boolean;
     auditors?: string[];

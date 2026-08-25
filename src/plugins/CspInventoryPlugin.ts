@@ -91,7 +91,7 @@ export type CspInventoryPluginOptions = {
 
 export class CspInventoryPlugin extends BasePlugin implements IPlugin {
     name = "csp-inventory";
-    phases: PluginPhase[] = ["beforeGoto", "afterGoto", "finally"];
+    phases: PluginPhase[] = ["beforeGoto", "process", "finally"];
 
     private readonly maxExampleUrls: number;
     private readonly pageStates = new WeakMap<Page, PageCspState>();
@@ -119,9 +119,9 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
             return;
         }
 
-        if (phase === "afterGoto") {
-            // Wait a bit for iframe resources to load
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+        if (phase === "process") {
+            // Frame loading is now handled by the engine before this phase
+            // We can access ctx.frameLoadingInfo for iframe analysis and use the collected request data
 
             const globalState = this.getInventoryState(ctx.engineState);
             const perPageOrigins: Record<
@@ -269,14 +269,39 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
             }
 
             const originCount = Object.keys(perPageOrigins).length;
+
+            // Include iframe information from engine-level tracking
+            const frameInfo = ctx.frameLoadingInfo;
+            const enhancedData: {
+                externalOrigins: typeof perPageOrigins;
+                iframeAnalysis?: {
+                    iframeCount: number;
+                    framesReady: boolean;
+                    frameLoadDuration?: number;
+                    frameUrls: string[];
+                };
+            } = { externalOrigins: perPageOrigins };
+
+            if (frameInfo) {
+                enhancedData.iframeAnalysis = {
+                    iframeCount: frameInfo.iframeCount,
+                    framesReady: frameInfo.framesReady,
+                    frameLoadDuration: frameInfo.frameLoadDuration,
+                    frameUrls: frameInfo.frameUrls,
+                };
+            }
+
             if (originCount > 0) {
-                this.registerInfo(
-                    ctx,
-                    "security",
-                    "CSP_EXTERNAL_RESOURCE",
-                    `Loads resources from ${originCount} external origin(s).`,
-                    { externalOrigins: perPageOrigins },
-                );
+                let message = `Loads resources from ${originCount} external origin(s).`;
+                if (frameInfo && frameInfo.iframeCount > 0) {
+                    message += ` Found ${frameInfo.iframeCount} iframe(s)`;
+                    if (frameInfo.frameLoadDuration !== undefined) {
+                        message += ` (frame analysis: ${frameInfo.frameLoadDuration}ms)`;
+                    }
+                    message += ".";
+                }
+
+                this.registerInfo(ctx, "security", "CSP_EXTERNAL_RESOURCE", message, enhancedData);
             } else if (pageState.blockedResources.length === 0) {
                 this.register(ctx);
             }
