@@ -232,23 +232,41 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
                     (r) => r.violationType === "report-only",
                 ).length;
 
-                // Extract blocked URLs similar to how externalOrigins works
-                const blockedUrls: Record<
+                // Extract blocked URLs grouped by domain (similar to how externalOrigins works)
+                const blocked: Record<
                     string,
-                    { directive: string; violationType: string; count: number; message: string }
+                    { directive: string; violationType: string; count: number; message: string; exampleUrls: string[] }
                 > = {};
                 for (const resource of pageState.blockedResources) {
                     if (resource.url) {
-                        const key = resource.url;
-                        if (!blockedUrls[key]) {
-                            blockedUrls[key] = {
-                                directive: resource.directive,
-                                violationType: resource.violationType,
-                                count: 0,
-                                message: resource.message,
-                            };
+                        try {
+                            // Extract domain from URL to use as key
+                            const parsedUrl = new URL(resource.url);
+                            const domain = parsedUrl.origin;
+                            
+                            if (!blocked[domain]) {
+                                blocked[domain] = {
+                                    directive: resource.directive,
+                                    violationType: resource.violationType,
+                                    count: 0,
+                                    message: resource.message,
+                                    exampleUrls: [],
+                                };
+                            }
+                            
+                            const domainEntry = blocked[domain];
+                            domainEntry.count += 1;
+                            
+                            // Add example URLs up to the limit
+                            if (
+                                domainEntry.exampleUrls.length < this.maxExampleUrls &&
+                                !domainEntry.exampleUrls.includes(resource.url)
+                            ) {
+                                domainEntry.exampleUrls.push(resource.url);
+                            }
+                        } catch {
+                            // Skip invalid URLs
                         }
-                        blockedUrls[key].count += 1;
                     }
                 }
 
@@ -262,7 +280,7 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
                 }
 
                 this.registerWarning(ctx, "security", "CSP_BLOCKED_RESOURCE", message, {
-                    blockedResources: blockedUrls,
+                    blocked: blocked,
                     blockedCount,
                     reportOnlyCount,
                 });
@@ -473,6 +491,15 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
             if (!url) {
                 const urlMatch = message.match(
                     /Loading the (?:script|stylesheet|image|font|frame|media|object|worker|manifest)\s+['"]([^'"]+)['"]/i,
+                );
+                if (urlMatch) {
+                    url = urlMatch[1];
+                }
+            }
+            // Pattern 2b: "Refused to load the script 'URL' because it violates"
+            if (!url) {
+                const urlMatch = message.match(
+                    /Refused to (?:load|execute|apply) the (?:script|stylesheet|image|font|frame|media|object|worker|manifest)\s+['"]([^'"]+)['"]/i,
                 );
                 if (urlMatch) {
                     url = urlMatch[1];

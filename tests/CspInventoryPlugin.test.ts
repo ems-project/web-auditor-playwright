@@ -316,8 +316,8 @@ describe("CspInventoryPlugin", () => {
             assert.equal(violation4.violationType, "blocked");
         });
 
-        it("should extract blocked URLs in the correct format", () => {
-            // const plugin = new CspInventoryPlugin();
+        it("should extract blocked URLs grouped by domain with example URLs", () => {
+            const plugin = new CspInventoryPlugin({ maxExampleUrls: 3 });
 
             // Mock page state with blocked resources
             const mockPageState = {
@@ -329,7 +329,7 @@ describe("CspInventoryPlugin", () => {
                         message: "CSP violation",
                     },
                     {
-                        url: "https://example.com/script.js", // Same URL, should be counted
+                        url: "https://example.com/script2.js", // Different URL, same domain
                         directive: "script-src",
                         violationType: "blocked",
                         message: "CSP violation",
@@ -343,41 +343,67 @@ describe("CspInventoryPlugin", () => {
                 ],
             };
 
-            // Extract blocked URLs similar to the plugin logic
-            const blockedUrls: Record<
+            // Extract blocked URLs grouped by domain (similar to the plugin logic)
+            const blocked: Record<
                 string,
-                { directive: string; violationType: string; count: number; message: string }
+                { directive: string; violationType: string; count: number; message: string; exampleUrls: string[] }
             > = {};
             for (const resource of mockPageState.blockedResources) {
                 if (resource.url) {
-                    const key = resource.url;
-                    if (!blockedUrls[key]) {
-                        blockedUrls[key] = {
-                            directive: resource.directive,
-                            violationType: resource.violationType,
-                            count: 0,
-                            message: resource.message,
-                        };
+                    try {
+                        // Extract domain from URL to use as key
+                        const parsedUrl = new URL(resource.url);
+                        const domain = parsedUrl.origin;
+                        
+                        if (!blocked[domain]) {
+                            blocked[domain] = {
+                                directive: resource.directive,
+                                violationType: resource.violationType,
+                                count: 0,
+                                message: resource.message,
+                                exampleUrls: [],
+                            };
+                        }
+                        
+                        const domainEntry = blocked[domain];
+                        domainEntry.count += 1;
+                        
+                        // Add example URLs up to the limit
+                        const maxExampleUrls = 3; // plugin.maxExampleUrls is private
+                        if (
+                            domainEntry.exampleUrls.length < maxExampleUrls &&
+                            !domainEntry.exampleUrls.includes(resource.url)
+                        ) {
+                            domainEntry.exampleUrls.push(resource.url);
+                        }
+                    } catch {
+                        // Skip invalid URLs
                     }
-                    blockedUrls[key].count += 1;
                 }
             }
 
-            // Verify the structure
-            assert.ok(blockedUrls["https://example.com/script.js"]);
-            assert.equal(blockedUrls["https://example.com/script.js"].directive, "script-src");
-            assert.equal(blockedUrls["https://example.com/script.js"].violationType, "blocked");
-            assert.equal(blockedUrls["https://example.com/script.js"].count, 2);
-            assert.equal(blockedUrls["https://example.com/script.js"].message, "CSP violation");
+            // Verify the structure - grouped by domain with exampleUrls
+            assert.ok(blocked["https://example.com"]);
+            assert.equal(blocked["https://example.com"].directive, "script-src");
+            assert.equal(blocked["https://example.com"].violationType, "blocked");
+            assert.equal(blocked["https://example.com"].count, 2); // Two different scripts from same domain
+            assert.equal(blocked["https://example.com"].message, "CSP violation");
+            assert.deepEqual(blocked["https://example.com"].exampleUrls, [
+                "https://example.com/script.js",
+                "https://example.com/script2.js"
+            ]);
 
-            assert.ok(blockedUrls["https://fonts.googleapis.com/css"]);
-            assert.equal(blockedUrls["https://fonts.googleapis.com/css"].directive, "style-src");
+            assert.ok(blocked["https://fonts.googleapis.com"]);
+            assert.equal(blocked["https://fonts.googleapis.com"].directive, "style-src");
             assert.equal(
-                blockedUrls["https://fonts.googleapis.com/css"].violationType,
+                blocked["https://fonts.googleapis.com"].violationType,
                 "report-only",
             );
-            assert.equal(blockedUrls["https://fonts.googleapis.com/css"].count, 1);
-            assert.equal(blockedUrls["https://fonts.googleapis.com/css"].message, "CSP violation");
+            assert.equal(blocked["https://fonts.googleapis.com"].count, 1);
+            assert.equal(blocked["https://fonts.googleapis.com"].message, "CSP violation");
+            assert.deepEqual(blocked["https://fonts.googleapis.com"].exampleUrls, [
+                "https://fonts.googleapis.com/css"
+            ]);
         });
     });
 });
