@@ -485,7 +485,7 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
 
             // Pattern 1: "blocked the loading of a resource (frame-src) at https://example.com"
             const pattern1 = message.match(
-                /blocked the loading of a resource \(([^)]+)\) at ([^\s?]+)/i,
+                /blocked the loading of a resource \(([^)]+)\) at ([^\s]+)/i,
             );
             if (pattern1) {
                 resourceType = pattern1[1];
@@ -500,6 +500,17 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
                 );
                 if (urlMatch) {
                     url = urlMatch[1];
+                }
+            }
+            
+            // Pattern 2c: "Framing 'https://example.com/' violates..."
+            if (!url) {
+                const framingMatch = message.match(
+                    /Framing\s+['"]([^'"]+)['"]/i,
+                );
+                if (framingMatch) {
+                    url = framingMatch[1];
+                    resourceType = "frame";
                 }
             }
             // Pattern 2b: "Refused to load the script 'URL' because it violates"
@@ -562,6 +573,7 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
                 else if (message.includes("Loading the image")) resourceType = "image";
                 else if (message.includes("Loading the font")) resourceType = "font";
                 else if (message.includes("Loading the frame")) resourceType = "frame";
+                else if (message.includes("Framing")) resourceType = "frame";
             }
 
             // Map common resource types to proper directive names
