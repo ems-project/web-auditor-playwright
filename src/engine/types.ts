@@ -46,12 +46,21 @@ export interface PersistPageResultInput {
 
 export type Mime = string;
 
+export type FrameDetectionInfo = {
+    attachedFrames: number;
+    failedFrames: number;
+    blockedFrames: number;
+    timeoutFrames: number;
+    frameEvents: string[];
+};
+
 export type FrameLoadingInfo = {
     iframeCount: number;
     framesReady: boolean;
     frameUrls: string[];
     frameLoadDuration?: number;
     frameLoadStartTime?: number;
+    frameDetectionInfo?: FrameDetectionInfo;
 };
 
 export type CrawlOptions = {

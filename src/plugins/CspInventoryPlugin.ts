@@ -235,7 +235,13 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
                 // Extract blocked URLs grouped by domain (similar to how externalOrigins works)
                 const blocked: Record<
                     string,
-                    { directive: string; violationType: string; count: number; message: string; exampleUrls: string[] }
+                    {
+                        directive: string;
+                        violationType: string;
+                        count: number;
+                        message: string;
+                        exampleUrls: string[];
+                    }
                 > = {};
                 for (const resource of pageState.blockedResources) {
                     if (resource.url) {
@@ -243,7 +249,7 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
                             // Extract domain from URL to use as key
                             const parsedUrl = new URL(resource.url);
                             const domain = parsedUrl.origin;
-                            
+
                             if (!blocked[domain]) {
                                 blocked[domain] = {
                                     directive: resource.directive,
@@ -253,10 +259,10 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
                                     exampleUrls: [],
                                 };
                             }
-                            
+
                             const domainEntry = blocked[domain];
                             domainEntry.count += 1;
-                            
+
                             // Add example URLs up to the limit
                             if (
                                 domainEntry.exampleUrls.length < this.maxExampleUrls &&

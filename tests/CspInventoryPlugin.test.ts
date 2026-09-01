@@ -317,8 +317,6 @@ describe("CspInventoryPlugin", () => {
         });
 
         it("should extract blocked URLs grouped by domain with example URLs", () => {
-            const plugin = new CspInventoryPlugin({ maxExampleUrls: 3 });
-
             // Mock page state with blocked resources
             const mockPageState = {
                 blockedResources: [
@@ -346,7 +344,13 @@ describe("CspInventoryPlugin", () => {
             // Extract blocked URLs grouped by domain (similar to the plugin logic)
             const blocked: Record<
                 string,
-                { directive: string; violationType: string; count: number; message: string; exampleUrls: string[] }
+                {
+                    directive: string;
+                    violationType: string;
+                    count: number;
+                    message: string;
+                    exampleUrls: string[];
+                }
             > = {};
             for (const resource of mockPageState.blockedResources) {
                 if (resource.url) {
@@ -354,7 +358,7 @@ describe("CspInventoryPlugin", () => {
                         // Extract domain from URL to use as key
                         const parsedUrl = new URL(resource.url);
                         const domain = parsedUrl.origin;
-                        
+
                         if (!blocked[domain]) {
                             blocked[domain] = {
                                 directive: resource.directive,
@@ -364,10 +368,10 @@ describe("CspInventoryPlugin", () => {
                                 exampleUrls: [],
                             };
                         }
-                        
+
                         const domainEntry = blocked[domain];
                         domainEntry.count += 1;
-                        
+
                         // Add example URLs up to the limit
                         const maxExampleUrls = 3; // plugin.maxExampleUrls is private
                         if (
@@ -390,19 +394,16 @@ describe("CspInventoryPlugin", () => {
             assert.equal(blocked["https://example.com"].message, "CSP violation");
             assert.deepEqual(blocked["https://example.com"].exampleUrls, [
                 "https://example.com/script.js",
-                "https://example.com/script2.js"
+                "https://example.com/script2.js",
             ]);
 
             assert.ok(blocked["https://fonts.googleapis.com"]);
             assert.equal(blocked["https://fonts.googleapis.com"].directive, "style-src");
-            assert.equal(
-                blocked["https://fonts.googleapis.com"].violationType,
-                "report-only",
-            );
+            assert.equal(blocked["https://fonts.googleapis.com"].violationType, "report-only");
             assert.equal(blocked["https://fonts.googleapis.com"].count, 1);
             assert.equal(blocked["https://fonts.googleapis.com"].message, "CSP violation");
             assert.deepEqual(blocked["https://fonts.googleapis.com"].exampleUrls, [
-                "https://fonts.googleapis.com/css"
+                "https://fonts.googleapis.com/css",
             ]);
         });
     });
