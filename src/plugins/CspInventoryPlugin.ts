@@ -502,12 +502,10 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
                     url = urlMatch[1];
                 }
             }
-            
+
             // Pattern 2c: "Framing 'https://example.com/' violates..."
             if (!url) {
-                const framingMatch = message.match(
-                    /Framing\s+['"]([^'"]+)['"]/i,
-                );
+                const framingMatch = message.match(/Framing\s+['"]([^'"]+)['"]/i);
                 if (framingMatch) {
                     url = framingMatch[1];
                     resourceType = "frame";

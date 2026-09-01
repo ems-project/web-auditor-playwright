@@ -3,6 +3,17 @@ import { describe, it } from "node:test";
 import { CspInventoryPlugin } from "../src/plugins/CspInventoryPlugin.js";
 import type { ResourceContext, EngineState } from "../src/engine/types.js";
 
+// Interface for testing private methods
+interface CspInventoryPluginWithPrivates extends CspInventoryPlugin {
+    parseCspViolation(message: string): {
+        url: string;
+        directive: string;
+        resourceType?: string;
+        violationType: "blocked" | "report-only";
+        message: string;
+    } | null;
+}
+
 describe("CspInventoryPlugin", () => {
     describe("Plugin Configuration", () => {
         it("should use default options when none provided", () => {
@@ -411,10 +422,11 @@ describe("CspInventoryPlugin", () => {
     describe("CSP Violation Parsing", () => {
         it("should parse script-src violation with Loading pattern", () => {
             const plugin = new CspInventoryPlugin();
-            const message = 'Loading the script \'https://example.com/script.js\' violates the following Content Security Policy directive: "script-src \'self\'". Note that \'script-src-elem\' was not explicitly set, so \'script-src\' is used as a fallback.';
-            
-            const violation = (plugin as any).parseCspViolation(message);
-            
+            const message =
+                "Loading the script 'https://example.com/script.js' violates the following Content Security Policy directive: \"script-src 'self'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.";
+
+            const violation = (plugin as CspInventoryPluginWithPrivates).parseCspViolation(message);
+
             assert.ok(violation);
             assert.equal(violation.url, "https://example.com/script.js");
             assert.equal(violation.directive, "script-src");
@@ -425,10 +437,11 @@ describe("CspInventoryPlugin", () => {
 
         it("should parse frame-src violation with Framing pattern", () => {
             const plugin = new CspInventoryPlugin();
-            const message = 'Framing \'https://www.youtube.com/\' violates the following Content Security Policy directive: "default-src \'self\' https://agenda-scraper.ailab.ai4belgium.be https://app.cumul.io https://app.luzmo.com https://community.ai4belgium.be https://e.infogram.com https://notfound-static.fwebservices.be https://player.vimeo.com https://salsim.bosa.belgium.be". The request has been blocked. Note that \'frame-src\' was not explicitly set, so \'default-src\' is used as a fallback.';
-            
-            const violation = (plugin as any).parseCspViolation(message);
-            
+            const message =
+                "Framing 'https://www.youtube.com/' violates the following Content Security Policy directive: \"default-src 'self' https://agenda-scraper.ailab.ai4belgium.be https://app.cumul.io https://app.luzmo.com https://community.ai4belgium.be https://e.infogram.com https://notfound-static.fwebservices.be https://player.vimeo.com https://salsim.bosa.belgium.be\". The request has been blocked. Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.";
+
+            const violation = (plugin as CspInventoryPluginWithPrivates).parseCspViolation(message);
+
             assert.ok(violation);
             assert.equal(violation.url, "https://www.youtube.com/");
             assert.equal(violation.directive, "default-src");
@@ -439,10 +452,11 @@ describe("CspInventoryPlugin", () => {
 
         it("should parse blocked resource pattern", () => {
             const plugin = new CspInventoryPlugin();
-            const message = "Content-Security-Policy: The page's settings blocked the loading of a resource (frame-src) at https://www.youtube.com/embed/JP9EU2FuLFM?feature=oembed because it violates the following directive: \"default-src 'self' https://agenda-scraper.ailab.ai4belgium.be https://app.cumul.io https://app.luzmo.com https://community.ai4belgium.be https://e.infogram.com https://notfound-static.fwebservices.be https://player.vimeo.com https://salsim.bosa.belgium.be\"";
-            
-            const violation = (plugin as any).parseCspViolation(message);
-            
+            const message =
+                "Content-Security-Policy: The page's settings blocked the loading of a resource (frame-src) at https://www.youtube.com/embed/JP9EU2FuLFM?feature=oembed because it violates the following directive: \"default-src 'self' https://agenda-scraper.ailab.ai4belgium.be https://app.cumul.io https://app.luzmo.com https://community.ai4belgium.be https://e.infogram.com https://notfound-static.fwebservices.be https://player.vimeo.com https://salsim.bosa.belgium.be\"";
+
+            const violation = (plugin as CspInventoryPluginWithPrivates).parseCspViolation(message);
+
             assert.ok(violation);
             assert.equal(violation.url, "https://www.youtube.com/embed/JP9EU2FuLFM?feature=oembed");
             assert.equal(violation.directive, "frame-src");
