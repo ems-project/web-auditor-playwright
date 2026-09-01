@@ -46,6 +46,23 @@ export interface PersistPageResultInput {
 
 export type Mime = string;
 
+export type FrameDetectionInfo = {
+    attachedFrames: number;
+    failedFrames: number;
+    blockedFrames: number;
+    timeoutFrames: number;
+    frameEvents: string[];
+};
+
+export type FrameLoadingInfo = {
+    iframeCount: number;
+    framesReady: boolean;
+    frameUrls: string[];
+    frameLoadDuration?: number;
+    frameLoadStartTime?: number;
+    frameDetectionInfo?: FrameDetectionInfo;
+};
+
 export type CrawlOptions = {
     startUrl: string;
     allowedHosts?: string[];
@@ -97,6 +114,7 @@ export type ResourceContext = {
     console: { type: string; text: string; location?: string }[];
     pageErrors: string[];
     extractedText?: string; // ex: textract PDF
+    frameLoadingInfo?: FrameLoadingInfo;
 
     audited?: boolean;
     auditors?: string[];
@@ -270,6 +288,7 @@ export type FindingCode =
     | "CONSOLE_ERRORS_DETECTED"
     // Security Headers
     | "CSP_EXTERNAL_RESOURCE"
+    | "CSP_BLOCKED_RESOURCE"
     | "CSP_NONCE_MISSING"
     | "CSP_NONCE_MISMATCH"
     | "CSP_NONCE_REUSED"

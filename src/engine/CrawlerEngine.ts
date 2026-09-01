@@ -4,6 +4,7 @@ import { chromium, type ConsoleMessage } from "playwright";
 
 import { ErrorUtils } from "../utils/ErrorUtils.js";
 import { AuditStore } from "./AuditStore.js";
+import { FrameTracker } from "./FrameTracker.js";
 import { PluginRegistry } from "./PluginRegistry.js";
 import { RateLimiter } from "./RateLimiter.js";
 import { createInitialReport } from "./report.js";
@@ -234,6 +235,13 @@ export class CrawlerEngine {
                 ctx.report.size = size;
 
                 await this.registry.runPhase("afterGoto", ctx);
+
+                // Engine-level iframe tracking: analyze and wait for iframe completion
+                // This provides frame loading information to plugins that need it
+                if (ctx.report.is_web) {
+                    ctx.frameLoadingInfo = await FrameTracker.analyzeAndWaitForFrames(page);
+                }
+
                 await this.registry.runPhase("process", ctx);
 
                 if (!ctx.report.is_web) {
