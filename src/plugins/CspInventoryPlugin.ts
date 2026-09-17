@@ -531,8 +531,9 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
 
             // Extract directive from various formats
             if (!directive) {
+                // Improved: allow optional 'report-only' in the violation message
                 const directiveMatch = message.match(
-                    /violates the following (?:Content Security Policy )?directive:\s*['"]\s*([^'"]+?)\s*['"]/i,
+                    /violates the following (?:report-only )?(?:Content Security Policy )?directive:\s*['"]\s*([^'"]+?)\s*['"]/i,
                 );
                 if (directiveMatch) {
                     // Extract the first directive name from the policy string
@@ -551,7 +552,8 @@ export class CspInventoryPlugin extends BasePlugin implements IPlugin {
             }
 
             // Determine if it's report-only or blocking
-            const isReportOnly = /\[Report Only\]/i.test(message);
+            // Support both '[Report Only]' and 'report-only Content Security Policy directive' forms
+            const isReportOnly = /\[Report Only\]/i.test(message) || /report-only Content Security Policy directive/i.test(message);
             const violationType: "blocked" | "report-only" = isReportOnly
                 ? "report-only"
                 : "blocked";
