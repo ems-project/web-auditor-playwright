@@ -191,8 +191,8 @@ async function main() {
     }
     const reportMaxIssuesValue = process.env.REPORT_MAX_ISSUES ?? "1000";
     const reportMaxIssues = Number(reportMaxIssuesValue);
-    if (!Number.isInteger(reportMaxIssues) || webUiPort < reportMaxIssues) {
-        throw new Error("Invalid REPORT_MAX_ISSUES: " + webUiPortValue);
+    if (!Number.isInteger(reportMaxIssues)) {
+        throw new Error("Invalid REPORT_MAX_ISSUES: " + reportMaxIssues);
     }
     const webUiHost = process.env.WEB_UI_HOST ?? "127.0.0.1";
     const findingCodesBlocklist = (process.env.FINDING_CODES_BLOCKLIST ?? "")
